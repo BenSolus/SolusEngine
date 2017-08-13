@@ -1,0 +1,40 @@
+
+# Valgrind (http://www.valgrind.org/) is amongst other things a free memory
+# debugging tool.
+
+# Pass this file to Valgrind with "--suppressions=tools/valgrind.supp"
+# suppresses warnings, resulting from false positives, matching the defined
+# patterns in this file.
+
+# 'Conditional jump or move depends on uninitialised value(s)' when calling
+# 'vkCreateSwapchainKHR' on NVIDIA GPUs
+
+{
+   <vkCreateSwapchainKHR_cond>
+   Memcheck:Cond
+   ...
+   obj:/usr/lib/libnvidia-glcore.so.*
+   ...
+   fun:_ZN3fcm2vk9SwapChainC1ERKSt10shared_ptrINS0_13LogicalDeviceEEP14VkSurfaceKHR_TP10GLFWwindowP16VkSwapchainKHR_T
+   ...
+}
+
+# It seems GLFW doesn't free all memory?
+
+{
+   <XGetDefault_leak_reachable>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:XGetDefault
+   ...
+}
+
+{
+   <glfwInit_leak_reachable>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:glfwInit
+   ...
+}

@@ -1,0 +1,72 @@
+# Build Configuration for Travis CI
+# https://travis-ci.org
+
+dist: trusty
+sudo: required
+language: cpp
+
+addons:
+  apt:
+    packages:
+      - build-essential
+      - git
+      - libgnome-keyring-dev
+      - fakeroot
+      - xorg-dev
+      - libwayland-dev
+      - libassimp-dev
+      - libglm-dev
+      - libgtest-dev
+
+matrix:
+  include:
+    - os: linux
+      compiler:
+        - gcc
+    - os: linux
+      compiler:
+        - clang
+
+
+before_install:
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd /usr/src/gtest; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo cmake -DBUILD_SHARED_LIBS=ON CMakeLists.txt; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo make; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo cp *.so /usr/lib; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd $TRAVIS_BUILD_DIR; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/Vulkan-LoaderAndValidationLayers; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd Vulkan-LoaderAndValidationLayers; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then ./update_external_sources.sh; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd external/glslang/build; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo make install; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ../../..; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cmake -H. -Bdbuild -DCMAKE_BUILD_TYPE=Debug; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd dbuild || exit 1; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then make; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo make install; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ../..; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/glfw/glfw.git; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then mkdir -p glfw/build; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd glfw/build || exit 1; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cmake -DBUILD_SHARED_LIBS=ON ..; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then make; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo make install; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ../..; fi
+
+script:
+  - mkdir -p build
+  - cd build || exit 1
+  - cmake -DCMAKE_BUILD_TYPE=Debug ..
+  - make -j2
+
+notifications:
+  email:
+    on_success: never
+    on_failure: change
+
+branches:
+  only:
+    - master
+
+git:
+  depth: 10
