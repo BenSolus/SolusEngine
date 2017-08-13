@@ -35,7 +35,7 @@ before_install:
   - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/g-truc/glm.git; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd glm; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo cmake CMakeLists.txt; fi
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then make; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo make; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo make install; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ..; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/Vulkan-LoaderAndValidationLayers; fi
