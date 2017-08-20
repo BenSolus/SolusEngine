@@ -11,22 +11,22 @@
 vk::eng::DepthImage::DepthImage() : Image(), mFormat(VK_FORMAT_UNDEFINED) {}
 
 vk::eng::DepthImage::DepthImage(SharedPtrLogicalDevice const& device,
-                                VkExtent2D                    extent,
-                                VkCommandPool                 commandPool)
+                                SharedPtrCommandPool const&   commandPool,
+                                SwapChain&                    swapChain)
   : Image(device), mFormat(VK_FORMAT_UNDEFINED)
 {
   try
   {
     mFormat = findDepthFormat();
 
-    createImage(extent.width,
-                extent.height,
+    createImage(swapChain.getVkExtent().width,
+                swapChain.getVkExtent().height,
                 mFormat,
                 VK_IMAGE_TILING_OPTIMAL,
                 VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-    transitionImageLayout(commandPool,
+    transitionImageLayout(commandPool->getVkCommandPool(),
                           mFormat,
                           VK_IMAGE_LAYOUT_UNDEFINED,
                           VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);

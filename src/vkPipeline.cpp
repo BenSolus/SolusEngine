@@ -48,17 +48,19 @@ vk::eng::Pipeline::Pipeline(SharedPtrLogicalDevice const& device,
 
   VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
 
-  vertShaderStageInfo.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+  vertShaderStageInfo.sType  =
+    VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
   vertShaderStageInfo.stage  = VK_SHADER_STAGE_VERTEX_BIT;
   vertShaderStageInfo.module = vertShaderModule.getVkShaderModule();
   vertShaderStageInfo.pName  = "main";
 
   VkPipelineShaderStageCreateInfo fragShaderStageInfo = {};
 
-  fragShaderStageInfo.sType    = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    fragShaderStageInfo.stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
-    fragShaderStageInfo.module = fragShaderModule.getVkShaderModule();
-    fragShaderStageInfo.pName  = "main";
+  fragShaderStageInfo.sType  =
+    VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+  fragShaderStageInfo.stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
+  fragShaderStageInfo.module = fragShaderModule.getVkShaderModule();
+  fragShaderStageInfo.pName  = "main";
 
   VkPipelineShaderStageCreateInfo shaderStages[] =
     { vertShaderStageInfo, fragShaderStageInfo };
@@ -113,7 +115,7 @@ vk::eng::Pipeline::Pipeline(SharedPtrLogicalDevice const& device,
   rasterizer.rasterizerDiscardEnable = VK_FALSE;
   rasterizer.polygonMode             = VK_POLYGON_MODE_FILL;
   rasterizer.lineWidth               = 1.0f;
-  rasterizer.cullMode                = VK_CULL_MODE_BACK_BIT;
+  rasterizer.cullMode                = VK_CULL_MODE_NONE;
   rasterizer.frontFace               = VK_FRONT_FACE_COUNTER_CLOCKWISE;
   rasterizer.depthBiasEnable         = VK_FALSE;
 
@@ -129,7 +131,7 @@ vk::eng::Pipeline::Pipeline(SharedPtrLogicalDevice const& device,
     VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
   depthStencil.depthTestEnable       = VK_TRUE;
   depthStencil.depthWriteEnable      = VK_TRUE;
-  depthStencil.depthCompareOp        = VK_COMPARE_OP_LESS;
+  depthStencil.depthCompareOp        = VK_COMPARE_OP_LESS_OR_EQUAL;
   depthStencil.depthBoundsTestEnable = VK_FALSE;
   depthStencil.stencilTestEnable     = VK_FALSE;
 
@@ -143,7 +145,8 @@ vk::eng::Pipeline::Pipeline(SharedPtrLogicalDevice const& device,
 
   VkPipelineColorBlendStateCreateInfo colorBlending = {};
 
-  colorBlending.sType             = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+  colorBlending.sType             =
+    VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
   colorBlending.logicOpEnable     = VK_FALSE;
   colorBlending.logicOp           = VK_LOGIC_OP_COPY;
   colorBlending.attachmentCount   = 1;

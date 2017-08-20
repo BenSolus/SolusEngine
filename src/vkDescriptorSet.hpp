@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include <vkUniformBuffer.hpp>
 
 namespace vk
 {
@@ -35,9 +35,9 @@ namespace vk
         DescriptorSet(VkDescriptorSetLayout descriptorSetLayout,
                       VkDescriptorPool      descriptorPool,
                       VkDevice              device,
-                      VkBuffer              uniformBuffer,
                       VkImageView           textureImageView,
-                      VkSampler             textureSampler);
+                      VkSampler             textureSampler,
+                      UniformBuffer&        uniformBuffer);
 
         DescriptorSet(DescriptorSet const& other) = delete;
 

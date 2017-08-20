@@ -21,6 +21,7 @@
 #pragma once
 
 #include <vkBuffer.hpp>
+#include <vkCommandPool.hpp>
 
 namespace vk
 {
@@ -33,7 +34,7 @@ namespace vk
         IndexBuffer();
 
         IndexBuffer(SharedPtrLogicalDevice const& device,
-                    VkCommandPool                 commandPool);
+                    SharedPtrCommandPool const&   commandPool);
 
         IndexBuffer(IndexBuffer const& other) = delete;
 

@@ -20,25 +20,38 @@ vk::eng::DescriptorSetLayout::DescriptorSetLayout
   : mDescriptorSetLayout(VK_NULL_HANDLE),
     mDevice(device)
 {
-  VkDescriptorSetLayoutBinding uboLayoutBinding = {};
+  VkDescriptorSetLayoutBinding uboViewProjectionLayoutBinding = {};
 
-  uboLayoutBinding.binding            = 0;
-  uboLayoutBinding.descriptorCount    = 1;
-  uboLayoutBinding.descriptorType     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-  uboLayoutBinding.pImmutableSamplers = nullptr;
-  uboLayoutBinding.stageFlags         = VK_SHADER_STAGE_VERTEX_BIT;
+  uboViewProjectionLayoutBinding.binding            = 0;
+  uboViewProjectionLayoutBinding.descriptorCount    = 1;
+  uboViewProjectionLayoutBinding.descriptorType     =
+    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  uboViewProjectionLayoutBinding.pImmutableSamplers = nullptr;
+  uboViewProjectionLayoutBinding.stageFlags         =
+    VK_SHADER_STAGE_VERTEX_BIT;
+
+  VkDescriptorSetLayoutBinding uboDynamicLayoutBinding = {};
+
+  uboDynamicLayoutBinding.binding            = 1;
+  uboDynamicLayoutBinding.descriptorCount    = 1;
+  uboDynamicLayoutBinding.descriptorType     =
+    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+  uboDynamicLayoutBinding.pImmutableSamplers = nullptr;
+  uboDynamicLayoutBinding.stageFlags         = VK_SHADER_STAGE_VERTEX_BIT;
 
   VkDescriptorSetLayoutBinding samplerLayoutBinding = {};
 
-  samplerLayoutBinding.binding            = 1;
+  samplerLayoutBinding.binding            = 2;
   samplerLayoutBinding.descriptorCount    = 1;
   samplerLayoutBinding.descriptorType     =
     VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
   samplerLayoutBinding.pImmutableSamplers = nullptr;
   samplerLayoutBinding.stageFlags         = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-  std::array<VkDescriptorSetLayoutBinding, 2> bindings = {uboLayoutBinding,
-                                                          samplerLayoutBinding};
+  std::array<VkDescriptorSetLayoutBinding, 3> bindings
+    ({ uboViewProjectionLayoutBinding,
+       uboDynamicLayoutBinding,
+       samplerLayoutBinding });
 
   VkDescriptorSetLayoutCreateInfo layoutInfo = {};
 

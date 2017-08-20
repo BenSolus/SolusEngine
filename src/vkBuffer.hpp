@@ -42,7 +42,7 @@ namespace vk
 
         Buffer(Buffer&& other) = delete;
 
-        ~Buffer() noexcept;
+        virtual ~Buffer() noexcept;
 
         Buffer& operator=(Buffer const& other) = delete;
 

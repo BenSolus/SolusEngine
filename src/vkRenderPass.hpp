@@ -20,7 +20,9 @@
 
 #pragma once
 
+#include <vkDepthImage.hpp>
 #include <vkLogicalDevice.hpp>
+#include <vkSwapChain.hpp>
 
 namespace vk
 {
@@ -33,8 +35,8 @@ namespace vk
         RenderPass();
 
         RenderPass(SharedPtrLogicalDevice const& device,
-                   VkFormat                      swapChainImageFormat,
-                   VkFormat                      depthFormat);
+                   SwapChain&                    swapChain,
+                   DepthImage&                   depthImage);
 
         RenderPass(RenderPass const& other) = delete;
 

@@ -16,7 +16,7 @@ vk::eng::VertexBuffer::VertexBuffer()
 {}
 
 vk::eng::VertexBuffer::VertexBuffer(SharedPtrLogicalDevice const& device,
-                                    VkCommandPool                 commandPool)
+                                    SharedPtrCommandPool const&   commandPool)
   : Buffer(device,
            sizeof(Model::getVertices()[0]) * Model::getVertices().size(),
            VK_BUFFER_USAGE_TRANSFER_DST_BIT |
@@ -28,5 +28,7 @@ vk::eng::VertexBuffer::VertexBuffer(SharedPtrLogicalDevice const& device,
 
   StagingBuffer stagingBuffer(device, size, Model::getVertices().data());
 
-  copyBuffer(stagingBuffer.getResource(), size, commandPool);
+  copyBuffer(stagingBuffer.getResource(),
+             size,
+             commandPool->getVkCommandPool());
 }

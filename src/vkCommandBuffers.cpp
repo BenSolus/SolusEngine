@@ -10,17 +10,15 @@
 
 #include <vkModel.hpp>
 
-#include <ccException.hpp>
-
 vk::eng::CommandBuffers::CommandBuffers()
   : mCommandBuffers(),
-    mCommandPool(SHARED_PTR_NULL_COMMAND_POOL),
-    mDevice(SHARED_PTR_NULL_LOGICAL_DEVICE)
+    mDevice(SHARED_PTR_NULL_LOGICAL_DEVICE),
+    mCommandPool(SHARED_PTR_NULL_COMMAND_POOL)
 {}
 
 vk::eng::CommandBuffers::CommandBuffers
   (SharedPtrLogicalDevice const& device,
-   SharedPtrCommandPool   const& commandPool,
+   SharedPtrCommandPool const&   commandPool,
    std::vector<VkFramebuffer>&   framebuffers,
    VkRenderPass                  renderPass,
    VkDescriptorSet&              descriptorSet,
@@ -28,28 +26,31 @@ vk::eng::CommandBuffers::CommandBuffers
    VkPipeline                    pipeline,
    VkPipelineLayout              pipelineLayout,
    VkBuffer                      vertexBuffer,
-   VkBuffer                      indexBuffer)
-  : mCommandBuffers(), mCommandPool(commandPool), mDevice(device)
+   VkBuffer                      indexBuffer,
+   UniformBuffer&                uniformBuffer)
+  : mCommandBuffers(), mDevice(device), mCommandPool(commandPool)
 {
   mCommandBuffers.resize(framebuffers.size());
 
-  VkCommandBufferAllocateInfo allocInfo = {};
+  VkCommandBufferAllocateInfo allocInfo({});
 
   allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-  allocInfo.commandPool        = commandPool->getVkCommandPool();
+  allocInfo.commandPool        = mCommandPool->getVkCommandPool();
   allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
   allocInfo.commandBufferCount = static_cast<uint32_t>(mCommandBuffers.size());
 
-  if(vkAllocateCommandBuffers(device->getVkDevice(), &allocInfo, mCommandBuffers.data()) != VK_SUCCESS)
-  {
+  VkResult const result(vkAllocateCommandBuffers(device->getVkDevice(),
+                                                 &allocInfo,
+                                                 mCommandBuffers.data()));
+
+  if(result not_eq VK_SUCCESS)
     cc::throw_with_nested<std::runtime_error>("failed to allocate command "
                                               "buffers!",
                                               PRETTY_FUNCTION_SIG);
-  }
 
   for(size_t i(0); i < mCommandBuffers.size(); ++i)
   {
-    VkCommandBufferBeginInfo beginInfo = {};
+    VkCommandBufferBeginInfo beginInfo({});
 
     beginInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags            = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
@@ -57,7 +58,7 @@ vk::eng::CommandBuffers::CommandBuffers
 
     vkBeginCommandBuffer(mCommandBuffers[i], &beginInfo);
 
-    VkRenderPassBeginInfo renderPassInfo = {};
+    VkRenderPassBeginInfo renderPassInfo({});
 
     renderPassInfo.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass        = renderPass;
@@ -65,7 +66,7 @@ vk::eng::CommandBuffers::CommandBuffers
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = extent;
 
-    std::array<VkClearValue, 2> clearValues = {};
+    std::array<VkClearValue, 2> clearValues({});
 
     clearValues[0].color        = { 0.0f, 0.0f, 0.0f, 1.0f };
     clearValues[1].depthStencil = { 1.0f, 0 };
@@ -81,9 +82,9 @@ vk::eng::CommandBuffers::CommandBuffers
                       VK_PIPELINE_BIND_POINT_GRAPHICS,
                       pipeline);
 
-    VkBuffer vertexBuffers[] = { vertexBuffer };
+    VkBuffer vertexBuffers[]{ vertexBuffer };
 
-    VkDeviceSize offsets[] = { 0 };
+    VkDeviceSize offsets[]{ 0 };
 
     vkCmdBindVertexBuffers(mCommandBuffers[i], 0, 1, vertexBuffers, offsets);
 
@@ -92,21 +93,31 @@ vk::eng::CommandBuffers::CommandBuffers
                          0,
                          VK_INDEX_TYPE_UINT32);
 
-    vkCmdBindDescriptorSets(mCommandBuffers[i],
-                            VK_PIPELINE_BIND_POINT_GRAPHICS,
-                            pipelineLayout,
-                            0,
-                            1,
-                            &descriptorSet,
-                            0,
-                            nullptr);
+    for(std::size_t j(0); j < uniformBuffer.getNumberOfDynamicUBOs(); ++j)
+    {
+      const uint32_t dynamicOffset
+        (static_cast<uint32_t>(j * uniformBuffer.getDynamicAlignment()));
 
-    vkCmdDrawIndexed(mCommandBuffers[i],
-                     static_cast<uint32_t>(Model::getIndices().size()), 1, 0, 0, 0);
+      vkCmdBindDescriptorSets(mCommandBuffers[i],
+                              VK_PIPELINE_BIND_POINT_GRAPHICS,
+                              pipelineLayout,
+                              0,
+                              1,
+                              &descriptorSet,
+                              1,
+                              &dynamicOffset);
+
+      vkCmdDrawIndexed(mCommandBuffers[i],
+                       static_cast<uint32_t>(Model::getIndices().size()),
+                       1,
+                       0,
+                       0,
+                       0);
+    }
 
     vkCmdEndRenderPass(mCommandBuffers[i]);
 
-    if(vkEndCommandBuffer(mCommandBuffers[i]) != VK_SUCCESS)
+    if(vkEndCommandBuffer(mCommandBuffers[i]) not_eq VK_SUCCESS)
       cc::throw_with_nested<std::runtime_error>("failed to record command "
                                                 "buffer!",
                                                 PRETTY_FUNCTION_SIG);
@@ -124,11 +135,11 @@ vk::eng::CommandBuffers::destroyMembers()
   VkCommandPool commandPool(mCommandPool->getVkCommandPool());
   VkDevice      device(mDevice->getVkDevice());
 
-  if((device != VK_NULL_HANDLE) && (commandPool != VK_NULL_HANDLE) && (mCommandBuffers.size() > 0))
-  {
-    vkFreeCommandBuffers(device,
-                         commandPool,
-                         static_cast<uint32_t>(mCommandBuffers.size()),
-                         mCommandBuffers.data());
-  }
+  if(device not_eq VK_NULL_HANDLE)
+    if(commandPool not_eq VK_NULL_HANDLE)
+      if(mCommandBuffers.size() not_eq 0)
+        vkFreeCommandBuffers(device,
+                             commandPool,
+                             static_cast<uint32_t>(mCommandBuffers.size()),
+                             mCommandBuffers.data());
 }

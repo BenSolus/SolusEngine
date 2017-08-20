@@ -21,6 +21,7 @@
 #pragma once
 
 #include <vkBuffer.hpp>
+#include <vkCommandPool.hpp>
 
 namespace vk
 {
@@ -33,7 +34,7 @@ namespace vk
         VertexBuffer();
 
         VertexBuffer(SharedPtrLogicalDevice const& device,
-                     VkCommandPool                 commandPool);
+                     SharedPtrCommandPool const&   commandPool);
 
         VertexBuffer(VertexBuffer const& other) = delete;
 

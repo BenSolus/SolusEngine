@@ -16,7 +16,7 @@ vk::eng::IndexBuffer::IndexBuffer()
 {}
 
 vk::eng::IndexBuffer::IndexBuffer(SharedPtrLogicalDevice const& device,
-                                  VkCommandPool                 commandPool)
+                                  SharedPtrCommandPool const&   commandPool)
   : Buffer(device,
            sizeof(Model::getIndices()[0]) * Model::getIndices().size(),
            VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
@@ -27,5 +27,7 @@ vk::eng::IndexBuffer::IndexBuffer(SharedPtrLogicalDevice const& device,
 
   StagingBuffer stagingBuffer(device, size, Model::getIndices().data());
 
-  copyBuffer(stagingBuffer.getResource(), size, commandPool);
+  copyBuffer(stagingBuffer.getResource(),
+             size,
+             commandPool->getVkCommandPool());
 }

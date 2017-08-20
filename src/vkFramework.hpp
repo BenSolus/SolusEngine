@@ -80,6 +80,7 @@ namespace vk
         ImageViews             mTextureImageView;
         IndexBuffer            mIndexBuffer;
         Model                  mModel;
+        Model                  mModel1;
         Pipeline               mPipeline;
         RenderPass             mRenderPass;
         Semaphore              mImageAvailableSemaphore;
@@ -92,6 +93,9 @@ namespace vk
         VertexBuffer           mVertexBuffer;
 
         SharedPtrLogicalDevice mDevice;
+        SharedPtrCommandPool   mCommandPool;
+
+        std::size_t            mDynamicAlignment;
 
         void
         recreateSwapChain();

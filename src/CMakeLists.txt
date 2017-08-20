@@ -70,6 +70,9 @@ ADD_LIBRARY(VkEng SHARED
             vkVertexBuffer.cpp
             vkVertexBuffer.hpp)
 
+SET_PROPERTY(TARGET VkEng PROPERTY CXX_STANDARD 14)
+SET_PROPERTY(TARGET VkEng PROPERTY CXX_STANDARD_REQUIRED ON)
+
 TARGET_LINK_LIBRARIES(VkEng ${Vulkan_LIBRARIES}
                             ${GLFW_LIBRARY}
                             ${assimp_LIBRARIES}

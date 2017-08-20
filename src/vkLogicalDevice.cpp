@@ -35,7 +35,7 @@ vk::eng::LogicalDevice::LogicalDevice(SharedPtrInstance const& instance,
   std::set<int> uniqueQueueFamilies = { indices.getGraphicsFamily(),
                                         indices.getPresentFamily() };
 
-  float queuePriority(1.0f);
+  float *queuePriority(new float(1.0f));
 
   for(int queueFamily : uniqueQueueFamilies)
   {
@@ -48,23 +48,23 @@ vk::eng::LogicalDevice::LogicalDevice(SharedPtrInstance const& instance,
     queueCreateInfo.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     queueCreateInfo.queueFamilyIndex = static_cast<uint32_t>(queueFamily);
     queueCreateInfo.queueCount       = 1;
-    queueCreateInfo.pQueuePriorities = &queuePriority;
+    queueCreateInfo.pQueuePriorities = queuePriority;
     queueCreateInfos.push_back(queueCreateInfo);
   }
 
-  VkPhysicalDeviceFeatures deviceFeatures = {};
+  VkPhysicalDeviceFeatures *deviceFeatures(new VkPhysicalDeviceFeatures({}));
 
-  deviceFeatures.samplerAnisotropy = VK_TRUE;
+  deviceFeatures->samplerAnisotropy = VK_TRUE;
 
   VkDeviceCreateInfo createInfo = {};
 
-  createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-  createInfo.pQueueCreateInfos = queueCreateInfos.data();
-  createInfo.queueCreateInfoCount =
+  createInfo.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+  createInfo.pQueueCreateInfos       = queueCreateInfos.data();
+  createInfo.queueCreateInfoCount    =
     static_cast<uint32_t>(queueCreateInfos.size());
-  createInfo.pEnabledFeatures = &deviceFeatures;
-  createInfo.enabledExtensionCount = 0;
-  createInfo.enabledExtensionCount =
+  createInfo.pEnabledFeatures        = deviceFeatures;
+  createInfo.enabledExtensionCount   = 0;
+  createInfo.enabledExtensionCount   =
     static_cast<uint32_t>(DEVICE_EXTENSIONS.size());
   createInfo.ppEnabledExtensionNames = DEVICE_EXTENSIONS.data();
 
@@ -76,12 +76,18 @@ vk::eng::LogicalDevice::LogicalDevice(SharedPtrInstance const& instance,
   } else
       createInfo.enabledLayerCount = 0;
 
-  if(vkCreateDevice(mPhysicalDevice, &createInfo, nullptr, &mDevice) != VK_SUCCESS)
-  {
+  VkResult const result(vkCreateDevice(mPhysicalDevice,
+                                       &createInfo,
+                                       nullptr,
+                                       &mDevice));
+
+  delete deviceFeatures;
+  delete queuePriority;
+
+  if(result not_eq VK_SUCCESS)
     cc::throw_with_nested<std::runtime_error>("failed to create logical "
                                               "device!",
                                               PRETTY_FUNCTION_SIG);
-  }
 
   vkGetDeviceQueue(mDevice,
                    static_cast<uint32_t>(indices.getGraphicsFamily()),
@@ -98,7 +104,7 @@ vk::eng::LogicalDevice::~LogicalDevice() noexcept { destroyMembers(); }
 void
 vk::eng::LogicalDevice::destroyMembers()
 {
-  if(mDevice != VK_NULL_HANDLE)
+  if(mDevice not_eq VK_NULL_HANDLE)
     vkDestroyDevice(mDevice, nullptr);
 }
 

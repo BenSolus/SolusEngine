@@ -21,7 +21,7 @@
 #pragma once
 
 #include <vkCommandPool.hpp>
-#include <vkLogicalDevice.hpp>
+#include <vkUniformBuffer.hpp>
 
 namespace vk
 {
@@ -34,7 +34,7 @@ namespace vk
         CommandBuffers();
 
         CommandBuffers(SharedPtrLogicalDevice const& device,
-                       SharedPtrCommandPool   const& commandPool,
+                       SharedPtrCommandPool const&   commandPool,
                        std::vector<VkFramebuffer>&   framebuffers,
                        VkRenderPass                  renderPass,
                        VkDescriptorSet&              descriptorSet,
@@ -42,7 +42,8 @@ namespace vk
                        VkPipeline                    pipeline,
                        VkPipelineLayout              pipelineLayout,
                        VkBuffer                      vertexBuffer,
-                       VkBuffer                      indexBuffer);
+                       VkBuffer                      indexBuffer,
+                       UniformBuffer&                uniformBuffer);
 
         CommandBuffers(CommandBuffers const& other) = delete;
 
@@ -59,27 +60,23 @@ namespace vk
           destroyMembers();
 
           mCommandBuffers = other.mCommandBuffers;
-          mCommandPool    = other.mCommandPool;
           mDevice         = other.mDevice;
+          mCommandPool    = other.mCommandPool;
 
           other.mCommandBuffers = std::vector<VkCommandBuffer>();
-          other.mCommandPool    = SHARED_PTR_NULL_COMMAND_POOL;
           other.mDevice         = SHARED_PTR_NULL_LOGICAL_DEVICE;
+          other.mCommandPool    = SHARED_PTR_NULL_COMMAND_POOL;
 
           return *this;
         }
 
-        inline std::vector<VkCommandBuffer>& getVkCommandBuffers()
-        { return mCommandBuffers; }
-
-        inline SharedPtrCommandPool getCommandPool()
-        { return mCommandPool->shared_from_this(); }
+        inline auto& getVkCommandBuffers() { return mCommandBuffers; }
 
       private:
         std::vector<VkCommandBuffer> mCommandBuffers;
 
-        SharedPtrCommandPool         mCommandPool;
         SharedPtrLogicalDevice       mDevice;
+        SharedPtrCommandPool         mCommandPool;
 
         void
         destroyMembers();

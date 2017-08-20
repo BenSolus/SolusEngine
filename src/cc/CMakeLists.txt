@@ -5,4 +5,6 @@ ADD_LIBRARY(cc SHARED
             ccException.cpp
             ccException.hpp
             ccFile.cpp
-            ccFile.hpp)
+            ccFile.hpp
+            ccMemory.cpp
+            ccMemory.hpp)

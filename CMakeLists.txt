@@ -52,7 +52,7 @@ ENDIF()
 # Default compiler flags                                                       #
 ################################################################################
 
-SET(DEFAULT_CXX_FLAGS "-std=c++11 -Wall -Wextra -pedantic ")
+SET(DEFAULT_CXX_FLAGS "-Wall -Wextra -pedantic ")
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${DEFAULT_CXX_FLAGS}")
 
@@ -65,7 +65,7 @@ ENDIF()
 IF(CMAKE_COMPILER_IS_GNUCC)
   EXECUTE_PROCESS(COMMAND ${CMAKE_C_COMPILER} -dumpversion
                   OUTPUT_VARIABLE GCC_VERSION)
-  IF(GCC_VERSION VERSION_GREATER 7.1.1 OR GCC_VERSION VERSION_EQUAL 7.1.1)
+  IF(GCC_VERSION VERSION_LESS 7.1.1)
     # Some older version of gcc spams
     # 'warning: missing initializer for member ...' warnings. Don't know in
     # which version they 'fixed' this.
@@ -82,3 +82,7 @@ ADD_SUBDIRECTORY(src)
 IF(CMAKE_BUILD_TYPE MATCHES Debug)
   ADD_SUBDIRECTORY(tests)
 ENDIF()
+
+ADD_EXECUTABLE(main main.cpp)
+
+TARGET_LINK_LIBRARIES(main VkEng)

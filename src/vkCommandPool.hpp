@@ -21,6 +21,7 @@
 #pragma once
 
 #include <vkLogicalDevice.hpp>
+#include <vkSurface.hpp>
 
 namespace vk
 {
@@ -33,12 +34,12 @@ namespace vk
         CommandPool();
 
         CommandPool(SharedPtrLogicalDevice const& device,
-                    VkSurfaceKHR                  surface);
+                    Surface&                      surface);
 
         CommandPool(SharedPtrLogicalDevice const& device,
                     VkCommandPool                 commandPool);
 
-        CommandPool(CommandPool const& other) = delete;
+        CommandPool(CommandPool& other) = delete;
 
         CommandPool(CommandPool&& other) = delete;
 
@@ -50,6 +51,8 @@ namespace vk
         CommandPool&
         operator=(CommandPool&& other) noexcept
         {
+          destroyMembers();
+
           mCommandPool = other.mCommandPool;
           mDevice      = other.mDevice;
 
@@ -59,15 +62,18 @@ namespace vk
           return *this;
         }
 
-        inline VkCommandPool getVkCommandPool() { return mCommandPool; }
+        inline auto getVkCommandPool() { return mCommandPool; }
 
       private:
         VkCommandPool          mCommandPool;
 
         SharedPtrLogicalDevice mDevice;
+
+        void
+        destroyMembers();
     };
 
-    using SharedPtrCommandPool = std::shared_ptr<CommandPool>;
+    using SharedPtrCommandPool = std::shared_ptr<vk::eng::CommandPool>;
   } // namespace eng
 } // namespace vk
 

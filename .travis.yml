@@ -42,7 +42,7 @@ before_install:
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd Vulkan-LoaderAndValidationLayers; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then ./update_external_sources.sh; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd external/glslang/build; fi
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo make install; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then export PATH=$PATH:/home/travis/build/BenSolus/vulkan-engine/Vulkan-LoaderAndValidationLayers/external/glslang/build/install/bin; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ../../..; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cmake -H. -Bdbuild -DCMAKE_BUILD_TYPE=Debug; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd dbuild || exit 1; fi

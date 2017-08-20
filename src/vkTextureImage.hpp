@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <vkCommandPool.hpp>
 #include <vkImage.hpp>
 
 namespace vk
@@ -33,8 +34,8 @@ namespace vk
         TextureImage();
 
         TextureImage(SharedPtrLogicalDevice const& device,
-                     std::string const&            path,
-                     VkCommandPool                 commandPool);
+                     SharedPtrCommandPool  const&  commandPool,
+                     std::string const&            path);
 
         TextureImage(TextureImage const& other) = delete;
 

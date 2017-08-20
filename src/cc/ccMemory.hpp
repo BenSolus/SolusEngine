@@ -7,7 +7,7 @@
  */
 
 /**
- *  @file      ccConstants.hpp
+ *  @file      ccMemory.hpp
  *  @author    Bennet Carstensen
  *  @date      2017
  *  @copyright Copyright (c) 2017 Bennet Carstensen
@@ -20,8 +20,13 @@
 
 #pragma once
 
-#include <string>
+#include <cstddef>
 
-#define is_eq ==
+namespace cc
+{
+  void*
+  alignedAlloc(std::size_t size, std::size_t alignment);
 
-extern const std::string BIN_DIR;
+  void
+  alignedFree(void* data);
+} // namespace cc

@@ -7,10 +7,8 @@
  */
 
 #include <vkFramework.hpp>
+
 #include <cc/ccConstants.hpp>
-
-
-#include <iostream>
 
 vk::eng::Framework::Framework()
   : mCommandBuffers(),
@@ -25,6 +23,7 @@ vk::eng::Framework::Framework()
     mTextureImageView(),
     mIndexBuffer(),
     mModel(),
+    mModel1(),
     mPipeline(),
     mRenderPass(),
     mImageAvailableSemaphore(),
@@ -35,7 +34,9 @@ vk::eng::Framework::Framework()
     mTextureSampler(),
     mUniformBuffer(),
     mVertexBuffer(),
-    mDevice(SHARED_PTR_NULL_LOGICAL_DEVICE)
+    mDevice(SHARED_PTR_NULL_LOGICAL_DEVICE),
+    mCommandPool(SHARED_PTR_NULL_COMMAND_POOL),
+    mDynamicAlignment(0)
 {
   try
   {
@@ -62,24 +63,18 @@ vk::eng::Framework::Framework()
                                          mSwapChain.getVkFormat(),
                                          VK_IMAGE_ASPECT_COLOR_BIT);
 
-    mDescriptorSetLayout = vk::eng::DescriptorSetLayout(mDevice);
+    mDescriptorSetLayout = DescriptorSetLayout(mDevice);
 
+    mCommandPool         = std::make_shared<CommandPool>(mDevice, mSurface);
 
+    mDepthImage          = DepthImage(mDevice, mCommandPool, mSwapChain);
 
-    SharedPtrCommandPool commandPool
-      (std::make_shared<CommandPool>(mDevice, mSurface.getVkSurfaceKHR()));
+    mDepthImageView      = ImageViews(mDevice,
+                                      { mDepthImage.getResource() },
+                                      mDepthImage.getVkFormat(),
+                                      VK_IMAGE_ASPECT_DEPTH_BIT);
 
-    mDepthImage       = vk::eng::DepthImage(mDevice,
-                                            mSwapChain.getVkExtent(),
-                                            commandPool->getVkCommandPool());
-    mDepthImageView   = vk::eng::ImageViews(mDevice,
-                                            { mDepthImage.getResource() },
-                                            mDepthImage.getVkFormat(),
-                                            VK_IMAGE_ASPECT_DEPTH_BIT);
-
-    mRenderPass       = vk::eng::RenderPass(mDevice,
-                                            mSwapChain.getVkFormat(),
-                                            mDepthImage.getVkFormat());
+    mRenderPass          = RenderPass(mDevice, mSwapChain, mDepthImage);
 
     mPipeline         = vk::eng::Pipeline
                           (mDevice,
@@ -93,10 +88,9 @@ vk::eng::Framework::Framework()
                                            mSwapChain.getVkExtent(),
                                            mDepthImageView.getVkImageViews()[0]);
 
-    mTextureImage     = vk::eng::TextureImage
-                          (mDevice,
-                           BIN_DIR + "/data/textures/texture.png",
-                           commandPool->getVkCommandPool());
+    mTextureImage     = TextureImage(mDevice,
+                                     mCommandPool,
+                                     BIN_DIR + "/data/textures/texture.png");
 
     mTextureSampler   = vk::eng::TextureSampler(mDevice);
 
@@ -105,15 +99,28 @@ vk::eng::Framework::Framework()
                                             VK_FORMAT_R8G8B8A8_UNORM,
                                             VK_IMAGE_ASPECT_COLOR_BIT);
 
-    mModel          = vk::eng::Model(BIN_DIR + "/data/models/body.glb");
+    mModel          = vk::eng::Model(BIN_DIR + "/data/models/body.dae");
 
-    mVertexBuffer   = vk::eng::VertexBuffer(mDevice,
-                                            commandPool->getVkCommandPool());
+    mVertexBuffer   = VertexBuffer(mDevice, mCommandPool);
 
-    mIndexBuffer    = vk::eng::IndexBuffer(mDevice,
-                                           commandPool->getVkCommandPool());
+    mIndexBuffer    = IndexBuffer(mDevice, mCommandPool);
 
-    mUniformBuffer  = vk::eng::UniformBuffer(mDevice);
+    VkPhysicalDeviceProperties deviceProperties;
+
+    vkGetPhysicalDeviceProperties(mDevice->getVkPhysicalDevice(),
+                                  &deviceProperties);
+
+    const std::size_t uboAlignment
+      (deviceProperties.limits.minUniformBufferOffsetAlignment);
+
+    mDynamicAlignment =
+      (sizeof(DynamicUBO) / uboAlignment) *
+      uboAlignment +
+      ((sizeof(DynamicUBO) % uboAlignment) > 0 ? uboAlignment : 0);
+
+    mUniformBuffer  = UniformBuffer(mDevice, mDynamicAlignment, 125);
+
+    mUniformBuffer.updateViewProjectionUBO(mSwapChain.getVkExtent());
 
     mDescriptorPool = vk::eng::DescriptorPool(mDevice);
 
@@ -121,24 +128,24 @@ vk::eng::Framework::Framework()
                         (mDescriptorSetLayout.getVkDescriptorSetLayout(),
                          mDescriptorPool.getVkDescriptorPool(),
                          mDevice->getVkDevice(),
-                         mUniformBuffer.getResource(),
                          mTextureImageView.getVkImageViews()[0],
-                         mTextureSampler.getVkSampler());
+                         mTextureSampler.getVkSampler(),
+                         mUniformBuffer);
 
-    mCommandBuffers = vk::eng::CommandBuffers
-                        (mDevice,
-                         commandPool,
-                         mFramebuffers.getVkFramebuffers(),
-                         mRenderPass.getVkRenderPass(),
-                         mDescriptorSet.getVkDescriptorSet(),
-                         mSwapChain.getVkExtent(),
-                         mPipeline.getVkPipeline(),
-                         mPipeline.getVkPipelineLayout(),
-                         mVertexBuffer.getResource(),
-                         mIndexBuffer.getResource());
+    mCommandBuffers          = CommandBuffers(mDevice,
+                                              mCommandPool,
+                                              mFramebuffers.getVkFramebuffers(),
+                                              mRenderPass.getVkRenderPass(),
+                                              mDescriptorSet.getVkDescriptorSet(),
+                                              mSwapChain.getVkExtent(),
+                                              mPipeline.getVkPipeline(),
+                                              mPipeline.getVkPipelineLayout(),
+                                     mVertexBuffer.getResource(),
+                                     mIndexBuffer.getResource(),
+                                     mUniformBuffer);
 
-    mImageAvailableSemaphore = vk::eng::Semaphore(mDevice);
-    mRenderFinishedSemaphore = vk::eng::Semaphore(mDevice);
+    mImageAvailableSemaphore = Semaphore(mDevice);
+    mRenderFinishedSemaphore = Semaphore(mDevice);
   }
   catch(...)
   {
@@ -242,18 +249,14 @@ vk::eng::Framework::recreateSwapChain()
                                         mSwapChain.getVkFormat(),
                                         VK_IMAGE_ASPECT_COLOR_BIT);
 
-  mDepthImage     = vk::eng::DepthImage(mDevice,
-                                        mSwapChain.getVkExtent(),
-                                        mCommandBuffers.getCommandPool()->getVkCommandPool());
+  mDepthImage     = DepthImage(mDevice, mCommandPool, mSwapChain);
 
   mDepthImageView = vk::eng::ImageViews(mDevice,
                                         { mDepthImage.getResource() },
                                         mDepthImage.getVkFormat(),
                                         VK_IMAGE_ASPECT_DEPTH_BIT);
 
-  mRenderPass     = vk::eng::RenderPass(mDevice,
-                                        mSwapChain.getVkFormat(),
-                                        mDepthImage.getVkFormat());
+  mRenderPass     = RenderPass(mDevice, mSwapChain, mDepthImage);
 
   mPipeline       = vk::eng::Pipeline
                       (mDevice,
@@ -269,7 +272,7 @@ vk::eng::Framework::recreateSwapChain()
 
   mCommandBuffers = vk::eng::CommandBuffers
                       (mDevice,
-                       mCommandBuffers.getCommandPool(),
+                       mCommandPool,
                        mFramebuffers.getVkFramebuffers(),
                        mRenderPass.getVkRenderPass(),
                        mDescriptorSet.getVkDescriptorSet(),
@@ -277,12 +280,13 @@ vk::eng::Framework::recreateSwapChain()
                        mPipeline.getVkPipeline(),
                        mPipeline.getVkPipelineLayout(),
                        mVertexBuffer.getResource(),
-                       mIndexBuffer.getResource());
+                       mIndexBuffer.getResource(),
+                       mUniformBuffer);
 }
 
 void
 vk::eng::Framework::updateUniformBuffer()
-{ mUniformBuffer.update(mSwapChain.getVkExtent()); }
+{ mUniformBuffer.update(); }
 
 void
 vk::eng::Framework::onWindowResized(GLFWwindow* window, int width, int height)

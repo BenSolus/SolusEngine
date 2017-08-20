@@ -17,23 +17,26 @@ vk::eng::CommandPool::CommandPool()
 {}
 
 vk::eng::CommandPool::CommandPool(SharedPtrLogicalDevice const& device,
-                                  VkSurfaceKHR                  surface)
+                                  Surface&                      surface)
   : mCommandPool(VK_NULL_HANDLE), mDevice(device)
 {
   vk::eng::QueueFamilyIndices queueFamilyIndices(device->getVkPhysicalDevice(),
-                                                 surface);
+                                                 surface.getVkSurfaceKHR());
 
-  VkCommandPoolCreateInfo poolInfo = {};
+  VkCommandPoolCreateInfo poolInfo({});
 
   poolInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
   poolInfo.queueFamilyIndex =
     static_cast<uint32_t>(queueFamilyIndices.getGraphicsFamily());
 
-  if(vkCreateCommandPool(device->getVkDevice(), &poolInfo, nullptr, &mCommandPool) != VK_SUCCESS)
-  {
+  VkResult const result(vkCreateCommandPool(device->getVkDevice(),
+                                            &poolInfo,
+                                            nullptr,
+                                            &mCommandPool));
+
+  if(result not_eq VK_SUCCESS)
     cc::throw_with_nested<std::runtime_error>("failed to create command pool!",
                                               PRETTY_FUNCTION_SIG);
-  }
 }
 
 vk::eng::CommandPool::CommandPool(SharedPtrLogicalDevice const& device,
@@ -43,13 +46,19 @@ vk::eng::CommandPool::CommandPool(SharedPtrLogicalDevice const& device,
 
 vk::eng::CommandPool::~CommandPool() noexcept
 {
+  destroyMembers();
+}
+
+void
+vk::eng::CommandPool::destroyMembers()
+{
   VkDevice device(mDevice->getVkDevice());
 
-  if((device != VK_NULL_HANDLE) && (mCommandPool != VK_NULL_HANDLE))
+  if((device not_eq VK_NULL_HANDLE) and (mCommandPool not_eq VK_NULL_HANDLE))
     vkDestroyCommandPool(device, mCommandPool, nullptr);
 }
 
 vk::eng::SharedPtrCommandPool const SHARED_PTR_NULL_COMMAND_POOL
   (std::make_shared<vk::eng::CommandPool>
-    (std::make_shared<vk::eng::LogicalDevice>(),
-     static_cast<VkCommandPool>(VK_NULL_HANDLE)));
+     (std::make_shared<vk::eng::LogicalDevice>(),
+      static_cast<VkCommandPool>(VK_NULL_HANDLE)));

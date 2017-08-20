@@ -20,7 +20,9 @@
 
 #pragma once
 
+#include <vkCommandPool.hpp>
 #include <vkImage.hpp>
+#include <vkSwapChain.hpp>
 
 namespace vk
 {
@@ -33,8 +35,8 @@ namespace vk
         DepthImage();
 
         DepthImage(SharedPtrLogicalDevice const& device,
-                   VkExtent2D                    extend,
-                   VkCommandPool                 commandPool);
+                   SharedPtrCommandPool const&   commandPool,
+                   SwapChain&                    swapChain);
 
         DepthImage(DepthImage const& other) = delete;
 

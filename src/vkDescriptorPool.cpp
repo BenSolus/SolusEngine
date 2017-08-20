@@ -17,26 +17,31 @@ vk::eng::DescriptorPool::DescriptorPool()
 vk::eng::DescriptorPool::DescriptorPool(SharedPtrLogicalDevice const& device)
   : mDescriptorPool(VK_NULL_HANDLE), mDevice(device)
 {
-  std::array<VkDescriptorPoolSize, 2> poolSizes = {};
+  std::array<VkDescriptorPoolSize, 3> poolSizes({});
 
   poolSizes[0].type            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
   poolSizes[0].descriptorCount = 1;
-  poolSizes[1].type            = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  poolSizes[1].type            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
   poolSizes[1].descriptorCount = 1;
+  poolSizes[2].type            = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  poolSizes[2].descriptorCount = 1;
 
-  VkDescriptorPoolCreateInfo poolInfo = {};
+  VkDescriptorPoolCreateInfo poolInfo({});
 
   poolInfo.sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
   poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
   poolInfo.pPoolSizes    = poolSizes.data();
-  poolInfo.maxSets       = 1;
+  poolInfo.maxSets       = 2;
 
-  if(vkCreateDescriptorPool(device->getVkDevice(), &poolInfo, nullptr, &mDescriptorPool) != VK_SUCCESS)
-  {
+  VkResult const result(vkCreateDescriptorPool(device->getVkDevice(),
+                                               &poolInfo,
+                                               nullptr,
+                                               &mDescriptorPool));
+
+  if(result not_eq VK_SUCCESS)
     cc::throw_with_nested<std::runtime_error>("failed to create descriptor "
                                               "pool!",
                                               PRETTY_FUNCTION_SIG);
-  }
 }
 
 vk::eng::DescriptorPool::~DescriptorPool() noexcept

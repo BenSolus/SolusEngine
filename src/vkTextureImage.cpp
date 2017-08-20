@@ -16,8 +16,8 @@
 vk::eng::TextureImage::TextureImage() : Image() {}
 
 vk::eng::TextureImage::TextureImage(SharedPtrLogicalDevice const& device,
-                                    std::string const&            path,
-                                    VkCommandPool                 commandPool)
+                                    SharedPtrCommandPool  const&  commandPool,
+                                    std::string const&            path)
   : Image(device)
 {
   int texWidth, texHeight, texChannels;
@@ -58,17 +58,17 @@ vk::eng::TextureImage::TextureImage(SharedPtrLogicalDevice const& device,
                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 
-    transitionImageLayout(commandPool,
+    transitionImageLayout(commandPool->getVkCommandPool(),
                           VK_FORMAT_R8G8B8A8_UNORM,
                           VK_IMAGE_LAYOUT_PREINITIALIZED,
                           VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
-    copyBufferToImage(commandPool,
+    copyBufferToImage(commandPool->getVkCommandPool(),
                       stagingBuffer.getResource(),
                       static_cast<uint32_t>(texWidth),
                       static_cast<uint32_t>(texHeight));
 
-    transitionImageLayout(commandPool,
+    transitionImageLayout(commandPool->getVkCommandPool(),
                           VK_FORMAT_R8G8B8A8_UNORM,
                           VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                           VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
