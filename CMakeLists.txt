@@ -35,7 +35,6 @@ ENDIF()
 INCLUDE_DIRECTORIES(SYSTEM ${PROJECT_SOURCE_DIR}/ext/stb)
 
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/cc)
 
 INCLUDE_DIRECTORIES(${assimp_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${GLFW_INCLUDE_DIR})
@@ -56,11 +55,9 @@ SET(DEFAULT_CXX_FLAGS "-Wall -Wextra -pedantic ")
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${DEFAULT_CXX_FLAGS}")
 
-IF(CMAKE_BUILD_TYPE MATCHES Debug)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wcast-align -Wconversion -Weffc++ -Wfloat-equal -Wformat=2 -Wformat-nonliteral -Winvalid-pch -Wold-style-cast -Wmissing-declarations -Wmissing-format-attribute -Wmissing-include-dirs -Wredundant-decls -Wshadow -Wstrict-overflow=5 -Wswitch-default -Wswitch-enum -Wundef -Wunreachable-code -DCMAKE_BIN_DIR=\\\"${PROJECT_BINARY_DIR}\\\"")
-ELSEIF(CMAKE_BUILD_TYPE MATCHES Release)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
-ENDIF()
+SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wcast-align -Wconversion -Weffc++ -Wfloat-equal -Wformat=2 -Wformat-nonliteral -Winvalid-pch -Wold-style-cast -Wmissing-declarations -Wmissing-format-attribute -Wmissing-include-dirs -Wredundant-decls -Wshadow -Wstrict-overflow=5 -Wswitch-default -Wswitch-enum -Wundef -Wunreachable-code -DCMAKE_BIN_DIR=\\\"${PROJECT_BINARY_DIR}\\\"")
+
+SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
 
 IF(CMAKE_COMPILER_IS_GNUCC)
   EXECUTE_PROCESS(COMMAND ${CMAKE_C_COMPILER} -dumpversion
@@ -85,4 +82,7 @@ ENDIF()
 
 ADD_EXECUTABLE(main main.cpp)
 
-TARGET_LINK_LIBRARIES(main VkEng)
+TARGET_LINK_LIBRARIES(main SoEng)
+
+SET_PROPERTY(TARGET main PROPERTY CXX_STANDARD 14)
+SET_PROPERTY(TARGET main PROPERTY CXX_STANDARD_REQUIRED ON)

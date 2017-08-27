@@ -6,7 +6,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include <vkFramework.hpp>
+#include <soEngine.hpp>
+
+#include <utils/err/soException.hpp>
 
 int
 main()
@@ -15,7 +17,7 @@ main()
   {
     try
     {
-      vk::eng::Framework engine;
+      so::Engine engine;
 
       GLFWwindow* window(engine.getWindow());
 
@@ -28,19 +30,20 @@ main()
         engine.updateUniformBuffer();
 
         engine.drawFrame();
+
       }
 
       vkDeviceWaitIdle(engine.getVkDevice());
     }
     catch(...)
     {
-      cc::throw_with_nested<std::runtime_error>("Unexpected error:",
-                                                PRETTY_FUNCTION_SIG);
+      std::throw_with_nested(so::utils::err::Exception<std::runtime_error>
+         ("Unexpected error:", PRETTY_FUNCTION_SIG));
     }
   }
-  catch(const std::exception& e)
+  catch(so::utils::err::Exception<std::runtime_error> const& e)
   {
-    cc::print_exception(e);
+    e.print();
 
     return EXIT_FAILURE;
   }

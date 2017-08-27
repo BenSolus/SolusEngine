@@ -1,14 +1,13 @@
 [![Travis.ci Shield](https://img.shields.io/travis/BenSolus/vulkan-engine/master.svg?style=plastic&label=Linux)](https://travis-ci.org/BenSolus/vulkan-engine)
 
-# vulkan-engine
+# SolusEngine
 
 ---
 
 ## Summary
 
-The vulkan-engine is a framework for the 3D graphics and compute API
-[Vulkan](https://www.khronos.org/vulkan/), handling interactions while also
-maintaining low-level access to the API components.
+The SolusEngine is a 3D graphics engine with
+[Vulkan](https://www.khronos.org/vulkan/) support.
 
 ---
 
@@ -69,7 +68,7 @@ to be implemented. Further ideas, feedback and help are appreciated.
 
 ## Attribution
 
-This project, "vulkan-engine",
+This project, "SolusEngine",
 *   is heavily inspired by the
     [code](https://github.com/Overv/VulkanTutorial/tree/master/code) of this
     [Vulkan Tutorial](https://vulkan-tutorial.com/) by

@@ -7,6 +7,8 @@ language: cpp
 
 addons:
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
       - build-essential
       - git
@@ -16,6 +18,9 @@ addons:
       - libwayland-dev
       - libassimp-dev
       - libgtest-dev
+      - ninja-build
+      - gcc-5
+      - g++-5
 
 matrix:
   include:
@@ -27,28 +32,48 @@ matrix:
         - clang
 
 before_install:
+  ### Set compiler versions
+  - if [ "$CC" = "gcc" ]; then export CC="gcc-5"; fi
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-5"; fi
+
+  ### Install Google Test
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd /usr/src/gtest; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo cmake -DBUILD_SHARED_LIBS=ON CMakeLists.txt; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo make; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo cp *.so /usr/lib; fi
+
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd $TRAVIS_BUILD_DIR; fi
+
+  ### Install OpenGL Mathematics
   - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/g-truc/glm.git; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd glm; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo cmake CMakeLists.txt; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo make; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo make install; fi
+
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ..; fi
+
+  ### Install glslang
+  - if [ $TRAVIS_OS_NAME = "linux" ]; git clone https://github.com/KhronosGroup/glslang.git; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; mkdir -p glslang/build
+  - if [ $TRAVIS_OS_NAME = "linux" ]; cd glslang/build; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; cmake -GNinja -DCMAKE_BUILD_TYPE=Release ..; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; ninja install; fi
+
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ../..; fi
+
+  ### Install Vulkan ICD loader and validation layers
   - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/Vulkan-LoaderAndValidationLayers; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd Vulkan-LoaderAndValidationLayers; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then ./update_external_sources.sh; fi
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd external/glslang/build; fi
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then export PATH=$PATH:/home/travis/build/BenSolus/vulkan-engine/Vulkan-LoaderAndValidationLayers/external/glslang/build/install/bin; fi
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ../../..; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cmake -H. -Bdbuild -DCMAKE_BUILD_TYPE=Debug; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd dbuild || exit 1; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then make; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo make install; fi
+
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ../..; fi
+
+  ### Install GLFW
   - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/glfw/glfw.git; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then mkdir -p glfw/build; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd glfw/build || exit 1; fi

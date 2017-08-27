@@ -40,3 +40,7 @@ builds
 # Atom
 .atom-build.json
 .build.sh
+
+# Misc
+src/models
+src/texture
