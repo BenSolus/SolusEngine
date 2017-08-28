@@ -1,4 +1,3 @@
-[![Travis.ci Shield](https://img.shields.io/travis/BenSolus/vulkan-engine/master.svg?style=plastic&label=Linux)](https://travis-ci.org/BenSolus/vulkan-engine)
 
 # SolusEngine
 
@@ -23,9 +22,11 @@ Older versions might also work, but untested.
 
 ---
 
-## Compiling
+## Building
 
 ### Linux
+
+[![Travis.ci Shield](https://img.shields.io/travis/BenSolus/SolusEngine/master.svg?style=plastic&label=Linux)](https://travis-ci.org/BenSolus/SolusEngine)
 
 Following bash script should retrieve the source and compile it in debug mode:
 
