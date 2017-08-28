@@ -54,11 +54,11 @@ before_install:
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ..; fi
 
   ### Install glslang
-  - if [ $TRAVIS_OS_NAME = "linux" ]; git clone https://github.com/KhronosGroup/glslang.git; fi
-  - if [ $TRAVIS_OS_NAME = "linux" ]; mkdir -p glslang/build; fi
-  - if [ $TRAVIS_OS_NAME = "linux" ]; cd glslang/build; fi
-  - if [ $TRAVIS_OS_NAME = "linux" ]; cmake -GNinja -DCMAKE_BUILD_TYPE=Release ..; fi
-  - if [ $TRAVIS_OS_NAME = "linux" ]; ninja install; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/glslang.git; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then mkdir -p glslang/build; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd glslang/build; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cmake -GNinja -DCMAKE_BUILD_TYPE=Release ..; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then ninja install; fi
 
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ../..; fi
 
