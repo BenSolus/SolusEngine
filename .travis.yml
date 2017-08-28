@@ -58,7 +58,7 @@ before_install:
   - if [ $TRAVIS_OS_NAME = "linux" ]; then mkdir -p glslang/build; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd glslang/build; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cmake -GNinja -DCMAKE_BUILD_TYPE=Release ..; fi
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then ninja install; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo ninja install; fi
 
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ../..; fi
 
