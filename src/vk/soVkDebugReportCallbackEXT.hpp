@@ -49,6 +49,8 @@ namespace so
         DebugReportCallbackEXT&
         operator=(DebugReportCallbackEXT&& other) noexcept
         {
+          deleteMembers();
+
           mCallback = other.mCallback;
           mInstance = other.mInstance;
 
@@ -65,6 +67,9 @@ namespace so
         VkDebugReportCallbackEXT mCallback;
 
         SharedPtrInstance        mInstance;
+
+        void
+        deleteMembers();
     };
 
     bool

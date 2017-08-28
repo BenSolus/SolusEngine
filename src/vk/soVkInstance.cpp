@@ -8,6 +8,7 @@
 
 #include <vk/soVkInstance.hpp>
 
+#include <utils/def/soDefinitions.hpp>
 #include <utils/err/soException.hpp>
 
 #define GLFW_INCLUDE_VULKAN
@@ -25,19 +26,19 @@ so::vk::Instance::Instance()
                                                     "available!",
                                                     PRETTY_FUNCTION_SIG);
 
-  VkApplicationInfo appInfo = {};
+  VkApplicationInfo* appInfo(new VkApplicationInfo({}));
 
-  appInfo.sType               = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-  appInfo.pApplicationName    = "Vulkan Engine";
-  appInfo.applicationVersion  = VK_MAKE_VERSION(1, 0, 0);
-  appInfo.pEngineName         = "Vulkan Engine";
-  appInfo.engineVersion       = VK_MAKE_VERSION(1, 0, 0);
-  appInfo.apiVersion          = VK_API_VERSION_1_0;
+  appInfo->sType               = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+  appInfo->pApplicationName    = "Vulkan Engine";
+  appInfo->applicationVersion  = VK_MAKE_VERSION(1, 0, 0);
+  appInfo->pEngineName         = "SolusEngine";
+  appInfo->engineVersion       = VK_MAKE_VERSION(1, 0, 0);
+  appInfo->apiVersion          = VK_API_VERSION_1_0;
 
-  VkInstanceCreateInfo createInfo = {};
+  VkInstanceCreateInfo createInfo({});
 
   createInfo.sType            = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-  createInfo.pApplicationInfo = &appInfo;
+  createInfo.pApplicationInfo = appInfo;
 
   auto extensions(getRequiredExtensions());
 
@@ -52,15 +53,17 @@ so::vk::Instance::Instance()
   } else
     createInfo.enabledLayerCount   = 0;
 
-  if(vkCreateInstance(&createInfo, nullptr, &mInstance) != VK_SUCCESS)
+  if(vkCreateInstance(&createInfo, nullptr, &mInstance) not_eq VK_SUCCESS)
     throw utils::err::Exception<std::runtime_error>("failed to create "
                                                     "instance!",
                                                     PRETTY_FUNCTION_SIG);
+
+  delete appInfo;
 }
 
 so::vk::Instance::~Instance() noexcept
 {
-  if(mInstance != VK_NULL_HANDLE)
+  if(mInstance not_eq VK_NULL_HANDLE)
     vkDestroyInstance(mInstance, nullptr);
 }
 
@@ -82,13 +85,13 @@ so::vk::Instance::checkValidationLayerSupport()
     bool layerFound = false;
 
     for(const auto& layerProperties : availableLayers)
-      if(std::strcmp(layerName, layerProperties.layerName) == 0)
+      if(std::strcmp(layerName, layerProperties.layerName) is_eq 0)
       {
         layerFound = true;
         break;
       }
 
-    if(!layerFound)
+    if(not layerFound)
       return false;
   }
 
@@ -98,13 +101,11 @@ so::vk::Instance::checkValidationLayerSupport()
 std::vector<const char*>
 so::vk::Instance::getRequiredExtensions()
 {
-  const char** glfwExtensions;
-
-  unsigned int glfwExtensionCount = 0;
+  unsigned int glfwExtensionCount(0);
 
   std::vector<const char*> extensions;
 
-  glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+  const char** glfwExtensions(glfwGetRequiredInstanceExtensions(&glfwExtensionCount));
 
   for(unsigned int i(0); i < glfwExtensionCount; ++i)
     extensions.push_back(glfwExtensions[i]);

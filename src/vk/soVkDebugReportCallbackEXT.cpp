@@ -36,11 +36,11 @@ so::vk::DebugReportCallbackEXT::DebugReportCallbackEXT
   if(!ENABLE_VALIDATION_LAYERS)
     return;
 
-  VkDebugReportCallbackCreateInfoEXT createInfo = {};
+  VkDebugReportCallbackCreateInfoEXT createInfo({});
 
-  createInfo.sType =
+  createInfo.sType       =
     VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
-  createInfo.flags =
+  createInfo.flags       =
     VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT;
   createInfo.pfnCallback = debugCallback;
 
@@ -64,19 +64,23 @@ so::vk::DebugReportCallbackEXT::DebugReportCallbackEXT
 
 so::vk::DebugReportCallbackEXT::~DebugReportCallbackEXT() noexcept
 {
-  VkInstance instance(mInstance->getVkInstance());
+  deleteMembers();
+}
 
-  if((mCallback != nullptr) && (instance != VK_NULL_HANDLE))
+void
+so::vk::DebugReportCallbackEXT::deleteMembers()
+{
+  VkInstance const instance(mInstance->getVkInstance());
+
+  if((mCallback not_eq nullptr) and (instance not_eq VK_NULL_HANDLE))
   {
     auto func(reinterpret_cast<PFN_vkDestroyDebugReportCallbackEXT>
-                (vkGetInstanceProcAddr(instance,
-                                       "vkDestroyDebugReportCallbackEXT")));
+      (vkGetInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT")));
 
-    if(func != nullptr)
+    if(func not_eq nullptr)
       func(instance, mCallback, nullptr);
   }
 }
-
 /******************************************************************************/
 /* Source of static functions                                                 */
 /******************************************************************************/
