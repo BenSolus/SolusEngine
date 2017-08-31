@@ -58,14 +58,23 @@ namespace so
   namespace vk
   {
     class
-    soVkModel {
+    Model
+    {
       public:
-        soVkModel();
+        Model();
 
+        Model(SharedPtrLogicalDevice const& device,
+              DescriptorPool&               descriptorPool,
+              DescriptorSetLayout&          descriptorSetLayout,
+              TextureSampler&               textureSampler,
+              UniformBuffer&                uniformBuffer,
+              std::string const&            path,
+              std::string const&            textureKey,
+              std::size_t const             numInstances = 0);
+        
       private:
         DescriptorSet mDescriptorSet;
         Mesh          mMesh;
-
         std::size_t   mNumInstances;
         std::string   mTextureKey;
     };

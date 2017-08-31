@@ -50,6 +50,8 @@
 
 #pragma once
 
+#include <vk/soVkDescriptorPool.hpp>
+#include <vk/soVkDescriptorSetLayout.hpp>
 #include <vk/soVkTextureSampler.hpp>
 #include <vk/soVkUniformBuffer.hpp>
 
@@ -63,12 +65,12 @@ namespace so
       public:
         DescriptorSet();
 
-        DescriptorSet(VkDescriptorSetLayout descriptorSetLayout,
-                      VkDescriptorPool      descriptorPool,
-                      VkDevice              device,
-                      std::string const     textureKey,
-                      TextureSampler&       textureSampler,
-                      UniformBuffer&        uniformBuffer);
+        DescriptorSet(SharedPtrLogicalDevice const& device,
+                      DescriptorPool&               descriptorPool,
+                      DescriptorSetLayout&          descriptorSetLayout,
+                      TextureSampler&               textureSampler,
+                      UniformBuffer&                uniformBuffer,
+                      std::string const&            textureKey);
 
         DescriptorSet(DescriptorSet const& other) = delete;
 
@@ -86,7 +88,7 @@ namespace so
           return *this;
         }
 
-        inline VkDescriptorSet& getVkDescriptorSet() { return mDescriptorSet; }
+        inline auto& getVkDescriptorSet() { return mDescriptorSet; }
 
       private:
         VkDescriptorSet       mDescriptorSet;

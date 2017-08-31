@@ -83,7 +83,7 @@ so::vk::UniformBuffer::UniformBuffer
 void
 so::vk::UniformBuffer::updateViewProjectionUBO(VkExtent2D swapChainExtent)
 {
-  mViewProjectionUBO.view  = glm::lookAt(glm::vec3(0.0f, -30.0f, -30.0f),
+  mViewProjectionUBO.view  = glm::lookAt(glm::vec3(0.0f, -5.0f, -5.0f),
                                          glm::vec3(0.0f, 0.0f, 0.0f),
                                          glm::vec3(0.0f, -1.0f, 0.0f));
 
@@ -121,34 +121,23 @@ so::vk::UniformBuffer::update()
 
   float time =
     static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>
-                         (currentTime - startTime).count()) / 100000000.0f;
+                         (currentTime - startTime).count()) / 1000.0f;
 
-  uint32_t dim = static_cast<uint32_t>(pow(125, (1.0f / 3.0f)));
   glm::vec3 offset(5.0f);
 
-  for (uint32_t x = 0; x < dim; x++)
+  for(std::size_t i(0); i < mDynamicUBOs.size(); ++i)
   {
-    for (uint32_t y = 0; y < dim; y++)
-    {
-      for (uint32_t z = 0; z < dim; z++)
-      {
-        uint32_t index = x * dim * dim + y * dim + z;
+    float array[] { 1.0f, 0.0f, 0.0f,     0.0f,
+                    0.0f, 1.0f, 0.0f,     0.0f,
+                    0.0f, 0.0f, 1.0f,     0.0f,
+                    0.0f, 0.0f, 2.5f * i, 1.0f };
 
-        DynamicUBO dynamicUBO({});
+    glm::mat4 pos(glm::make_mat4(array));
 
-        // Update rotations
-        rotations[index] += time * rotationSpeeds[index];
-
-        // Update matrices
-        glm::vec3 pos = glm::vec3(-((dim * offset.x) / 2.0f) + offset.x / 2.0f + x * offset.x, -((dim * offset.y) / 2.0f) + offset.y / 2.0f + y * offset.y, -((dim * offset.z) / 2.0f) + offset.z / 2.0f + z * offset.z);
-        dynamicUBO.model = glm::translate(glm::mat4(), pos);
-        dynamicUBO.model = glm::rotate(dynamicUBO.model, rotations[index].x, glm::vec3(1.0f, 1.0f, 0.0f));
-        dynamicUBO.model = glm::rotate(dynamicUBO.model, rotations[index].y, glm::vec3(0.0f, 1.0f, 0.0f));
-        dynamicUBO.model = glm::rotate(dynamicUBO.model, rotations[index].z, glm::vec3(0.0f, 0.0f, 1.0f));
-
-        mDynamicUBOs[index] = dynamicUBO;
-      }
-    }
+    mDynamicUBOs[i].model = glm::rotate
+      (pos,
+       (i % 2 ? 1 : -1) * time * glm::radians(90.0f),
+       glm::vec3(0.0f, 1.0f, 0.0f));
   }
 
   VkDevice device(mDevice->getVkDevice());

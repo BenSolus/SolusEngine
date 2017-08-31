@@ -32,7 +32,7 @@
 
 so::vk::Mesh::Mesh() {}
 
-so::vk::Mesh::Mesh(std::string const path)
+so::vk::Mesh::Mesh(std::string const& path)
 {
   Assimp::Importer importer;
 

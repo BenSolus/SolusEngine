@@ -62,7 +62,7 @@ namespace so
       public:
         Mesh();
 
-        Mesh(std::string const path);
+        Mesh(std::string const& path);
 
         static inline auto const& getVertices() { return mVertices; }
 

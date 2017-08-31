@@ -22,3 +22,26 @@
 
 #include <vk/soVkModel.hpp>
 
+so::vk::Model::Model()
+  : mDescriptorSet(), mMesh(), mNumInstances(0), mTextureKey("") {}
+
+so::vk::Model::Model(SharedPtrLogicalDevice const& device,
+                     DescriptorPool&               descriptorPool,
+                     DescriptorSetLayout&          descriptorSetLayout,
+                     TextureSampler&               textureSampler,
+                     UniformBuffer&                uniformBuffer,
+                     std::string const&            path,
+                     std::string const&            textureKey,
+                     std::size_t const             numInstances)
+  : mDescriptorSet(device,
+                   descriptorPool,
+                   descriptorSetLayout,
+                   textureSampler,
+                   uniformBuffer,
+                   textureKey),
+    mMesh(path),
+    mNumInstances(numInstances),
+    mTextureKey(textureKey)
+{
+
+}

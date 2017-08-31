@@ -120,19 +120,18 @@ so::Engine::Engine()
       uboAlignment +
       ((sizeof(vk::DynamicUBO) % uboAlignment) > 0 ? uboAlignment : 0);
 
-    mUniformBuffer       = vk::UniformBuffer(mDevice, mDynamicAlignment, 125);
+    mUniformBuffer       = vk::UniformBuffer(mDevice, mDynamicAlignment, 2);
 
     mUniformBuffer.updateViewProjectionUBO(mSwapChain.getVkExtent());
 
     mDescriptorPool      = vk::DescriptorPool(mDevice);
 
-    mDescriptorSet       = vk::DescriptorSet
-                             (mDescriptorSetLayout.getVkDescriptorSetLayout(),
-                              mDescriptorPool.getVkDescriptorPool(),
-                              mDevice->getVkDevice(),
-                              "body_0",
-                              mTextureSampler,
-                              mUniformBuffer);
+    mDescriptorSet       = vk::DescriptorSet(mDevice,
+                                             mDescriptorPool,
+                                             mDescriptorSetLayout,
+                                             mTextureSampler,
+                                             mUniformBuffer,
+                                             "body_0");
 
     mCommandBuffers      = vk::CommandBuffers(mDevice,
                                               mCommandPool,
