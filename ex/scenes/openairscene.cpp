@@ -63,7 +63,7 @@ main()
 
       GLFWwindow* window(engine.getWindow());
 
-      engine.addModel(BIN_DIR + "/data/models/body.dae",
+      engine.addModel(BIN_DIR + "/data/models/body.glb",
                       BIN_DIR + "/data/textures/texture.png",
                       1,
                       "body_0",

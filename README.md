@@ -26,16 +26,17 @@ Older versions might also work, but untested.
 
 ### Linux
 
-[![Travis.ci Shield](https://img.shields.io/travis/BenSolus/SolusEngine/master.svg?style=plastic&label=Linux)](https://travis-ci.org/BenSolus/SolusEngine)
+[![Travis.ci Shield](https://img.shields.io/travis/BenSolus/SolusEngine/master.svg?style=plastic&label=Ubuntu-14.04)](https://travis-ci.org/BenSolus/SolusEngine)
 
-Following bash script should retrieve the source and compile it in debug mode:
+Following bash script retrieves the source and compiles it, including the
+examples, in debug mode:
 
 ```shell
 #!/usr/bin/bash
 
-git clone https://github.com/BenSolus/master-thesis.git
+git clone https://github.com/BenSolus/SolusEngine.git
 
-cd master-thesis || exit 1
+cd SolusEngine || exit 1
 
 PROJECT_DIR=${PWD}
 
@@ -43,7 +44,7 @@ mkdir -p "${PROJECT_DIR}/build"
 
 cd "${PROJECT_DIR}/build" || exit 1
 
-cmake -DCMAKE_BUILD_TYPE=Debug ../..
+cmake -DCMAKE_BUILD_TYPE=Debug -DEXAMPLES:BOOL=ON ../..
 
 make -j2
 ```
