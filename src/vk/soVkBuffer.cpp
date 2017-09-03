@@ -27,47 +27,80 @@
 so::vk::Buffer::Buffer() : Resource() {}
 
 so::vk::Buffer::Buffer(SharedPtrLogicalDevice const& device,
-                        VkDeviceSize                  size,
-                        VkBufferUsageFlags            usage,
-                        VkMemoryPropertyFlags         properties)
+                       VkDeviceSize                  size,
+                       VkBufferUsageFlags            usage,
+                       VkMemoryPropertyFlags         properties,
+                       Buffer_t                      bufferType)
   : Resource(device)
 {
-  VkBufferCreateInfo bufferInfo = {};
+  if(size not_eq 0)
+  {
+    VkBufferCreateInfo bufferInfo = {};
 
-  bufferInfo.sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-  bufferInfo.size        = size;
-  bufferInfo.usage       = usage;
-  bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = size;
+    bufferInfo.usage = usage;
+    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-  VkDevice vkDevice(device->getVkDevice());
+    VkDevice vkDevice(device->getVkDevice());
 
-  if(vkCreateBuffer(vkDevice, &bufferInfo, nullptr, &mResource) != VK_SUCCESS)
-    throw utils::err::Exception<std::runtime_error>("failed to create buffer!",
-                                                    PRETTY_FUNCTION_SIG);
+    VkResult result(vkCreateBuffer(vkDevice, &bufferInfo, nullptr, &mResource));
+
+    if(result not_eq VK_SUCCESS)
+    {
+      std::string explanatory("failed to create ");
+
+      switch(bufferType)
+      {
+        case DYNAMIC: explanatory += "dynamic "; break;
+        case INDEX :  explanatory += "index ";   break;
+        case STAGING: explanatory += "staging "; break;
+        case UNIFORM: explanatory += "uniform "; break;
+        case VERTEX:  explanatory += "vertex ";  break;
+      }
+
+      explanatory += "buffer!";
+
+      throw utils::err::Exception<std::runtime_error>(explanatory,
+                                                      PRETTY_FUNCTION_SIG);
+    }
 
 
-  VkMemoryRequirements memRequirements;
 
-  vkGetBufferMemoryRequirements(vkDevice, mResource, &memRequirements);
+    VkMemoryRequirements memRequirements;
 
-  VkMemoryAllocateInfo allocInfo = {};
+    vkGetBufferMemoryRequirements(vkDevice, mResource, &memRequirements);
 
-  allocInfo.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-  allocInfo.allocationSize  = memRequirements.size;
-  allocInfo.memoryTypeIndex =
-    findMemoryType(memRequirements.memoryTypeBits, properties);
+    VkMemoryAllocateInfo allocInfo = {};
 
-  VkResult const result(vkAllocateMemory(vkDevice,
-                                         &allocInfo,
-                                         nullptr,
-                                         &mDeviceMemory));
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex =
+      findMemoryType(memRequirements.memoryTypeBits, properties);
 
-  if(result not_eq VK_SUCCESS)
-    throw utils::err::Exception<std::runtime_error>("failed to allocate buffer "
-                                                    "memory!",
-                                                    PRETTY_FUNCTION_SIG);
+    result = vkAllocateMemory(vkDevice, &allocInfo, nullptr, &mDeviceMemory);
 
-  vkBindBufferMemory(vkDevice, mResource, mDeviceMemory, 0);
+    if(result not_eq VK_SUCCESS)
+    {
+      std::string explanatory("failed to allocate ");
+
+      switch(bufferType)
+      {
+        case DYNAMIC: explanatory += "dynamic "; break;
+        case INDEX :  explanatory += "index ";   break;
+        case STAGING: explanatory += "staging "; break;
+        case UNIFORM: explanatory += "uniform "; break;
+        case VERTEX:  explanatory += "vertex ";  break;
+      }
+
+      explanatory += "buffer memory!";
+
+      throw utils::err::Exception<std::runtime_error>(explanatory,
+                                                      PRETTY_FUNCTION_SIG);
+    }
+
+    vkBindBufferMemory(vkDevice, mResource, mDeviceMemory, 0);
+  }
 }
 
 so::vk::Buffer::~Buffer() noexcept { destroyMembers(); }

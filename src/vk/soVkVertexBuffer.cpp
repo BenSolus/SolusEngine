@@ -35,14 +35,18 @@ so::vk::VertexBuffer::VertexBuffer(SharedPtrLogicalDevice const& device,
            sizeof(Mesh::getVertices()[0]) * Mesh::getVertices().size(),
            VK_BUFFER_USAGE_TRANSFER_DST_BIT |
            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-           VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
+           VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+           VERTEX)
 {
-  VkDeviceSize  size(sizeof(Mesh::getVertices()[0]) *
-                     Mesh::getVertices().size());
+  VkDeviceSize const size(sizeof(Mesh::getVertices()[0]) *
+                          Mesh::getVertices().size());
 
-  StagingBuffer stagingBuffer(device, size, Mesh::getVertices().data());
+  if(size not_eq 0)
+  {
+    StagingBuffer stagingBuffer(device, size, Mesh::getVertices().data());
 
-  copyBuffer(stagingBuffer.getResource(),
-             size,
-             commandPool->getVkCommandPool());
+    copyBuffer(stagingBuffer.getResource(),
+               size,
+               commandPool->getVkCommandPool());
+  }
 }

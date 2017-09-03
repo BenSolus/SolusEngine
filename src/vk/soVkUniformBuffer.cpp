@@ -28,10 +28,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <chrono>
-#include <random>
-
-static glm::vec3 rotations[125];
-static glm::vec3 rotationSpeeds[125];
 
 so::vk::UniformBuffer::UniformBuffer()
   : mViewProjectionUBO({}),
@@ -50,35 +46,16 @@ so::vk::UniformBuffer::UniformBuffer
                              sizeof(ViewProjectionUBO),
                              VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                              VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                             VK_MEMORY_PROPERTY_HOST_COHERENT_BIT),
+                             VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                             UNIFORM),
     mDynamicUBOs(dynamicAlignment, numDynamicUBOs),
     mDynamicBuffer(device,
                    numDynamicUBOs * dynamicAlignment,
                    VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT),
+                   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+                   DYNAMIC),
     mDevice(device)
-{
-  if(numDynamicUBOs not_eq 0)
-  {
-    static auto startTime(std::chrono::high_resolution_clock::now());
-
-    auto currentTime(std::chrono::high_resolution_clock::now());
-
-    float time =
-      static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>
-        (currentTime - startTime).count()) / 1000.0f;
-
-    std::mt19937 rndGen(static_cast<uint32_t>(time));
-
-    std::normal_distribution<float> rndDist(-1.0f, 1.0f);
-
-    for (uint32_t i = 0; i < 125; i++)
-    {
-      rotations[i] = glm::vec3(rndDist(rndGen), rndDist(rndGen), rndDist(rndGen)) * 2.0f * (float)M_PI;
-      rotationSpeeds[i] = glm::vec3(rndDist(rndGen), rndDist(rndGen), rndDist(rndGen));
-    }
-  }
-}
+{}
 
 void
 so::vk::UniformBuffer::updateViewProjectionUBO(VkExtent2D swapChainExtent)
@@ -115,55 +92,69 @@ so::vk::UniformBuffer::updateViewProjectionUBO(VkExtent2D swapChainExtent)
 void
 so::vk::UniformBuffer::update()
 {
-  static auto startTime(std::chrono::high_resolution_clock::now());
-
-  auto currentTime(std::chrono::high_resolution_clock::now());
-
-  float time =
-    static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>
-                         (currentTime - startTime).count()) / 1000.0f;
-
-  glm::vec3 offset(5.0f);
-
-  for(std::size_t i(0); i < mDynamicUBOs.size(); ++i)
+  if(mDynamicUBOs.size() not_eq 0)
   {
-    float array[] { 1.0f, 0.0f, 0.0f,     0.0f,
-                    0.0f, 1.0f, 0.0f,     0.0f,
-                    0.0f, 0.0f, 1.0f,     0.0f,
-                    0.0f, 0.0f, 2.5f * i, 1.0f };
+    static auto startTime(std::chrono::high_resolution_clock::now());
 
-    glm::mat4 pos(glm::make_mat4(array));
+    auto currentTime(std::chrono::high_resolution_clock::now());
 
-    mDynamicUBOs[i].model = glm::rotate
-      (pos,
-       (i % 2 ? 1 : -1) * time * glm::radians(90.0f),
-       glm::vec3(0.0f, 1.0f, 0.0f));
+    float time =
+      static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>
+        (currentTime - startTime).count()) / 1000.0f;
+
+    glm::vec3 offset(5.0f);
+
+    for (std::size_t i(0); i < mDynamicUBOs.size(); ++i) {
+      float array[]{1.0f, 0.0f, 0.0f, 0.0f,
+                    0.0f, 1.0f, 0.0f, 0.0f,
+                    0.0f, 0.0f, 1.0f, 0.0f,
+                    0.0f, 0.0f, 2.5f * i, 1.0f};
+
+      glm::mat4 pos(glm::make_mat4(array));
+
+      mDynamicUBOs[i].model = glm::rotate
+        (pos,
+         (i % 2 ? 1 : -1) * time * glm::radians(90.0f),
+         glm::vec3(0.0f, 1.0f, 0.0f));
+    }
+
+    VkDevice device(mDevice->getVkDevice());
+
+    void *data;
+
+    vkMapMemory(device,
+                mDynamicBuffer.getVkDeviceMemory(),
+                0,
+                mDynamicUBOs.alignment() * mDynamicUBOs.size(),
+                0,
+                &data);
+
+    memcpy(data,
+           mDynamicUBOs.data(),
+           mDynamicUBOs.alignment() * mDynamicUBOs.size());
+
+    VkMappedMemoryRange memoryRange({});
+
+    memoryRange.sType  = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+    memoryRange.pNext  = nullptr;
+    memoryRange.memory = mDynamicBuffer.getVkDeviceMemory();
+    memoryRange.offset = 0;
+    memoryRange.size   = mDynamicUBOs.alignment() * mDynamicUBOs.size();
+
+    vkFlushMappedMemoryRanges(device, 1, &memoryRange);
+
+    vkUnmapMemory(device, mDynamicBuffer.getVkDeviceMemory());
   }
+}
 
-  VkDevice device(mDevice->getVkDevice());
+void
+so::vk::UniformBuffer::recreateDynamicBuffer(std::size_t const numDynamicUBOs)
+{
+  mDynamicUBOs = DynamicUBOs(mDynamicUBOs.alignment(), numDynamicUBOs);
 
-  void* data;
-
-  vkMapMemory(device,
-              mDynamicBuffer.getVkDeviceMemory(),
-              0,
-              mDynamicUBOs.alignment() * mDynamicUBOs.size(),
-              0,
-              &data);
-
-  memcpy(data,
-         mDynamicUBOs.data(),
-         mDynamicUBOs.alignment() * mDynamicUBOs.size());
-
-  VkMappedMemoryRange memoryRange({ });
-
-  memoryRange.sType  = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-  memoryRange.pNext  = nullptr;
-  memoryRange.memory = mDynamicBuffer.getVkDeviceMemory();
-  memoryRange.offset = 0;
-  memoryRange.size   = mDynamicUBOs.alignment() * mDynamicUBOs.size();
-
-  vkFlushMappedMemoryRanges(device, 1, &memoryRange);
-
-  vkUnmapMemory(device, mDynamicBuffer.getVkDeviceMemory());
+  mDynamicBuffer = Buffer(mDevice,
+                          numDynamicUBOs * mDynamicUBOs.alignment(),
+                          VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                          VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+                          DYNAMIC);
 }

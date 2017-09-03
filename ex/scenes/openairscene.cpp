@@ -21,7 +21,7 @@
  */
 
 /**
- *  @file      soVkDescriptorSet.hpp
+ *  @file      openairscene.hpp
  *  @author    Bennet Carstensen
  *  @date      2017
  *  @copyright Copyright (c) 2017 Bennet Carstensen
@@ -48,65 +48,52 @@
  *             OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#pragma once
+#include <soEngine.hpp>
 
-#include <vk/soVkDescriptorPool.hpp>
-#include <vk/soVkDescriptorSetLayout.hpp>
-#include <vk/soVkTextureSampler.hpp>
-#include <vk/soVkUniformBuffer.hpp>
+#include <utils/fs/soFileSystem.hpp>
 
-namespace so
+int
+main()
 {
-  namespace vk
+  try
   {
-    class
-    DescriptorSet
+    try
     {
-      public:
-        DescriptorSet();
+      so::Engine engine;
 
-        DescriptorSet(SharedPtrLogicalDevice const& device,
-                      DescriptorPool&               descriptorPool,
-                      DescriptorSetLayout&          descriptorSetLayout,
-                      TextureSampler&               textureSampler,
-                      UniformBuffer&                uniformBuffer,
-                      std::string const&            textureKey);
+      GLFWwindow* window(engine.getWindow());
 
-        DescriptorSet(DescriptorSet const& other);
+      engine.addModel(BIN_DIR + "/data/models/body.dae",
+                      BIN_DIR + "/data/textures/texture.png",
+                      1,
+                      "body_0",
+                      "body_0");
 
-        DescriptorSet(DescriptorSet&& other) = delete;
+      vkDeviceWaitIdle(engine.getVkDevice());
 
-        DescriptorSet& operator=(DescriptorSet const& other) = delete;
+      while(!glfwWindowShouldClose(window))
+      {
+        glfwPollEvents();
 
-        DescriptorSet&
-        operator=(DescriptorSet&& other) noexcept
-        {
-          mDescriptorSet = other.mDescriptorSet;
+        engine.updateUniformBuffer();
 
-          other.mDescriptorSet = VK_NULL_HANDLE;
+        engine.drawFrame();
+      }
 
-          return *this;
-        }
+      vkDeviceWaitIdle(engine.getVkDevice());
+    }
+    catch(...)
+    {
+      std::throw_with_nested(so::utils::err::Exception<std::runtime_error>
+         ("Unexpected error:", PRETTY_FUNCTION_SIG));
+    }
+  }
+  catch(so::utils::err::Exception<std::runtime_error> const& e)
+  {
+    e.print();
 
-        auto& getVkDescriptorSet() { return mDescriptorSet; }
+    return EXIT_FAILURE;
+  }
 
-        auto& getVkDescriptorSet() const { return mDescriptorSet; }
-
-        void unsetMembers() { mDescriptorSet = VK_NULL_HANDLE; }
-
-        void
-        recreateDescriptorSet
-          (SharedPtrLogicalDevice const& device,
-           DescriptorPool&               descriptorPool,
-           DescriptorSetLayout&          descriptorSetLayout,
-           TextureSampler&               textureSampler,
-           UniformBuffer&                uniformBuffer,
-           std::string const&            textureKey,
-           std::size_t const             dynamicUBOsOffset,
-           std::size_t const             numDynamicUBOs);
-
-      private:
-        VkDescriptorSet       mDescriptorSet;
-    };
-  } // namespace vk
-} // namespace so
+  return EXIT_SUCCESS;
+}

@@ -30,9 +30,11 @@
 
 #include <unordered_map>
 
-so::vk::Mesh::Mesh() {}
+so::vk::Mesh::Mesh()
+  : mVertexOffset(0), mNumVertices(0), mIndexOffset(0), mNumIndices(0) {}
 
 so::vk::Mesh::Mesh(std::string const& path)
+  : mVertexOffset(0), mNumVertices(0), mIndexOffset(0), mNumIndices(0)
 {
   Assimp::Importer importer;
 
@@ -52,13 +54,17 @@ so::vk::Mesh::Mesh(std::string const& path)
   {
     aiMesh **meshes(scene->mMeshes);
 
+    mVertexOffset = sVertices.size();
+
     for(uint32_t m(0); m < scene->mNumMeshes; ++m)
     {
+      mNumVertices += meshes[m]->mNumVertices;
+
       const aiVector3D* vertices(meshes[m]->mVertices);
 
       for (uint32_t v(0); v < meshes[m]->mNumVertices; ++v)
       {
-        mVertices.push_back
+        sVertices.push_back
           (Vertex({ vertices[v].x, -vertices[v].y, vertices[v].z },
                   { 1.0f, 1.0f, 1.0f },
                   {  meshes[m]->mTextureCoords[0][v].x,
@@ -68,18 +74,20 @@ so::vk::Mesh::Mesh(std::string const& path)
 
     for(uint32_t m(0); m < scene->mNumMeshes; ++m)
     {
+      mNumIndices += 3 * meshes[m]->mNumFaces;
+
       const aiFace* faces(meshes[m]->mFaces);
 
-      const uint32_t oldNumIndices(static_cast<uint32_t>(mIndices.size()));
+      const uint32_t oldNumIndices(static_cast<uint32_t>(sIndices.size()));
 
       for(uint32_t f(0); f < meshes[m]->mNumFaces; ++f)
         for(uint32_t i(0); i < 3; ++i)
-          mIndices.push_back(oldNumIndices + faces[f].mIndices[i]);
+          sIndices.push_back(oldNumIndices + faces[f].mIndices[i]);
     }
   }
 }
 
-std::vector<so::vk::Vertex> so::vk::Mesh::mVertices =
+std::vector<so::vk::Vertex> so::vk::Mesh::sVertices =
   std::vector<so::vk::Vertex>();
 
-std::vector<uint32_t> so::vk::Mesh::mIndices  = std::vector<uint32_t>();
+std::vector<uint32_t> so::vk::Mesh::sIndices  = std::vector<uint32_t>();

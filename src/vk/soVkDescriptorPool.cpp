@@ -22,6 +22,7 @@
 
 #include <vk/soVkDescriptorPool.hpp>
 
+#include <utils/def/soDefinitions.hpp>
 #include <utils/err/soException.hpp>
 
 so::vk::DescriptorPool::DescriptorPool()

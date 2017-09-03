@@ -77,7 +77,7 @@ namespace so
 
         Resource(Resource const& other) = delete;
 
-        Resource(Resource&& other)
+        Resource(Resource&& other) noexcept
           : mResource(other.mResource),
             mDeviceMemory(other.mDeviceMemory),
             mDevice(other.mDevice)

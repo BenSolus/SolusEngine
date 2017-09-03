@@ -97,13 +97,13 @@ namespace so
           return *this;
         }
 
-        inline auto getVkSampler() { return mSampler; }
+        auto getVkSampler() { return mSampler; }
 
-        inline auto& getTextureImageViews() { return mTextureImageViews; }
+        auto& getTextureImageViews() { return mTextureImageViews; }
 
-        inline auto& getTextureImages() { return mTextureImages; }
+        auto& getTextureImages() { return mTextureImages; }
 
-        bool
+        std::string
         addTexture(std::string const path, std::string const key = "");
 
       private:

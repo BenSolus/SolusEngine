@@ -63,20 +63,59 @@ namespace so
       public:
         Model();
 
-        Model(SharedPtrLogicalDevice const& device,
-              DescriptorPool&               descriptorPool,
-              DescriptorSetLayout&          descriptorSetLayout,
-              TextureSampler&               textureSampler,
-              UniformBuffer&                uniformBuffer,
-              std::string const&            path,
+        Model(std::string const&            path,
               std::string const&            textureKey,
               std::size_t const             numInstances = 0);
-        
+
+        Model(Model const& other) = delete;
+
+        Model(Model&& other) noexcept;
+
+        Model& operator=(Model const& other) = delete;
+
+        Model&
+        operator=(Model&& other) noexcept
+        {
+          mDescriptorSet     = std::move(other.mDescriptorSet);
+          mMesh              = std::move(other.mMesh);
+          mNumInstances      = other.mNumInstances;
+          mTextureKey        = other.mTextureKey;
+          mDynamicUBOsOffset = other.mDynamicUBOsOffset;
+
+          other.mNumInstances      = 0;
+          other.mTextureKey        = "";
+          other.mDynamicUBOsOffset = 0;
+
+          return *this;
+        }
+
+        auto& getDescriptorSet() { return mDescriptorSet; }
+
+        auto& getDescriptorSet() const { return mDescriptorSet; }
+
+        auto& getMesh() { return mMesh; }
+
+        auto& getMesh() const { return mMesh; }
+
+        auto  getNumInstances() const { return mNumInstances; }
+
+        auto& getTextureKey() { return mTextureKey; }
+
+        auto  getDynamicUBOsOffset() { return mDynamicUBOsOffset; }
+
+        auto  getDynamicUBOsOffset() const { return mDynamicUBOsOffset; }
+
+        auto  setDynamicUBOsOffset(std::size_t const dynamicUBOOffset)
+        { mDynamicUBOsOffset = dynamicUBOOffset; }
+
       private:
         DescriptorSet mDescriptorSet;
         Mesh          mMesh;
         std::size_t   mNumInstances;
         std::string   mTextureKey;
+        std::size_t   mDynamicUBOsOffset;
     };
+
+    using ModelMap = std::map<std::string, Model>;
   } // vk
 } // so

@@ -67,7 +67,7 @@ namespace so
 
         Image(Image const& other) = delete;
 
-        Image(Image&& other);
+        Image(Image&& other) noexcept;
 
         ~Image() noexcept;
 

@@ -64,14 +64,29 @@ namespace so
 
         Mesh(std::string const& path);
 
-        static inline auto const& getVertices() { return mVertices; }
+        auto getVertexOffset() { return mVertexOffset; }
 
-        static inline auto const& getIndices() { return mIndices; }
+        auto getVertexOffset() const { return mVertexOffset; }
+
+        static auto const& getVertices() { return sVertices; }
+
+        auto getIndexOffset() { return mIndexOffset; }
+
+        auto getIndexOffset() const { return mIndexOffset; }
+
+        auto getNumIndices() { return mNumIndices; }
+
+        auto getNumIndices() const { return mNumIndices; }
+
+        static auto const& getIndices() { return sIndices; }
 
       private:
-        static std::vector<Vertex>   mVertices;
-
-        static std::vector<uint32_t> mIndices;
+        std::size_t                  mVertexOffset;
+        std::size_t                  mNumVertices;
+        static std::vector<Vertex>   sVertices;
+        std::size_t                  mIndexOffset;
+        std::size_t                  mNumIndices;
+        static std::vector<uint32_t> sIndices;
     };
   } // namespace vk
 } // namespace so

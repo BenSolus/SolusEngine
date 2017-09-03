@@ -1,10 +1,12 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.2.2)
 
-PROJECT(vulkan-engine)
+PROJECT(SolusEngine)
 
-IF(CMAKE_BUILD_TYPE MATCHES Debug)
-  ENABLE_TESTING()
-ENDIF()
+################################################################################
+# Defining custom variables                                                    #
+################################################################################
+
+SET(EXAMPLES OFF CACHE BOOL "Whether to build examples.")
 
 ################################################################################
 # Setup for various paths                                                      #
@@ -48,16 +50,16 @@ IF(CMAKE_BUILD_TYPE MATCHES Debug)
 ENDIF()
 
 ################################################################################
-# Default compiler flags                                                       #
+# Set compiler flags                                                           #
 ################################################################################
 
 SET(DEFAULT_CXX_FLAGS "-Wall -Wextra -pedantic ")
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${DEFAULT_CXX_FLAGS}")
 
-SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wcast-align -Wconversion -Weffc++ -Wfloat-equal -Wformat=2 -Wformat-nonliteral -Winvalid-pch -Wold-style-cast -Wmissing-declarations -Wmissing-format-attribute -Wmissing-include-dirs -Wredundant-decls -Wshadow -Wstrict-overflow=5 -Wswitch-default -Wswitch-enum -Wundef -Wunreachable-code -DCMAKE_BIN_DIR=\\\"${PROJECT_BINARY_DIR}\\\"")
+SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wcast-align -Wconversion -Weffc++ -Wfloat-equal -Wformat=2 -Wformat-nonliteral -Winvalid-pch -Wold-style-cast -Wmissing-declarations -Wmissing-format-attribute -Wmissing-include-dirs -Wredundant-decls -Wshadow -Wstrict-overflow=5 -Wswitch-enum -Wundef -Wunreachable-code -DCMAKE_BIN_DIR=\\\"${PROJECT_BINARY_DIR}\\\"")
 
-SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
+SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 
 IF(CMAKE_COMPILER_IS_GNUCC)
   EXECUTE_PROCESS(COMMAND ${CMAKE_C_COMPILER} -dumpversion
@@ -71,18 +73,17 @@ IF(CMAKE_COMPILER_IS_GNUCC)
 ENDIF()
 
 ################################################################################
-# Add source subdirectory                                                      #
+# Add source subdirectories                                                    #
 ################################################################################
 
 ADD_SUBDIRECTORY(src)
 
 IF(CMAKE_BUILD_TYPE MATCHES Debug)
+  ENABLE_TESTING()
+
   ADD_SUBDIRECTORY(tests)
 ENDIF()
 
-ADD_EXECUTABLE(main main.cpp)
-
-TARGET_LINK_LIBRARIES(main SoEng)
-
-SET_PROPERTY(TARGET main PROPERTY CXX_STANDARD 14)
-SET_PROPERTY(TARGET main PROPERTY CXX_STANDARD_REQUIRED ON)
+IF(EXAMPLES MATCHES ON)
+  ADD_SUBDIRECTORY(ex)
+ENDIF()

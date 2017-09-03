@@ -82,7 +82,7 @@ namespace so
 
         UniformBuffer(SharedPtrLogicalDevice const& device,
                       const std::size_t             dynamicAlignment,
-                      const std::size_t             numDynamicUBOs);
+                      const std::size_t             numDynamicUBOs = 0);
 
         UniformBuffer(UniformBuffer const& other) = delete;
 
@@ -109,15 +109,18 @@ namespace so
         getViewProjectionUBOBuffer()
         { return mViewProjectionUBOBuffer; }
 
-        inline auto& getDynamicUBOs() {return mDynamicUBOs; }
+        auto& getDynamicUBOs() {return mDynamicUBOs; }
 
-        inline auto& getDynamicBuffer() { return mDynamicBuffer; }
+        auto& getDynamicBuffer() { return mDynamicBuffer; }
 
         void
         updateViewProjectionUBO(VkExtent2D swapChainExtent);
 
         void
         update();
+
+        void
+        recreateDynamicBuffer(std::size_t const numDynamicUBOs);
 
       private:
         ViewProjectionUBO      mViewProjectionUBO;

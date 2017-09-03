@@ -23,25 +23,33 @@
 #include <vk/soVkModel.hpp>
 
 so::vk::Model::Model()
-  : mDescriptorSet(), mMesh(), mNumInstances(0), mTextureKey("") {}
+  : mDescriptorSet(),
+    mMesh(),
+    mNumInstances(0),
+    mTextureKey(""),
+    mDynamicUBOsOffset(0)
+{}
 
-so::vk::Model::Model(SharedPtrLogicalDevice const& device,
-                     DescriptorPool&               descriptorPool,
-                     DescriptorSetLayout&          descriptorSetLayout,
-                     TextureSampler&               textureSampler,
-                     UniformBuffer&                uniformBuffer,
-                     std::string const&            path,
+so::vk::Model::Model(std::string const&            path,
                      std::string const&            textureKey,
                      std::size_t const             numInstances)
-  : mDescriptorSet(device,
-                   descriptorPool,
-                   descriptorSetLayout,
-                   textureSampler,
-                   uniformBuffer,
-                   textureKey),
+  : mDescriptorSet(),
     mMesh(path),
     mNumInstances(numInstances),
-    mTextureKey(textureKey)
-{
+    mTextureKey(textureKey),
+    mDynamicUBOsOffset(0)
+{}
 
+so::vk::Model::Model(Model&& other) noexcept
+  : mDescriptorSet(other.mDescriptorSet),
+    mMesh(other.mMesh),
+    mNumInstances(other.mNumInstances),
+    mTextureKey(other.mTextureKey),
+    mDynamicUBOsOffset(other.mDynamicUBOsOffset)
+{
+  other.mDescriptorSet.unsetMembers();
+
+  other.mNumInstances      = 0;
+  other.mTextureKey        = "";
+  other.mDynamicUBOsOffset = 0;
 }

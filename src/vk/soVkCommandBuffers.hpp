@@ -51,7 +51,11 @@
 #pragma once
 
 #include <vk/soVkCommandPool.hpp>
+#include <vk/soVkFramebuffers.hpp>
 #include <vk/soVkIndexBuffer.hpp>
+#include <vk/soVkModel.hpp>
+#include <vk/soVkPipeline.hpp>
+#include <vk/soVkRenderPass.hpp>
 #include <vk/soVkUniformBuffer.hpp>
 #include <vk/soVkVertexBuffer.hpp>
 
@@ -64,6 +68,9 @@ namespace so
     {
       public:
         CommandBuffers();
+
+        CommandBuffers(SharedPtrLogicalDevice const& device,
+                       SharedPtrCommandPool const&   commandPool);
 
         CommandBuffers(SharedPtrLogicalDevice const& device,
                        SharedPtrCommandPool const&   commandPool,
@@ -104,6 +111,14 @@ namespace so
         }
 
         inline auto& getVkCommandBuffers() { return mCommandBuffers; }
+
+        void
+        recreateCommandBuffers(Framebuffers&                 framebuffers,
+                               Pipeline&                     pipeline,
+                               RenderPass&                   renderPass,
+                               SwapChain&                    swapChain,
+                               UniformBuffer&                uniformBuffer,
+                               ModelMap const&               models);
 
       private:
         std::vector<VkCommandBuffer> mCommandBuffers;

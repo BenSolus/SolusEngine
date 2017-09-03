@@ -68,12 +68,12 @@ so::vk::TextureSampler::TextureSampler
 
 so::vk::TextureSampler::~TextureSampler() noexcept { destroyMembers(); }
 
-bool
+std::string
 so::vk::TextureSampler::addTexture(std::string const path,
-                                    std::string const key)
+                                   std::string const key)
 {
-  std::string realKey(key.empty() ? std::to_string(mTextureImages.size())
-                                  : key);
+  std::string const realKey(key.empty() ? std::to_string(mTextureImages.size())
+                                        : key);
 
   try
   {
@@ -88,6 +88,7 @@ so::vk::TextureSampler::addTexture(std::string const path,
      * element or to the element with an equivalent key and a bool set to true
      * if a new element was inserted or false if an equivalent key already
      * existed. */
+
     if(not result.second)
       throw utils::err::Exception<std::runtime_error>("key already taken by a "
                                                       "texture image!",
@@ -98,7 +99,7 @@ so::vk::TextureSampler::addTexture(std::string const path,
        VK_FORMAT_R8G8B8A8_UNORM,
        VK_IMAGE_ASPECT_COLOR_BIT);
 
-    return result.second;
+    return result.first->first;
   }
   catch(...)
   {
@@ -110,10 +111,6 @@ so::vk::TextureSampler::addTexture(std::string const path,
        ")",
        PRETTY_FUNCTION_SIG));
   }
-
-  /* Shouldn't reach this statement, but it will silence some
-   * compilers/linters. */
-  return false;
 }
 
 void

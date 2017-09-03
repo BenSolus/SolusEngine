@@ -55,7 +55,7 @@ so::utils::fs::readBinaryFile(const std::string& filename)
 static std::string
 getBinDir()
 {
-  // Trying to find the root directory of the binarys.
+  /* Trying to find the root directory of the binarys. */
   std::string root;
 
 #ifdef __linux__ // Using readlink on Linux.
@@ -74,8 +74,8 @@ getBinDir()
 
   root = std::string(exe);
 
-  // Remove executable name and the bin folder which will result in the
-  // root directory. (Kinda hardcoded, but easily changeable.)
+  /* Remove executable name and the bin folder which will result in the
+   * root directory. (Kinda hardcoded, but easily changeable.) */
 
   const std::size_t pos(root.find("bin/" +
                                   std::string(program_invocation_short_name)));

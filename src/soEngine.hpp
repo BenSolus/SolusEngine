@@ -54,12 +54,10 @@
 #include <vk/soVkDebugReportCallbackEXT.hpp>
 #include <vk/soVkDepthImage.hpp>
 #include <vk/soVkDescriptorPool.hpp>
-#include <vk/soVkDescriptorSet.hpp>
 #include <vk/soVkDescriptorSetLayout.hpp>
 #include <vk/soVkFramebuffers.hpp>
 #include <vk/soVkImageViews.hpp>
-#include <vk/soVkIndexBuffer.hpp>
-#include <vk/soVkMesh.hpp>
+#include <vk/soVkModel.hpp>
 #include <vk/soVkPipeline.hpp>
 #include <vk/soVkRenderPass.hpp>
 #include <vk/soVkSemaphore.hpp>
@@ -67,9 +65,6 @@
 #include <vk/soVkSwapChain.hpp>
 #include <vk/soVkTextureSampler.hpp>
 #include <vk/soVkUniformBuffer.hpp>
-#include <vk/soVkVertexBuffer.hpp>
-
-#include <map>
 
 namespace so
 {
@@ -90,18 +85,21 @@ namespace so
       void
       updateUniformBuffer();
 
+      void
+      addModel(std::string const& meshPath,
+               std::string const& texturePath,
+               std::size_t const  numInstances = 0,
+               std::string const& meshKey = "",
+               std::string const& textureKey = "");
     private:
       vk::CommandBuffers         mCommandBuffers;
       vk::DebugReportCallbackEXT mDebugCallback;
       vk::DepthImage             mDepthImage;
       vk::DescriptorPool         mDescriptorPool;
-      vk::DescriptorSet          mDescriptorSet;
       vk::DescriptorSetLayout    mDescriptorSetLayout;
       vk::Framebuffers           mFramebuffers;
       vk::ImageViews             mDepthImageView;
       vk::ImageViews             mImageViews;
-      vk::Mesh                   mModel;
-      vk::Mesh                   mModel1;
       vk::Pipeline               mPipeline;
       vk::RenderPass             mRenderPass;
       vk::Semaphore              mImageAvailableSemaphore;
@@ -110,6 +108,8 @@ namespace so
       vk::SwapChain              mSwapChain;
       vk::TextureSampler         mTextureSampler;
       vk::UniformBuffer          mUniformBuffer;
+
+      vk::ModelMap               mModels;
 
       vk::SharedPtrLogicalDevice mDevice;
       vk::SharedPtrCommandPool   mCommandPool;

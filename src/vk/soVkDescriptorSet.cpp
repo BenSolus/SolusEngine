@@ -119,3 +119,106 @@ so::vk::DescriptorSet::DescriptorSet
   delete(dynamicBufferInfo);
   delete(layouts);
 }
+
+so::vk::DescriptorSet::DescriptorSet(DescriptorSet const &other)
+  : mDescriptorSet(other.mDescriptorSet) {}
+
+void
+so::vk::DescriptorSet::recreateDescriptorSet
+  (SharedPtrLogicalDevice const& device,
+   DescriptorPool&               descriptorPool,
+   DescriptorSetLayout&          descriptorSetLayout,
+   TextureSampler&               textureSampler,
+   UniformBuffer&                uniformBuffer,
+   std::string const&            textureKey,
+   std::size_t const             dynamicUBOsOffset,
+   std::size_t const             numDynamicUBOs)
+{
+  VkDescriptorSetLayout* layouts(new VkDescriptorSetLayout(
+    { descriptorSetLayout.getVkDescriptorSetLayout() }));
+
+  VkDescriptorSetAllocateInfo allocInfo {};
+
+  allocInfo.sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+  allocInfo.descriptorPool     = descriptorPool.getVkDescriptorPool();
+  allocInfo.descriptorSetCount = 1;
+  allocInfo.pSetLayouts        = layouts;
+
+  VkResult const result(vkAllocateDescriptorSets(device->getVkDevice(),
+                                                 &allocInfo,
+                                                 &mDescriptorSet));
+
+  if(result not_eq VK_SUCCESS)
+    throw utils::err::Exception<std::runtime_error>("failed to allocate "
+                                                      "descriptor set!",
+                                                    PRETTY_FUNCTION_SIG);
+
+  VkDescriptorBufferInfo* viewProjectionBufferInfo
+    (new VkDescriptorBufferInfo({}));
+
+  viewProjectionBufferInfo->buffer =
+    uniformBuffer.getViewProjectionUBOBuffer().getResource();
+  viewProjectionBufferInfo->offset = 0;
+  viewProjectionBufferInfo->range  = sizeof(ViewProjectionUBO);
+
+  VkDescriptorBufferInfo* dynamicBufferInfo(new VkDescriptorBufferInfo({}));
+
+  dynamicBufferInfo->buffer = uniformBuffer.getDynamicBuffer().getResource();
+  dynamicBufferInfo->offset =
+    dynamicUBOsOffset * uniformBuffer.getDynamicUBOs().alignment();
+  dynamicBufferInfo->range  =
+    numDynamicUBOs * uniformBuffer.getDynamicUBOs().alignment();
+
+  std::size_t const imageViewIdx
+    (textureSampler.getTextureImages().find(textureKey)
+       ->second.getImageViewIdx());
+
+  VkImageView imageView
+    (textureSampler.getTextureImageViews().getVkImageViews()[imageViewIdx]);
+
+  VkDescriptorImageInfo* imageInfo(new VkDescriptorImageInfo({}));
+
+  imageInfo->imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+  imageInfo->imageView   = imageView;
+  imageInfo->sampler     = textureSampler.getVkSampler();
+
+  std::array<VkWriteDescriptorSet, 3> descriptorWrites {};
+
+  descriptorWrites[0].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+  descriptorWrites[0].dstSet          = mDescriptorSet;
+  descriptorWrites[0].dstBinding      = 0;
+  descriptorWrites[0].dstArrayElement = 0;
+  descriptorWrites[0].descriptorType  =
+    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  descriptorWrites[0].descriptorCount = 1;
+  descriptorWrites[0].pBufferInfo     = viewProjectionBufferInfo;
+
+  descriptorWrites[1].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+  descriptorWrites[1].dstSet          = mDescriptorSet;
+  descriptorWrites[1].dstBinding      = 1;
+  descriptorWrites[1].dstArrayElement = 0;
+  descriptorWrites[1].descriptorType  =
+    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+  descriptorWrites[1].descriptorCount = 1;
+  descriptorWrites[1].pBufferInfo     = dynamicBufferInfo;
+
+  descriptorWrites[2].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+  descriptorWrites[2].dstSet          = mDescriptorSet;
+  descriptorWrites[2].dstBinding      = 2;
+  descriptorWrites[2].dstArrayElement = 0;
+  descriptorWrites[2].descriptorType  =
+    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  descriptorWrites[2].descriptorCount = 1;
+  descriptorWrites[2].pImageInfo      = imageInfo;
+
+  vkUpdateDescriptorSets(device->getVkDevice(),
+                         static_cast<uint32_t>(descriptorWrites.size()),
+                         descriptorWrites.data(),
+                         0,
+                         nullptr);
+
+  delete(imageInfo);
+  delete(viewProjectionBufferInfo);
+  delete(dynamicBufferInfo);
+  delete(layouts);
+}

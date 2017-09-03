@@ -28,7 +28,7 @@ so::vk::Image::Image(SharedPtrLogicalDevice const& device)
   : Resource(device)
 {}
 
-so::vk::Image::Image(Image&& other)
+so::vk::Image::Image(Image&& other) noexcept
   : Resource(static_cast<Resource&&>(other))
 {}
 
@@ -60,7 +60,9 @@ so::vk::Image::createImage(uint32_t              width,
 
   VkDevice vkDevice(mDevice->getVkDevice());
 
-  if(vkCreateImage(vkDevice, &imageInfo, nullptr, &mResource) != VK_SUCCESS)
+  VkResult result(vkCreateImage(vkDevice, &imageInfo, nullptr, &mResource));
+
+  if(result not_eq VK_SUCCESS)
     throw utils::err::Exception<std::runtime_error>("failed to create image!",
                                                     PRETTY_FUNCTION_SIG);
 
@@ -75,10 +77,7 @@ so::vk::Image::createImage(uint32_t              width,
   allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits,
                                              properties);
 
-  VkResult const result(vkAllocateMemory(vkDevice,
-                                         &allocInfo,
-                                         nullptr,
-                                         &mDeviceMemory));
+  result = vkAllocateMemory(vkDevice, &allocInfo, nullptr, &mDeviceMemory);
 
   if(result not_eq VK_SUCCESS)
     throw utils::err::Exception<std::runtime_error>("failed to allocate image "

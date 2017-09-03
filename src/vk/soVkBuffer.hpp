@@ -57,6 +57,15 @@ namespace so
 {
   namespace vk
   {
+    enum Buffer_t
+    {
+      DYNAMIC,
+      INDEX,
+      STAGING,
+      UNIFORM,
+      VERTEX
+    };
+
     class
     Buffer : public Resource<VkBuffer>
     {
@@ -66,7 +75,8 @@ namespace so
         Buffer(SharedPtrLogicalDevice const& device,
                VkDeviceSize                  size,
                VkBufferUsageFlags            usage,
-               VkMemoryPropertyFlags         properties);
+               VkMemoryPropertyFlags         properties,
+               Buffer_t                      bufferType);
 
         Buffer(Buffer const& other) = delete;
 
