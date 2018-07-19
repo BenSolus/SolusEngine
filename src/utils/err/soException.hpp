@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 by Bennet Carstensen
+ * Copyright (C) 2017-2018 by Bennet Carstensen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
  *  @file      soException.hpp
  *  @author    Bennet Carstensen
  *  @date      2017
- *  @copyright Copyright (c) 2017 Bennet Carstensen
+ *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
  *             obtaining a copy of this software and associated documentation
@@ -64,40 +64,39 @@
 #define PRETTY_FUNCTION_SIG __FUNCTION__
 #endif
 
-namespace so
+namespace so {
+namespace utils {
+namespace err {
+
+template <typename T>
+class
+Exception : public T
 {
-  namespace utils
-  {
-    namespace err
+  static_assert(std::is_base_of<std::exception, T>::value,
+                "Template is not derived from std::exception!");
+  public:
+    Exception() : T() {}
+
+    Exception(std::string const& explanatoryString,
+              std::string const& explanatoryPrefix)
+      : T(explanatoryPrefix + ": " + explanatoryString) {}
+
+    void
+    print(size_t const indent = 0) const
     {
-      template <typename T>
-      class
-      Exception : public T
+      std::cerr << std::string(indent, ' ') << this->what() << '\n';
+
+      try
       {
-        static_assert(std::is_base_of<std::exception, T>::value,
-                      "Template is not derived from std::exception!");
-        public:
-          Exception() : T() {}
+        std::rethrow_if_nested(*this);
+      }
+      catch(Exception const& next)
+      {
+        next.print(indent + 1);
+      }
+    }
+};
 
-          Exception(std::string const& explanatoryString,
-                    std::string const& explanatoryPrefix)
-            : T(explanatoryPrefix + ": " + explanatoryString) {}
-
-          void
-          print(size_t const indent = 0) const
-          {
-            std::cerr << std::string(indent, ' ') << this->what() << '\n';
-
-            try
-            {
-              std::rethrow_if_nested(*this);
-            }
-            catch(Exception const& next)
-            {
-              next.print(indent + 1);
-            }
-          }
-      };
-    } // err
-  } // utils
-} // so
+} // namespace err
+} // namespace utils
+} // namespace so

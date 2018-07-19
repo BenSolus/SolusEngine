@@ -21,10 +21,10 @@
  */
 
 /**
- *  @file      soVkDescriptorSet.hpp
+ *  @file      soEngine.hpp
  *  @author    Bennet Carstensen
  *  @date      2017
- *  @copyright Copyright (c) 2017 Bennet Carstensen
+ *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
  *             obtaining a copy of this software and associated documentation
@@ -50,63 +50,34 @@
 
 #pragma once
 
-#include <vk/soVkDescriptorPool.hpp>
-#include <vk/soVkDescriptorSetLayout.hpp>
-#include <vk/soVkTextureSampler.hpp>
-#include <vk/soVkUniformBuffer.hpp>
+#include <interfaces/soEngineInterface.hpp>
+
+#include <vk/soVkSurface.hpp>
 
 namespace so
 {
-  namespace vk
-  {
-    class
-    DescriptorSet
+
+template<SurfaceBackend SB>
+class
+Engine<EngineBackend::Vulkan, SB>
+{
+  public:
+    Engine() : mSurface() { }
+
+    ~Engine() noexcept { }
+
+    void
+    createSurface(std::string const& title = "soEngine (Vulkan backend)")
     {
-      public:
-        DescriptorSet();
+      mSurface = std::move(vk::Surface<SB>(title));
+    }
 
-        DescriptorSet(SharedPtrLogicalDevice const& device,
-                      DescriptorPool&               descriptorPool,
-                      DescriptorSetLayout&          descriptorSetLayout,
-                      TextureSampler&               textureSampler,
-                      UniformBuffer&                uniformBuffer,
-                      std::string const&            textureKey);
+    inline auto surfaceIsClosed() { return mSurface.isClosed(); } 
 
-        DescriptorSet(DescriptorSet const& other);
+    inline void surfacePollEvents() { mSurface.pollEvents(); } 
 
-        DescriptorSet(DescriptorSet&& other) = delete;
+  private:
+    vk::Surface<SB> mSurface;
+};
 
-        DescriptorSet& operator=(DescriptorSet const& other) = delete;
-
-        DescriptorSet&
-        operator=(DescriptorSet&& other) noexcept
-        {
-          mDescriptorSet = other.mDescriptorSet;
-
-          other.mDescriptorSet = VK_NULL_HANDLE;
-
-          return *this;
-        }
-
-        auto& getVkDescriptorSet() { return mDescriptorSet; }
-
-        auto& getVkDescriptorSet() const { return mDescriptorSet; }
-
-        void unsetMembers() { mDescriptorSet = VK_NULL_HANDLE; }
-
-        void
-        recreateDescriptorSet
-          (SharedPtrLogicalDevice const& device,
-           DescriptorPool&               descriptorPool,
-           DescriptorSetLayout&          descriptorSetLayout,
-           TextureSampler&               textureSampler,
-           UniformBuffer&                uniformBuffer,
-           std::string const&            textureKey,
-           std::size_t const             dynamicUBOsOffset,
-           std::size_t const             numDynamicUBOs);
-
-      private:
-        VkDescriptorSet       mDescriptorSet;
-    };
-  } // namespace vk
 } // namespace so

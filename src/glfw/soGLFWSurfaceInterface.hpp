@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 by Bennet Carstensen
+ * Copyright (C) 2017-2018 by Bennet Carstensen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,10 +21,10 @@
  */
 
 /**
- *  @file      soVkModel.hpp
+ *  @file      soGLFWSurfaceInterface.hpp
  *  @author    Bennet Carstensen
- *  @date      2017
- *  @copyright Copyright (c) 2017 Bennet Carstensen
+ *  @date      2018
+ *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
  *             obtaining a copy of this software and associated documentation
@@ -50,72 +50,85 @@
 
 #pragma once
 
-#include <vk/soVkDescriptorSet.hpp>
-#include <vk/soVkMesh.hpp>
+#include <interfaces/soSurfaceInterface.hpp>
 
-namespace so
+#include <utils/def/soDefinitions.hpp>
+#include <utils/err/soException.hpp>
+
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+
+namespace so {
+    
+template<>
+class
+SurfaceInterface<SurfaceBackend::GLFW>
 {
-  namespace vk
-  {
-    class
-    Model
+  public:
+    SurfaceInterface() : mWindow(nullptr) { }
+    
+    SurfaceInterface(std::string const& title) : mWindow(nullptr)
     {
-      public:
-        Model();
+      glfwInit();
 
-        Model(std::string const&            path,
-              std::string const&            textureKey,
-              std::size_t const             numInstances = 0);
+      glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+      glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-        Model(Model const& other) = delete;
+      mWindow = glfwCreateWindow(800,
+                                 600,
+                                 title.c_str(),
+                                 nullptr,
+                                 nullptr);
 
-        Model(Model&& other) noexcept;
+      if(mWindow is_eq nullptr)
+        throw utils::err::Exception<std::runtime_error>
+          ("Failed to create GLFWwindow.",
+           PRETTY_FUNCTION_SIG);
+    }
 
-        Model& operator=(Model const& other) = delete;
+    SurfaceInterface(SurfaceInterface const& other) = delete;
 
-        Model&
-        operator=(Model&& other) noexcept
-        {
-          mDescriptorSet     = std::move(other.mDescriptorSet);
-          mMesh              = std::move(other.mMesh);
-          mNumInstances      = other.mNumInstances;
-          mTextureKey        = other.mTextureKey;
-          mDynamicUBOsOffset = other.mDynamicUBOsOffset;
+    SurfaceInterface(SurfaceInterface&& other) = delete;
 
-          other.mNumInstances      = 0;
-          other.mTextureKey        = "";
-          other.mDynamicUBOsOffset = 0;
+    ~SurfaceInterface() noexcept { deleteMembers(); }
 
-          return *this;
-        }
+    SurfaceInterface&
+    operator=(SurfaceInterface const& other) = delete;
 
-        auto& getDescriptorSet() { return mDescriptorSet; }
+    SurfaceInterface&
+    operator=(SurfaceInterface&& other) noexcept
+    {
+      if(this is_eq &other)
+        return *this;
 
-        auto& getDescriptorSet() const { return mDescriptorSet; }
+      deleteMembers();
 
-        auto& getMesh() { return mMesh; }
+      mWindow = other.mWindow;
 
-        auto& getMesh() const { return mMesh; }
+      other.mWindow = nullptr;
 
-        auto  getNumInstances() const { return mNumInstances; }
+      return *this;
+    }
 
-        auto& getTextureKey() { return mTextureKey; }
+    inline auto isClosed() { return glfwWindowShouldClose(mWindow); }
+      
+    inline void pollEvents() { glfwPollEvents(); }
 
-        auto  getDynamicUBOsOffset() { return mDynamicUBOsOffset; }
+  private:
+    GLFWwindow* mWindow;
 
-        auto  getDynamicUBOsOffset() const { return mDynamicUBOsOffset; }
+    void
+    deleteMembers()
+    {
+      if(mWindow not_eq nullptr)
+      {
+        glfwDestroyWindow(mWindow);
 
-        auto  setDynamicUBOsOffset(std::size_t const dynamicUBOOffset)
-        { mDynamicUBOsOffset = dynamicUBOOffset; }
+        glfwTerminate();
 
-      private:
-        DescriptorSet mDescriptorSet;
-        Mesh          mMesh;
-        std::size_t   mNumInstances;
-        std::string   mTextureKey;
-        std::size_t   mDynamicUBOsOffset;
-    };
+        mWindow = nullptr;
+      }
+    }
+}; // class SurfaceInterface
 
-    using ModelMap = std::map<std::string, Model>;
-  } // vk
-} // so
+} // namespace so

@@ -53,16 +53,16 @@
 #include <vector>
 #include <string>
 
-namespace so
-{
-  namespace utils
-  {
-    namespace fs
-    {
-      std::vector<char>
-      readBinaryFile(std::string const& filename);
-    } // namespace fs
-  } // namespace utils
+namespace so {
+namespace utils {
+namespace fs {
+
+std::vector<char>
+readBinaryFile(std::string const& filename);
+
+} // namespace fs
+} // namespace utils
 } // namespace so
 
 extern std::string const BIN_DIR;
+

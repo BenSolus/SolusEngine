@@ -21,10 +21,10 @@
  */
 
 /**
- *  @file      soVkSemaphore.hpp
+ *  @file      soEngineInterface.hpp
  *  @author    Bennet Carstensen
  *  @date      2017
- *  @copyright Copyright (c) 2017 Bennet Carstensen
+ *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
  *             obtaining a copy of this software and associated documentation
@@ -50,52 +50,24 @@
 
 #pragma once
 
-#include <vk/soVkLogicalDevice.hpp>
+#include <interfaces/soSurfaceInterface.hpp>
 
 namespace so
 {
-  namespace vk
-  {
-    class
-    Semaphore
-    {
-      public:
-        Semaphore();
 
-        Semaphore(SharedPtrLogicalDevice const& device);
+enum class EngineBackend
+{
+  None,
+  Vulkan
+};
 
-        Semaphore(Semaphore const& other) = delete;
+template <EngineBackend  EB = EngineBackend::None,
+          SurfaceBackend SB = SurfaceBackend::None>
+class Engine
+{
+  public:
+    virtual ~Engine() = 0;
+};
 
-        Semaphore(Semaphore&& other) = delete;
-
-        ~Semaphore() noexcept;
-
-        Semaphore&
-        operator=(Semaphore const& other) = delete;
-
-        Semaphore&
-        operator=(Semaphore&& other) noexcept
-        {
-          destroyMembers();
-
-          mSemaphore = other.mSemaphore;
-          mDevice    = other.mDevice;
-
-          other.mSemaphore = VK_NULL_HANDLE;
-          other.mDevice    = SHARED_PTR_NULL_LOGICAL_DEVICE;
-
-          return *this;
-        }
-
-        inline VkSemaphore getVkSemaphore() { return mSemaphore; }
-        
-      private:
-        VkSemaphore            mSemaphore;
-
-        SharedPtrLogicalDevice mDevice;
-
-        void
-        destroyMembers();
-    };
-  } // namespace vk
 } // namespace so
+

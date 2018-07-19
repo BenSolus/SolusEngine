@@ -1,0 +1,11 @@
+
+SET(CURRENT_DIR "${PROJECT_SOURCE_DIR}/samples")
+
+FILE(GLOB samples RELATIVE ${CURRENT_DIR} ${CURRENT_DIR}/*)
+
+FOREACH(sample ${samples})
+  IF(IS_DIRECTORY "${CURRENT_DIR}/${sample}")
+    ADD_SUBDIRECTORY("${CURRENT_DIR}/${sample}")
+  ENDIF()
+ENDFOREACH()
+

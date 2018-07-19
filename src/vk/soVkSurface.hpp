@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 by Bennet Carstensen
+ * Copyright (C) 2017-2018 by Bennet Carstensen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
  *  @file      soVkSurface.hpp
  *  @author    Bennet Carstensen
  *  @date      2017
- *  @copyright Copyright (c) 2017 Bennet Carstensen
+ *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
  *             obtaining a copy of this software and associated documentation
@@ -50,60 +50,40 @@
 
 #pragma once
 
-#include <vk/soVkInstance.hpp>
+#include <glfw/soGLFWSurfaceInterface.hpp>
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+namespace so {
+namespace vk {
 
-const int WIDTH(800);
-const int HEIGHT(600);
-
-namespace so
+template<SurfaceBackend SB>
+class Surface : public SurfaceInterface<SB>
 {
-  namespace vk
-  {
-    class
-    Surface : public std::enable_shared_from_this<Surface>
+  public:
+    Surface() : SurfaceInterface<SB>()
+    { }
+
+    Surface(Surface const& other) = delete;
+
+    Surface(Surface&& other) noexcept = delete;  
+
+    Surface(std::string const& title) : SurfaceInterface<SB>(title)
+    { }
+
+    ~Surface() noexcept
+    { }
+
+    Surface<SB>& operator=(Surface<SB> const& other) = delete;
+
+    Surface<SB>&
+    operator=(Surface<SB>&& other)
     {
-      public:
-        Surface();
+      SurfaceInterface<SB>::operator=
+        (static_cast<SurfaceInterface<SB>&&>(other));
 
-        Surface(GLFWwindow* window, SharedPtrInstance const& instance);
+      return *this;
+    }
+}; // class Surface
 
-        Surface(Surface const& other) = delete;
-
-        Surface(Surface&& other) = delete;
-
-        ~Surface() noexcept;
-
-        Surface&
-        operator=(Surface const& other) = delete;
-
-        Surface&
-        operator=(Surface&& other) noexcept
-        {
-          mSurface  = other.mSurface;
-          mWindow   = other.mWindow;
-          mInstance = other.mInstance;
-
-          other.mSurface  = VK_NULL_HANDLE;
-          other.mWindow   = nullptr;
-          other.mInstance = SHARED_PTR_NULL_INSTANCE;
-
-          return *this;
-        }
-
-        inline VkSurfaceKHR getVkSurfaceKHR() { return mSurface; }
-
-        inline GLFWwindow* getGLFWwindow() { return mWindow; }
-
-      private:
-        VkSurfaceKHR      mSurface;
-        GLFWwindow*       mWindow;
-
-        SharedPtrInstance mInstance;
-    };
-
-    using SharedPtrSurface = std::shared_ptr<Surface>;
-  } // namespace vk
+} // namespace vk
 } // namespace so
+

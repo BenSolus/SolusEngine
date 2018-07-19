@@ -5,8 +5,9 @@
 
 ## Summary
 
-The SolusEngine is a 3D graphics engine with
-[Vulkan](https://www.khronos.org/vulkan/) support.
+The SolusEngine is a hobby project, trying to implement a 3D graphics engine.
+Currently focusing on an Implementation of a
+[Vulkan](https://www.khronos.org/vulkan/)-Backend for the engine.
 
 ---
 
@@ -17,6 +18,7 @@ The SolusEngine is a 3D graphics engine with
 *   [GLM](http://glm.g-truc.net/0.9.8/index.html) 0.9.5.1-1 or newer
 *   [VulkanSDK](https://vulkan.lunarg.com/sdk/home) 1.0.51.0 or newer
 *   [GLFW](http://www.glfw.org/) 3.2.1 or newer
+*   [Google Test](https://github.com/google/googletest) 1.8 or newer
 
 Older versions might also work, but untested.
 
@@ -29,7 +31,8 @@ Older versions might also work, but untested.
 [![Travis.ci Shield](https://img.shields.io/travis/BenSolus/SolusEngine/master.svg?style=plastic&label=Ubuntu-14.04)](https://travis-ci.org/BenSolus/SolusEngine)
 
 Following bash script retrieves the source and compiles it, including the
-examples, in debug mode:
+examples, replacing <Build-Mode> with the desired mode to build, e.g. Debug or
+Release:
 
 ```shell
 #!/usr/bin/bash
@@ -51,23 +54,6 @@ make -j2
 
 ---
 
-## Roadmap
-
--   [x] Vulkan interface
--   [ ] Vulkan interface improvments
--   [ ] Vulkan interface testing
--   [ ] Integrate a Vulkan memory allocator
--   [ ] Input handling
--   [ ] Input handling testing
--   [ ] 3D Models
--   [ ] Shader
--   [ ] Integrate a physic engine
-
-Currently, this is only a very rough, non-exhaustive overview of things needed
-to be implemented. Further ideas, feedback and help are appreciated.
-
----
-
 ## Attribution
 
 This project, "SolusEngine",
@@ -80,4 +66,5 @@ This project, "SolusEngine",
     by [Sean Barrett](https://github.com/nothings), used under
     [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/).
 
-We don't imply any endorsement by the authors or any affirmer.
+I don't imply any endorsement by the authors or any affirmer.
+

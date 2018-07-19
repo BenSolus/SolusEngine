@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 by Bennet Carstensen
+ * Copyright (C) 2017-2018 by Bennet Carstensen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
  *  @file      soDefinitions.hpp
  *  @author    Bennet Carstensen
  *  @date      2017
- *  @copyright Copyright (c) 2017 Bennet Carstensen
+ *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
  *             obtaining a copy of this software and associated documentation
@@ -51,3 +51,4 @@
 #pragma once
 
 #define is_eq ==
+

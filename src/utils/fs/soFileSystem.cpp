@@ -65,9 +65,10 @@ getBinDir()
   // Find path to executable
   if(readlink("/proc/self/exe", exe, FILENAME_MAX) is_eq -1)
   {
-    throw so::utils::err::Exception<std::runtime_error>("failed to get path of "
-                                                        "this executable!",
-                                                        PRETTY_FUNCTION_SIG);
+    throw so::utils::err::Exception<std::runtime_error>(
+      "failed to get path of "
+      "this executable!",
+      PRETTY_FUNCTION_SIG);
   }
   else
     exe[sizeof(exe) - 1] = '\0';
@@ -90,3 +91,4 @@ getBinDir()
 }
 
 std::string const BIN_DIR(getBinDir());
+

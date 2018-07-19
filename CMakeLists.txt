@@ -2,23 +2,23 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.2.2)
 
 PROJECT(SolusEngine)
 
-################################################################################
-# Defining custom variables                                                    #
-################################################################################
+###############################################################################
+# Defining custom variables                                                   #
+###############################################################################
 
 SET(EXAMPLES OFF CACHE BOOL "Whether to build examples.")
 
-################################################################################
-# Setup for various paths                                                      #
-################################################################################
+###############################################################################
+# Setup for various paths                                                     #
+###############################################################################
 
 SET(CMAKE_MODULE_PATH      "${PROJECT_SOURCE_DIR}/moduls")
 SET(LIBRARY_OUTPUT_PATH    "${PROJECT_BINARY_DIR}/lib")
 SET(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}/bin")
 
-################################################################################
-# Find packages                                                                #
-################################################################################
+###############################################################################
+# Find packages                                                               #
+###############################################################################
 
 FIND_PACKAGE(assimp REQUIRED)
 FIND_PACKAGE(GLFW REQUIRED)
@@ -30,11 +30,11 @@ IF(CMAKE_BUILD_TYPE MATCHES Debug)
   FIND_PACKAGE(GTest REQUIRED)
 ENDIF()
 
-################################################################################
-# Adding various include directories                                           #
-################################################################################
+###############################################################################
+# Adding various include directories                                          #
+###############################################################################
 
-INCLUDE_DIRECTORIES(SYSTEM ${PROJECT_SOURCE_DIR}/ext/stb)
+INCLUDE_DIRECTORIES(SYSTEM ${PROJECT_SOURCE_DIR}/3rdparty/stb)
 
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src)
 
@@ -49,9 +49,9 @@ IF(CMAKE_BUILD_TYPE MATCHES Debug)
   INCLUDE_DIRECTORIES(${GTEST_INCLUDE_DIRS})
 ENDIF()
 
-################################################################################
-# Set compiler flags                                                           #
-################################################################################
+###############################################################################
+# Set compiler flags                                                          #
+###############################################################################
 
 SET(DEFAULT_CXX_FLAGS "-Wall -Wextra -pedantic ")
 
@@ -59,7 +59,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${DEFAULT_CXX_FLAGS}")
 
 SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wcast-align -Wconversion -Weffc++ -Wfloat-equal -Wformat=2 -Wformat-nonliteral -Winvalid-pch -Wold-style-cast -Wmissing-declarations -Wmissing-format-attribute -Wmissing-include-dirs -Wredundant-decls -Wshadow -Wstrict-overflow=5 -Wswitch-enum -Wundef -Wunreachable-code -DCMAKE_BIN_DIR=\\\"${PROJECT_BINARY_DIR}\\\"")
 
-SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
 
 IF(CMAKE_COMPILER_IS_GNUCC)
   EXECUTE_PROCESS(COMMAND ${CMAKE_C_COMPILER} -dumpversion
@@ -72,9 +72,9 @@ IF(CMAKE_COMPILER_IS_GNUCC)
   ENDIF()
 ENDIF()
 
-################################################################################
-# Add source subdirectories                                                    #
-################################################################################
+###############################################################################
+# Add source subdirectories                                                   #
+###############################################################################
 
 ADD_SUBDIRECTORY(src)
 
@@ -85,5 +85,5 @@ IF(CMAKE_BUILD_TYPE MATCHES Debug)
 ENDIF()
 
 IF(EXAMPLES MATCHES ON)
-  ADD_SUBDIRECTORY(ex)
+  ADD_SUBDIRECTORY(samples)
 ENDIF()

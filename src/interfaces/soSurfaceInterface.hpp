@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 by Bennet Carstensen
+ * Copyright (C) 2017-2018 by Bennet Carstensen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,10 +21,10 @@
  */
 
 /**
- *  @file      soVkImageViews.hpp
+ *  @file      interfaces/soSurface.hpp
  *  @author    Bennet Carstensen
- *  @date      2017
- *  @copyright Copyright (c) 2017 Bennet Carstensen
+ *  @date      2018
+ *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
  *             obtaining a copy of this software and associated documentation
@@ -50,61 +50,23 @@
 
 #pragma once
 
-#include <vk/soVkLogicalDevice.hpp>
-
 namespace so
 {
-  namespace vk
-  {
-    class
-    ImageViews
-    {
-      public:
-        ImageViews();
 
-        ImageViews(SharedPtrLogicalDevice const& device);
+enum class SurfaceBackend
+{
+  None,
+  GLFW
+};
 
-        ImageViews(SharedPtrLogicalDevice const& device,
-                   std::vector<VkImage> const&   images,
-                   VkFormat                      format,
-                   VkImageAspectFlags            aspectFlags);
+template <SurfaceBackend SB>
+class SurfaceInterface
+{
+  public:
+    virtual ~SurfaceInterface() = 0;
+};
 
-        ImageViews(ImageViews const& other) = delete;
-
-        ImageViews(ImageViews&& other) = delete;
-
-        ~ImageViews() noexcept;
-
-        ImageViews&
-        operator=(ImageViews const& other) = delete;
-
-        ImageViews&
-        operator=(ImageViews&& other) noexcept
-        {
-          destroyMembers();
-          
-          mImageViews = other.mImageViews;
-          mDevice     = other.mDevice;
-
-          other.mImageViews = std::vector<VkImageView>();
-          other.mDevice     = SHARED_PTR_NULL_LOGICAL_DEVICE;
-
-          return *this;
-        }
-
-        inline auto& getVkImageViews() { return mImageViews; }
-
-        void
-        addImageViews(std::vector<VkImage> const&   images,
-                      VkFormat                      format,
-                      VkImageAspectFlags            aspectFlags);
-      private:
-        std::vector<VkImageView> mImageViews;
-
-        SharedPtrLogicalDevice   mDevice;
-
-        void
-        destroyMembers();
-    };
-  } // namespace vk
 } // namespace so
+
+constexpr so::SurfaceBackend GLFW(so::SurfaceBackend::GLFW);
+

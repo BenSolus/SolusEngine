@@ -35,12 +35,12 @@
 .idea
 
 # CMake
+build
 builds
 
-# Atom
-.atom-build.json
-.build.sh
+# Neovim
+.ycm_extra_conf.py
 
 # Misc
-models
-textures
+compile_commands.json
+
