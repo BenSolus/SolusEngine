@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2017-2018 by Bennet Carstensen
+ * Copyright (C) 2017 by Bennet Carstensen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to
- * deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
- * sell copies of the Software, and to permit persons to whom the Software is
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in
@@ -15,23 +15,23 @@
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
- * IN THE SOFTWARE.
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 
 /**
- *  @file      interfaces/soSurfaceInterface.hpp
+ *  @file      soFileSystem.hpp
  *  @author    Bennet Carstensen
- *  @date      2018
- *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
+ *  @date      2017
+ *  @copyright Copyright (c) 2017 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
  *             obtaining a copy of this software and associated documentation
  *             files (the "Software"), to deal in the Software without
  *             restriction, including without limitation the rights to use,
- *             copy, modify, merge, publish, distribute, sublicense, and/or
- *             sell copies of the Software, and to permit persons to whom the
+ *             copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *             copies of the Software, and to permit persons to whom the
  *             Software is furnished to do so, subject to the following
  *             conditions:
  *
@@ -50,23 +50,15 @@
 
 #pragma once
 
-namespace so
-{
+#include <vector>
+#include <string>
 
-enum class SurfaceBackend
-{
-  None,
-  GLFW
-};
+namespace so {
 
-template <SurfaceBackend SB>
-class SurfaceInterface
-{
-  public:
-    virtual ~SurfaceInterface() = 0;
-};
+std::vector<char>
+readBinaryFile(std::string const& filename);
 
 } // namespace so
 
-constexpr so::SurfaceBackend GLFW(so::SurfaceBackend::GLFW);
+extern std::string const BIN_DIR;
 

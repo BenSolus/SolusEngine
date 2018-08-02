@@ -6,6 +6,17 @@
 # suppresses warnings, resulting from false positives, matching the defined
 # patterns in this file.
 
+# dlopen seems not to free all memory.
+
+{
+   <dlopen_leak>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:dlopen
+   ...
+}
+
 # 'Conditional jump or move depends on uninitialised value(s)' when calling
 # 'vkCreateSwapchainKHR' on NVIDIA GPUs
 

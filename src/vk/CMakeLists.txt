@@ -3,11 +3,14 @@
 # Add public interface.                                                       #
 ###############################################################################
 
-FILE(GLOB sources "*.hpp" ".cpp")
+FILE(GLOB sources "*.hpp" "*.cpp")
 FILE(GLOB interfaces "interfaces/*.hpp")
 FILE(GLOB glfw "glfw/*.hpp")
 
 ADD_LIBRARY(SoVk SHARED ${sources} ${interfaces} ${glfw})
+
+TARGET_INCLUDE_DIRECTORIES(SoVk PUBLIC ${PROJECT_SOURCE_DIR}/src/cxx)
+TARGET_INCLUDE_DIRECTORIES(SoVk PUBLIC ${PROJECT_SOURCE_DIR}/src/vk)
 
 ###############################################################################
 # Set C++14 Standard as required.                                             #

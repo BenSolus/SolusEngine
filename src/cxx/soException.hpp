@@ -21,9 +21,9 @@
  */
 
 /**
- *  @file      interfaces/soSurfaceInterface.hpp
+ *  @file      cxx/soException.hpp
  *  @author    Bennet Carstensen
- *  @date      2018
+ *  @date      2017
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
@@ -50,23 +50,48 @@
 
 #pragma once
 
-namespace so
-{
+#include <soDefinitions.hpp>
 
-enum class SurfaceBackend
-{
-  None,
-  GLFW
-};
+#include <exception>
+#include <iostream>
+#include <string>
 
-template <SurfaceBackend SB>
-class SurfaceInterface
+#define THROW_EXCEPTION(explanatoryString) \
+  throw Exception<std::runtime_error>(explanatoryString, PRETTY_FUNCTION_SIG);
+
+#define THROW_NESTED_EXCEPTION(explanatoryString) \
+  std::throw_with_nested(so::Exception<std::runtime_error> \
+      (explanatoryString, PRETTY_FUNCTION_SIG))
+
+namespace so {
+
+template <typename T>
+class
+Exception : public T
 {
+  static_assert(std::is_base_of<std::exception, T>::value,
+                "Template is not derived from std::exception!");
   public:
-    virtual ~SurfaceInterface() = 0;
+    Exception() : T() {}
+
+    Exception(std::string const& explanatoryString,
+              std::string const& explanatoryPrefix)
+      : T(explanatoryPrefix + ": " + explanatoryString) {}
+
+    void
+    print(size_t const indent = 0) const
+    {
+      std::cerr << std::string(indent, ' ') << this->what() << '\n';
+
+      try
+      {
+        std::rethrow_if_nested(*this);
+      }
+      catch(Exception const& next)
+      {
+        next.print(indent + 1);
+      }
+    }
 };
 
 } // namespace so
-
-constexpr so::SurfaceBackend GLFW(so::SurfaceBackend::GLFW);
-

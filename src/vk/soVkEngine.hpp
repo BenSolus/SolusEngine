@@ -52,7 +52,9 @@
 
 #include <interfaces/soEngineInterface.hpp>
 
-#include <vk/soVkSurface.hpp>
+#include <soVkDebugReportCallbackEXT.hpp>
+#include <soVkInstance.hpp>
+#include <soVkSurface.hpp>
 
 namespace so
 {
@@ -62,14 +64,37 @@ class
 Engine<EngineBackend::Vulkan, SB>
 {
   public:
-    Engine() : mSurface() { }
+    Engine() : mDebugCallback(), mSurface() { }
+
+    Engine(std::string const& applicationName,
+           uint32_t    const  applicationVersion)
+      : Engine()
+    {
+      try
+      {
+        vk::SharedPtrInstance instance
+          (std::make_shared<vk::Instance>
+            (applicationName, applicationVersion));
+
+        mDebugCallback = vk::DebugReportCallbackEXT(instance);
+          
+        mSurface       = vk::Surface<SB>(applicationName, instance);
+      }
+      catch(...)
+      {
+        THROW_NESTED_EXCEPTION("failed to create the Solus Engine.");
+        //throw so::Exception<std::exception>("TEST", PRETTY_FUNCTION_SIG);
+        //throw EXCEPTION("failed to create the Solus Engine!");
+      }
+    }
 
     ~Engine() noexcept { }
 
     void
     createSurface(std::string const& title = "soEngine (Vulkan backend)")
     {
-      mSurface = std::move(vk::Surface<SB>(title));
+      mSurface = std::move(vk::Surface<SB>(title,
+                                           mSurface.getSharedPtrInstance()));
     }
 
     inline auto surfaceIsClosed() { return mSurface.isClosed(); } 
@@ -77,7 +102,8 @@ Engine<EngineBackend::Vulkan, SB>
     inline void surfacePollEvents() { mSurface.pollEvents(); } 
 
   private:
-    vk::Surface<SB> mSurface;
+    vk::DebugReportCallbackEXT mDebugCallback;
+    vk::Surface<SB>            mSurface;
 };
 
 } // namespace so

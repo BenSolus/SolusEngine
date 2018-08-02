@@ -1,16 +1,13 @@
 
-###############################################################################
-# Add directories to include.                                                 #
-###############################################################################
-
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/vk)
+include(CheckCXXCompilerFlag)
 
 ###############################################################################
-# Add source subdirectory.                                                    #
+# Add source subdirectories.                                                  #
 ###############################################################################
+
+ADD_SUBDIRECTORY(cxx)
 
 ADD_SUBDIRECTORY(vk)
-ADD_SUBDIRECTORY(utils)
 
 ###############################################################################
 # Add public interface.                                                       #
@@ -32,7 +29,7 @@ SET_PROPERTY(TARGET SoEng PROPERTY CXX_STANDARD_REQUIRED ON)
 # Link with necessary libraries.                                              #
 ###############################################################################
 
-TARGET_LINK_LIBRARIES(SoEng SoVk)
+TARGET_LINK_LIBRARIES(SoEng SoVk SoCxx)
 
 ###############################################################################
 # Compile shaders.                                                            #

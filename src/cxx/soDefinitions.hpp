@@ -2,10 +2,10 @@
  * Copyright (C) 2017-2018 by Bennet Carstensen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to
- * deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
- * sell copies of the Software, and to permit persons to whom the Software is
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in
@@ -15,23 +15,23 @@
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
- * IN THE SOFTWARE.
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 
 /**
- *  @file      interfaces/soSurfaceInterface.hpp
+ *  @file      soDefinitions.hpp
  *  @author    Bennet Carstensen
- *  @date      2018
+ *  @date      2017
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
  *             obtaining a copy of this software and associated documentation
  *             files (the "Software"), to deal in the Software without
  *             restriction, including without limitation the rights to use,
- *             copy, modify, merge, publish, distribute, sublicense, and/or
- *             sell copies of the Software, and to permit persons to whom the
+ *             copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *             copies of the Software, and to permit persons to whom the
  *             Software is furnished to do so, subject to the following
  *             conditions:
  *
@@ -50,23 +50,15 @@
 
 #pragma once
 
-namespace so
-{
+#define is_eq ==
 
-enum class SurfaceBackend
-{
-  None,
-  GLFW
-};
-
-template <SurfaceBackend SB>
-class SurfaceInterface
-{
-  public:
-    virtual ~SurfaceInterface() = 0;
-};
-
-} // namespace so
-
-constexpr so::SurfaceBackend GLFW(so::SurfaceBackend::GLFW);
+#if defined(__GNUC__) || defined(__clang__)
+#define PRETTY_FUNCTION_SIG __PRETTY_FUNCTION__
+#elif defined(_MSC_VER)
+#define PRETTY_FUNCTION_SIG __FUNCSIG__
+#elif defined(__func__)
+#define PRETTY_FUNCTION_SIG __func__
+#else
+#define PRETTY_FUNCTION_SIG __FUNCTION__
+#endif
 

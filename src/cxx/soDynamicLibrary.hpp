@@ -21,7 +21,7 @@
  */
 
 /**
- *  @file      soGLFWSurfaceInterface.hpp
+ *  @file      cxx/soDynamicLibrary.hpp
  *  @author    Bennet Carstensen
  *  @date      2018
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
@@ -50,85 +50,128 @@
 
 #pragma once
 
-#include <interfaces/soSurfaceInterface.hpp>
-
 #include <soDefinitions.hpp>
-#include <soException.hpp>
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+#if defined(_MSC_VER) || defined(__MINGW32__)
+static_assert(false, "Windows implementation of this module not provided.");
+#else
+#include <unistd.h>
+static_assert(_POSIX_VERSION >= 200112L, "ISO POSIX.1-2001 "
+                                         "(_POSIX_VERSION >= 200112L) "
+                                         "required.");
+#include <dlfcn.h>
+#endif
+
+#include <string>
+#include <utility>
 
 namespace so {
-    
-template<>
+
+template<typename Ret, typename... Args>
 class
-SurfaceInterface<SurfaceBackend::GLFW>
+Symbol
 {
   public:
-    SurfaceInterface() : mWindow(nullptr) { }
-    
-    SurfaceInterface(std::string const& title) : SurfaceInterface()
-    {
-      glfwInit();
+    Symbol() : mSymbol(nullptr) {}
 
-      glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-      glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    Symbol(Symbol const& other) : mSymbol(other.mSymbol) {}
 
-      mWindow = glfwCreateWindow(800,
-                                 600,
-                                 title.c_str(),
-                                 nullptr,
-                                 nullptr);
+    Symbol(Symbol& other) noexcept = delete;
+ 
+    Symbol(void* symbol) : mSymbol(symbol) {}
 
-      if(mWindow is_eq nullptr)
-        throw Exception<std::runtime_error>("Failed to create GLFWwindow.",
-                                            PRETTY_FUNCTION_SIG);
-    }
+    ~Symbol() { mSymbol = nullptr; }
 
-    SurfaceInterface(SurfaceInterface const& other) = delete;
+    Symbol& operator=(Symbol const& other) = delete;
 
-    SurfaceInterface(SurfaceInterface&& other) = delete;
-
-    ~SurfaceInterface() noexcept { deleteMembers(); }
-
-    SurfaceInterface&
-    operator=(SurfaceInterface const& other) = delete;
-
-    SurfaceInterface&
-    operator=(SurfaceInterface&& other) noexcept
+    Symbol&
+    operator=(Symbol&& other) noexcept
     {
       if(this is_eq &other)
         return *this;
 
-      deleteMembers();
+      mSymbol = other.mSymbol;
 
-      mWindow = other.mWindow;
-
-      other.mWindow = nullptr;
+      other.mSymbol = nullptr;
 
       return *this;
     }
 
-    inline auto isClosed() { return glfwWindowShouldClose(mWindow); }
-      
-    inline void pollEvents() { glfwPollEvents(); }
+    Ret
+    operator()(Args... args)
+    {
+      Ret(*f)(Args...)(nullptr);
 
-  protected:
-    GLFWwindow* mWindow;
+      *reinterpret_cast<void**>(&f) = mSymbol;
+
+      return f(args...);
+    }
 
   private:
-    void
-    deleteMembers()
+    void* mSymbol;
+
+}; // class Symbol
+
+class
+DynamicLibrary
+{
+  public:
+    template<typename Ret, typename... IN, typename... NEXT>
+    DynamicLibrary(char const*                                 filename,
+                   std::pair<char const*, Symbol<Ret, IN...>&> symbol,
+                   NEXT...                                     next)
+      : DynamicLibrary()
     {
-      if(mWindow not_eq nullptr)
+#if defined(_MSC_VER) || defined(__MINGW32__)
+      
+#else
+      mHandle = dlopen(filename, RTLD_NOW);
+
+      (void) dlerror();
+
+      if(mHandle not_eq nullptr)
+        loadSymbols(symbol, next...);
+#endif 
+    } 
+
+    DynamicLibrary(DynamicLibrary const& other) = delete;
+
+    DynamicLibrary(DynamicLibrary&& other) noexcept = delete;
+
+    ~DynamicLibrary() noexcept;
+
+    DynamicLibrary& operator=(DynamicLibrary const& other) = delete;
+
+    DynamicLibrary& operator=(DynamicLibrary&& other) noexcept = delete;
+
+    inline auto isAvailable() const { return mIsAvailable; }
+
+  private:
+    bool  mIsAvailable;
+    void* mHandle;
+
+    DynamicLibrary();
+
+    template<typename Ret, typename... IN, typename... NEXT>
+    void
+    loadSymbols(std::pair<char const*, Symbol<Ret, IN...>&>& symbol,
+                NEXT...                                      next)
+    {
+#if defined(_MSC_VER) || defined(__MINGW32__)
+#else
+      void* symbolAddress(dlsym(mHandle, std::get<0>(symbol)));
+
+      if(dlerror() is_eq nullptr)
       {
-        glfwDestroyWindow(mWindow);
+        std::get<1>(symbol) = Symbol<Ret, IN...>(symbolAddress);
 
-        glfwTerminate();
-
-        mWindow = nullptr;
+        loadSymbols(next...);
       }
+#endif
     }
-}; // class SurfaceInterface
+
+    void loadSymbols() { mIsAvailable = true; }
+}; // class DynamicLibrary
 
 } // namespace so
+

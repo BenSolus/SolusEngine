@@ -1,0 +1,114 @@
+/* 
+ * Copyright (C) 2017-2018 by Bennet Carstensen
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
+ */
+
+#include <soVulkan.hpp>
+
+so::Symbol<VkResult, uint32_t*, VkLayerProperties*>
+so::vk::enumerateInstanceLayerProperties;
+
+so::Symbol<VkResult,
+           VkInstanceCreateInfo*,
+           VkApplicationInfo*,
+           VkInstance*>
+so::vk::createInstance;
+
+so::Symbol<void, VkInstance, VkAllocationCallbacks const*>
+so::vk::destroyInstance;
+
+so::Symbol<PFN_vkVoidFunction, VkInstance, char const*>
+so::vk::getInstanceProcAddr;
+
+so::Symbol<void, VkInstance, VkSurfaceKHR, VkAllocationCallbacks const*>
+so::vk::destroySurfaceKHR;
+
+so::DynamicLibrary const so::VulkanLibrary
+#if defined(_MSC_VER) || defined(__MINGW32__)
+      
+#else
+  ("libvulkan.so",
+#endif 
+  std::make_pair("vkEnumerateInstanceLayerProperties",
+                  std::reference_wrapper<Symbol<VkResult,
+                                                uint32_t*,
+                                                VkLayerProperties*>>
+                    (so::vk::enumerateInstanceLayerProperties)),
+   std::make_pair("vkCreateInstance",
+                  std::reference_wrapper<Symbol<VkResult,
+                                                VkInstanceCreateInfo*,
+                                                VkApplicationInfo*,
+                                                VkInstance*>>
+                    (so::vk::createInstance)),
+   std::make_pair("vkDestroyInstance",
+                  std::reference_wrapper<Symbol<void,
+                                                VkInstance,
+                                                VkAllocationCallbacks const*>>
+                    (so::vk::destroyInstance)),
+   std::make_pair("vkGetInstanceProcAddr",
+                  std::reference_wrapper<Symbol<PFN_vkVoidFunction,
+                                                VkInstance,
+                                                char const*>>
+                    (so::vk::getInstanceProcAddr)),   
+   std::make_pair("vkDestroySurfaceKHR",
+                  std::reference_wrapper<Symbol<void,
+                                                VkInstance,
+                                                VkSurfaceKHR,
+                                                VkAllocationCallbacks const*>>
+                    (so::vk::destroySurfaceKHR)));
+
+std::string
+std::to_string(VkResult result)
+{
+  switch(result)
+  {
+    case 0  : return "VK_SUCCESS";
+    case 1  : return "VK_NOT_READY";
+    case 2  : return "VK_TIMEOUT";
+    case 3  : return "VK_EVENT_SET";
+    case 4  : return "VK_EVENT_RESET";
+    case 5  : return "VK_INCOMPLETE";
+    case -1 : return "VK_ERROR_OUT_OF_HOST_MEMORY";
+    case -2 : return "VK_ERROR_OUT_OF_DEVICE_MEMORY";
+    case -3 : return "VK_ERROR_INITIALIZATION_FAILED";
+    case -4 : return "VK_ERROR_DEVICE_LOST";
+    case -5 : return "VK_ERROR_MEMORY_MAP_FAILED";
+    case -6 : return "VK_ERROR_LAYER_NOT_PRESENT";
+    case -7 : return "VK_ERROR_EXTENSION_NOT_PRESENT";
+    case -8 : return "VK_ERROR_FEATURE_NOT_PRESENT";
+    case -9 : return "VK_ERROR_INCOMPATIBLE_DRIVER";
+    case -10 : return "VK_ERROR_TOO_MANY_OBJECTS";
+    case -11 : return "VK_ERROR_FORMAT_NOT_SUPPORTED";
+    case -12 : return "VK_ERROR_FRAGMENTED_POOL";
+    case -1000069000 : return "VK_ERROR_OUT_OF_POOL_MEMORY";
+    case -1000072003 : return "VK_ERROR_INVALID_EXTERNAL_HANDLE";
+    case -1000000000 : return "VK_ERROR_SURFACE_LOST_KHR";
+    case -1000000001 : return "VK_ERROR_NATIVE_WINDOW_IN_USE_KHR";
+    case  1000001003 : return "VK_SUBOPTIMAL_KHR";
+    case -1000001004 : return "VK_ERROR_OUT_OF_DATE_KHR";
+    case -1000003001 : return "VK_ERROR_INCOMPATIBLE_DISPLAY_KHR";
+    case -1000011001 : return "VK_ERROR_VALIDATION_FAILED_EXT"; 
+    case -1000012000 : return "VK_ERROR_INVALID_SHADER_NV";
+    case -1000161000 : return "VK_ERROR_FRAGMENTATION_EXT";
+    case VK_ERROR_NOT_PERMITTED_EXT : return "VK_ERROR_NOT_PERMITTED_EXT";
+    case VK_RESULT_MAX_ENUM         :
+    case VK_RESULT_RANGE_SIZE       : break;
+  }
+}

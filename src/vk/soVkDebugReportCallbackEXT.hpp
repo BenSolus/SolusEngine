@@ -21,9 +21,9 @@
  */
 
 /**
- *  @file      interfaces/soSurfaceInterface.hpp
+ *  @file      soVkDebugReportCallbackEXT.hpp
  *  @author    Bennet Carstensen
- *  @date      2018
+ *  @date      2017
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
@@ -50,23 +50,48 @@
 
 #pragma once
 
-namespace so
-{
+#include <soVkInstance.hpp>
 
-enum class SurfaceBackend
-{
-  None,
-  GLFW
-};
+#include <memory>
+#include <vector>
 
-template <SurfaceBackend SB>
-class SurfaceInterface
+namespace so {
+namespace vk {
+
+class
+DebugReportCallbackEXT
 {
   public:
-    virtual ~SurfaceInterface() = 0;
+    DebugReportCallbackEXT();
+
+    DebugReportCallbackEXT(SharedPtrInstance const& instance);
+
+    DebugReportCallbackEXT(DebugReportCallbackEXT const& other) = delete;
+
+    DebugReportCallbackEXT(DebugReportCallbackEXT&& other) = delete;
+
+    ~DebugReportCallbackEXT() noexcept;
+
+    DebugReportCallbackEXT&
+    operator=(DebugReportCallbackEXT const& other) = delete;
+
+    DebugReportCallbackEXT&
+    operator=(DebugReportCallbackEXT&& other) noexcept;
+    
+    VkDebugReportCallbackEXT&
+    getVkDebugReportCallbackEXT() { return mCallback; }
+
+  private:
+    VkDebugReportCallbackEXT mCallback;
+
+    SharedPtrInstance        mInstance;
+
+    void
+    deleteMembers();
 };
 
+bool
+checkValidationLayerSupport();
+
+} // namespace vk
 } // namespace so
-
-constexpr so::SurfaceBackend GLFW(so::SurfaceBackend::GLFW);
-
