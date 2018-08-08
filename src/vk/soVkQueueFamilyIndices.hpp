@@ -21,7 +21,7 @@
  */
 
 /**
- *  @file      vk/glfw/soVkGLFWSurface.hpp
+ *  @file      soVkQueueFamilyIndices.hpp
  *  @author    Bennet Carstensen
  *  @date      2017
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
@@ -50,45 +50,35 @@
 
 #pragma once
 
-#include <interfaces/soVkSurfaceInterface.hpp>
+#include <soVulkan.hpp>
 
 namespace so {
 namespace vk {
-
-template<>
-class Surface<GLFW> : public so::vk::SurfaceInterface<GLFW>
+    
+class
+QueueFamilyIndices
 {
   public:
-    Surface() : so::vk::SurfaceInterface<GLFW>() {}
+    QueueFamilyIndices() : mGraphicsFamily(-1), mPresentFamily(-1) {}
 
-    Surface(std::string const& title, SharedPtrInstance instance)
-      : so::vk::SurfaceInterface<GLFW>(title)
-    {
-      
-      if(mWindow not_eq nullptr)
-      {
-        VkResult const result(glfwCreateWindowSurface
-            (instance->getVkInstance(), mWindow, nullptr, &mSurface));
+    QueueFamilyIndices(VkPhysicalDevice device, VkSurfaceKHR surface);
 
-        if(result not_eq VK_SUCCESS)
-          THROW_EXCEPTION(std::string("failed to create window surface! "
-                                      "(Error code: ") + std::to_string(result)
-                                      + std::string(")"));
-      }
-    }
+    inline auto getGraphicsFamily() { return mGraphicsFamily; }
 
-    Surface<GLFW>&
-    operator=(Surface<GLFW>&& other)
-    {
-      if(this is_eq &other)
-        return *this;
+    inline void setGraphicsFamily(int value) { mGraphicsFamily = value; }
 
-      so::vk::SurfaceInterface<GLFW>::operator=
-        (static_cast<so::vk::SurfaceInterface<GLFW>&&>(other));
+    inline auto getPresentFamily() { return mPresentFamily; }
 
-      return *this;
-    }
-}; // class Surface
+    inline void setPresentFamily(int value) { mPresentFamily = value; }
+
+    inline bool isComplete()
+      { return (mGraphicsFamily >= 0) && (mPresentFamily >= 0); }
+
+  private:
+    int mGraphicsFamily;
+    int mPresentFamily;
+};
 
 } // namespace vk
 } // namespace so
+

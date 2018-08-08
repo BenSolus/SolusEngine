@@ -34,8 +34,7 @@ std::vector<char const*> const VALIDATION_LAYERS
   ({ "VK_LAYER_LUNARG_standard_validation" });
 
 so::vk::SharedPtrInstance const so::vk::Instance::SHARED_PTR_NULL_INSTANCE
-  (std::make_shared<so::vk::Instance>
-    (static_cast<VkInstance>(VK_NULL_HANDLE)));
+  (std::make_shared<so::vk::Instance>());
 
 so::vk::Instance::Instance() : mInstance(VK_NULL_HANDLE) {}
 
@@ -102,6 +101,7 @@ so::vk::Instance::checkValidationLayerSupport()
   std::cout << "<INFO> Available Vulkan layers:\n";
   for(auto const& layerProperties : availableLayers)
     std::cout << "<INFO>   " << layerProperties.layerName << "\n";
+  
 
   for(char const* layerName : VALIDATION_LAYERS)
   {
@@ -131,8 +131,16 @@ so::vk::Instance::getRequiredExtensions()
   char const** glfwExtensions(glfwGetRequiredInstanceExtensions
                                 (&glfwExtensionCount));
 
+  std::cout << "<INFO> Available GLFW-Extensions:\n";
+
   for(unsigned int i(0); i < glfwExtensionCount; ++i)
+  {
+    std::cout << "<INFO>   " << glfwExtensions[i] << "\n";
+
     extensions.push_back(glfwExtensions[i]);
+  }
+
+  std::cout << "\n";
 
   if(ENABLE_VALIDATION_LAYERS)
     extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);

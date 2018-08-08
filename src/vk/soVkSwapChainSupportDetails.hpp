@@ -21,7 +21,7 @@
  */
 
 /**
- *  @file      vk/glfw/soVkGLFWSurface.hpp
+ *  @file      vk/soVkSwapChainSupportDetails.hpp
  *  @author    Bennet Carstensen
  *  @date      2017
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
@@ -50,45 +50,49 @@
 
 #pragma once
 
-#include <interfaces/soVkSurfaceInterface.hpp>
+#include <soVulkan.hpp>
+
+#include <vector>
 
 namespace so {
 namespace vk {
-
-template<>
-class Surface<GLFW> : public so::vk::SurfaceInterface<GLFW>
+    
+class
+SwapChainSupportDetails
 {
   public:
-    Surface() : so::vk::SurfaceInterface<GLFW>() {}
+    SwapChainSupportDetails();
 
-    Surface(std::string const& title, SharedPtrInstance instance)
-      : so::vk::SurfaceInterface<GLFW>(title)
-    {
-      
-      if(mWindow not_eq nullptr)
-      {
-        VkResult const result(glfwCreateWindowSurface
-            (instance->getVkInstance(), mWindow, nullptr, &mSurface));
+    SwapChainSupportDetails(VkPhysicalDevice device, VkSurfaceKHR surface);
 
-        if(result not_eq VK_SUCCESS)
-          THROW_EXCEPTION(std::string("failed to create window surface! "
-                                      "(Error code: ") + std::to_string(result)
-                                      + std::string(")"));
-      }
-    }
+    inline VkSurfaceCapabilitiesKHR*
+    getCapabilitiesPointer() { return &mCapabilities; }
 
-    Surface<GLFW>&
-    operator=(Surface<GLFW>&& other)
-    {
-      if(this is_eq &other)
-        return *this;
+    inline VkSurfaceCapabilitiesKHR&
+    getCapabilities() { return mCapabilities; }
 
-      so::vk::SurfaceInterface<GLFW>::operator=
-        (static_cast<so::vk::SurfaceInterface<GLFW>&&>(other));
+    inline std::vector<VkSurfaceFormatKHR>& getFormats()
+    { return mFormats; }
 
-      return *this;
-    }
-}; // class Surface
+    inline void
+    resizeFormats(std::vector<VkSurfaceFormatKHR>::size_type n)
+    { mFormats.resize(n); }
+
+    inline std::vector<VkPresentModeKHR>&
+    getPresentModes() { return mPresentModes; }
+
+    inline void
+    resizePresentModes(std::vector<VkPresentModeKHR>::size_type n)
+    { mPresentModes.resize(n); }
+
+  private:
+    VkSurfaceCapabilitiesKHR        mCapabilities;
+
+    std::vector<VkSurfaceFormatKHR> mFormats;
+    std::vector<VkPresentModeKHR>   mPresentModes;
+
+};
 
 } // namespace vk
 } // namespace so
+

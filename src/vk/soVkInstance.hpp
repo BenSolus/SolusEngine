@@ -74,8 +74,6 @@ Instance : public std::enable_shared_from_this<Instance>
 
     Instance();
 
-    Instance(VkInstance instance) : mInstance(instance) {}
-
     Instance(std::string const& applicationName,
              uint32_t    const  applicationVersion);
  

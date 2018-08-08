@@ -113,6 +113,8 @@ SurfaceInterface : public so::SurfaceInterface<SB>
       return *this;
     }
 
+    inline auto getVkSurfaceKHR() { return mSurface; }
+
     inline auto getSharedPtrInstance() { return mInstance; }
 
   protected:

@@ -22,8 +22,29 @@
 
 #include <soVulkan.hpp>
 
+so::Symbol<VkResult,
+           VkPhysicalDevice,
+           VkDeviceCreateInfo const*,
+           VkAllocationCallbacks const*,
+           VkDevice*>
+so::vk::createDevice;
+
+
+so::Symbol<void, VkDevice, VkAllocationCallbacks const*>
+so::vk::destroyDevice;
+
+so::Symbol<VkResult,
+           VkPhysicalDevice,
+           char const*,
+           uint32_t*,
+           VkExtensionProperties*>
+so::vk::enumerateDeviceExtensionProperties;
+
 so::Symbol<VkResult, uint32_t*, VkLayerProperties*>
 so::vk::enumerateInstanceLayerProperties;
+
+so::Symbol<VkResult, VkInstance, uint32_t*, VkPhysicalDevice*>
+so::vk::enumeratePhysicalDevices;
 
 so::Symbol<VkResult,
            VkInstanceCreateInfo*,
@@ -34,8 +55,38 @@ so::vk::createInstance;
 so::Symbol<void, VkInstance, VkAllocationCallbacks const*>
 so::vk::destroyInstance;
 
+so::Symbol<void, VkDevice, uint32_t, uint32_t, VkQueue*>
+so::vk::getDeviceQueue;
+
 so::Symbol<PFN_vkVoidFunction, VkInstance, char const*>
 so::vk::getInstanceProcAddr;
+
+so::Symbol<void, VkPhysicalDevice, VkPhysicalDeviceFeatures*>
+so::vk::getPhysicalDeviceFeatures;
+
+so::Symbol<void, VkPhysicalDevice, uint32_t*, VkQueueFamilyProperties*>
+so::vk::getPhysicalDeviceQueueFamilyProperties;
+
+so::Symbol<VkResult, VkPhysicalDevice, VkSurfaceKHR, VkSurfaceCapabilitiesKHR*>
+so::vk::getPhysicalDeviceSurfaceCapabilitiesKHR;
+
+so::Symbol<VkResult,
+           VkPhysicalDevice,
+           VkSurfaceKHR,
+           uint32_t*,
+           VkSurfaceFormatKHR*>
+so::vk::getPhysicalDeviceSurfaceFormatsKHR;
+
+so::Symbol<VkResult,
+           VkPhysicalDevice,
+           VkSurfaceKHR,
+           uint32_t*,
+           VkPresentModeKHR*>
+so::vk::getPhysicalDeviceSurfacePresentModesKHR;
+
+
+so::Symbol<VkResult, VkPhysicalDevice, uint32_t, VkSurfaceKHR, VkBool32*>
+so::vk::getPhysicalDeviceSurfaceSupportKHR;
 
 so::Symbol<void, VkInstance, VkSurfaceKHR, VkAllocationCallbacks const*>
 so::vk::destroySurfaceKHR;
@@ -45,12 +96,37 @@ so::DynamicLibrary const so::VulkanLibrary
       
 #else
   ("libvulkan.so",
-#endif 
-  std::make_pair("vkEnumerateInstanceLayerProperties",
+#endif
+   std::make_pair("vkCreateDevice",
+                  std::reference_wrapper<Symbol<VkResult,
+                                                VkPhysicalDevice,
+                                                VkDeviceCreateInfo const*,
+                                                VkAllocationCallbacks const*,
+                                                VkDevice*>>
+                    (so::vk::createDevice)),
+   std::make_pair("vkDestroyDevice",
+                  std::reference_wrapper<Symbol<void,
+                                                VkDevice,
+                                                VkAllocationCallbacks const*>>
+                    (so::vk::destroyDevice)),
+   std::make_pair("vkEnumerateDeviceExtensionProperties",
+                  std::reference_wrapper<Symbol<VkResult,
+                                                VkPhysicalDevice,
+                                                char const*,
+                                                uint32_t*,
+                                                VkExtensionProperties*>>
+                    (so::vk::enumerateDeviceExtensionProperties)),
+   std::make_pair("vkEnumerateInstanceLayerProperties",
                   std::reference_wrapper<Symbol<VkResult,
                                                 uint32_t*,
                                                 VkLayerProperties*>>
                     (so::vk::enumerateInstanceLayerProperties)),
+   std::make_pair("vkEnumeratePhysicalDevices",
+                  std::reference_wrapper<Symbol<VkResult,
+                                                VkInstance,
+                                                uint32_t*,
+                                                VkPhysicalDevice*>>
+                    (so::vk::enumeratePhysicalDevices)),    
    std::make_pair("vkCreateInstance",
                   std::reference_wrapper<Symbol<VkResult,
                                                 VkInstanceCreateInfo*,
@@ -62,11 +138,56 @@ so::DynamicLibrary const so::VulkanLibrary
                                                 VkInstance,
                                                 VkAllocationCallbacks const*>>
                     (so::vk::destroyInstance)),
+   std::make_pair("vkGetDeviceQueue",
+                  std::reference_wrapper<Symbol<void,
+                                                VkDevice,
+                                                uint32_t,
+                                                uint32_t,
+                                                VkQueue*>>
+                    (so::vk::getDeviceQueue)),
    std::make_pair("vkGetInstanceProcAddr",
                   std::reference_wrapper<Symbol<PFN_vkVoidFunction,
                                                 VkInstance,
                                                 char const*>>
                     (so::vk::getInstanceProcAddr)),   
+   std::make_pair("vkGetPhysicalDeviceFeatures",
+                  std::reference_wrapper<Symbol<void,
+                                                VkPhysicalDevice,
+                                                VkPhysicalDeviceFeatures*>>
+                    (so::vk::getPhysicalDeviceFeatures)),
+   std::make_pair("vkGetPhysicalDeviceQueueFamilyProperties",
+                  std::reference_wrapper<Symbol<void,
+                                                VkPhysicalDevice,
+                                                uint32_t*,
+                                                VkQueueFamilyProperties*>>
+                    (so::vk::getPhysicalDeviceQueueFamilyProperties)),
+   std::make_pair("vkGetPhysicalDeviceSurfaceCapabilitiesKHR",
+                  std::reference_wrapper<Symbol<VkResult,
+                                                VkPhysicalDevice,
+                                                VkSurfaceKHR,
+                                                VkSurfaceCapabilitiesKHR*>>
+                    (so::vk::getPhysicalDeviceSurfaceCapabilitiesKHR)),
+   std::make_pair("vkGetPhysicalDeviceSurfaceFormatsKHR",
+                  std::reference_wrapper<Symbol<VkResult,
+                                                VkPhysicalDevice,
+                                                VkSurfaceKHR,
+                                                uint32_t*,
+                                                VkSurfaceFormatKHR*>>
+                    (so::vk::getPhysicalDeviceSurfaceFormatsKHR)), 
+   std::make_pair("vkGetPhysicalDeviceSurfacePresentModesKHR",
+                  std::reference_wrapper<Symbol<VkResult,
+                                                VkPhysicalDevice,
+                                                VkSurfaceKHR,
+                                                uint32_t*,
+                                                VkPresentModeKHR*>>
+                    (so::vk::getPhysicalDeviceSurfacePresentModesKHR)),   
+   std::make_pair("vkGetPhysicalDeviceSurfaceSupportKHR",
+                  std::reference_wrapper<Symbol<VkResult,
+                                                VkPhysicalDevice,
+                                                uint32_t,
+                                                VkSurfaceKHR,
+                                                VkBool32*>>
+                    (so::vk::getPhysicalDeviceSurfaceSupportKHR)), 
    std::make_pair("vkDestroySurfaceKHR",
                   std::reference_wrapper<Symbol<void,
                                                 VkInstance,
@@ -111,4 +232,6 @@ std::to_string(VkResult result)
     case VK_RESULT_MAX_ENUM         :
     case VK_RESULT_RANGE_SIZE       : break;
   }
+
+  return "VK_ERROR_UNKNOWN";
 }

@@ -1,0 +1,39 @@
+version: '(build)'
+branches:
+  only:
+    - master
+
+platform:
+  - x64
+
+environment:
+  matrix:
+    - arch: Win64
+      generator: "Visual Studio 14"
+      config: Debug
+    - arch: Win64
+      generator: "Visual Studio 14"
+      config: Release
+
+matrix:
+  fast_finish: true
+
+init:
+  - cmd: |-
+      mkdir c:\projects\SolusEngine\builds
+      
+      git clone https://github.com/glfw/glfw.git .\glfw
+      cd glfw
+      cmake -DBUILD_SHARED_LIBS=ON ..\..
+      cmake --build .
+before_build:
+  - cmd: |-
+      mkdir builds\%config%
+      cd build
+      cmake --version
+      cmake ..\.. -G -DEXAMPLES:BOOL=ON %generator%
+
+build:
+  project: c:\projects\SolusEngine\builds\%config%\SolusEngine.sln
+  verbosity: minimal
+  parallel: true

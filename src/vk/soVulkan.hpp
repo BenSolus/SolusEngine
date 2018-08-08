@@ -60,8 +60,28 @@ extern DynamicLibrary const VulkanLibrary;
 
 namespace vk {
 
+extern Symbol<VkResult,
+              VkPhysicalDevice,
+              VkDeviceCreateInfo const*,
+              VkAllocationCallbacks const*,
+              VkDevice*>
+createDevice;
+
+extern Symbol<void, VkDevice, VkAllocationCallbacks const*>
+destroyDevice;
+
+extern Symbol<VkResult,
+              VkPhysicalDevice,
+              char const*,
+              uint32_t*,
+              VkExtensionProperties*>
+enumerateDeviceExtensionProperties;
+
 extern Symbol<VkResult, uint32_t*, VkLayerProperties*>
 enumerateInstanceLayerProperties;
+
+extern Symbol<VkResult, VkInstance, uint32_t*, VkPhysicalDevice*>
+enumeratePhysicalDevices;
 
 extern Symbol<VkResult, VkInstanceCreateInfo*, VkApplicationInfo*, VkInstance*>
 createInstance;
@@ -69,8 +89,44 @@ createInstance;
 extern Symbol<void, VkInstance, VkAllocationCallbacks const*>
 destroyInstance;
 
+extern Symbol<void, VkDevice, uint32_t, uint32_t, VkQueue*>
+getDeviceQueue;
+
 extern Symbol<PFN_vkVoidFunction, VkInstance, char const*>
 getInstanceProcAddr;
+
+extern Symbol<void, VkPhysicalDevice, VkPhysicalDeviceFeatures*>
+getPhysicalDeviceFeatures;
+
+extern Symbol<void, VkPhysicalDevice, uint32_t*, VkQueueFamilyProperties*>
+getPhysicalDeviceQueueFamilyProperties;
+
+extern Symbol<VkResult,
+              VkPhysicalDevice,
+              VkSurfaceKHR,
+              VkSurfaceCapabilitiesKHR*>
+getPhysicalDeviceSurfaceCapabilitiesKHR;
+
+extern Symbol<VkResult,
+              VkPhysicalDevice,
+              VkSurfaceKHR,
+              uint32_t*,
+              VkSurfaceFormatKHR*>
+getPhysicalDeviceSurfaceFormatsKHR;
+
+extern Symbol<VkResult,
+              VkPhysicalDevice,
+              VkSurfaceKHR,
+              uint32_t*,
+              VkPresentModeKHR*>
+getPhysicalDeviceSurfacePresentModesKHR;
+
+extern Symbol<VkResult,
+              VkPhysicalDevice,
+              uint32_t,
+              VkSurfaceKHR,
+              VkBool32*>
+getPhysicalDeviceSurfaceSupportKHR;
 
 extern Symbol<void, VkInstance, VkSurfaceKHR, VkAllocationCallbacks const*>
 destroySurfaceKHR;
@@ -84,5 +140,4 @@ string
 to_string(VkResult result);
 
 } // namespace std
-
-
+ 

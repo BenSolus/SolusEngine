@@ -54,6 +54,7 @@
 
 #include <soVkDebugReportCallbackEXT.hpp>
 #include <soVkInstance.hpp>
+#include <soVkLogicalDevice.hpp>
 #include <soVkSurface.hpp>
 
 namespace so
@@ -79,6 +80,10 @@ Engine<EngineBackend::Vulkan, SB>
         mDebugCallback = vk::DebugReportCallbackEXT(instance);
           
         mSurface       = vk::Surface<SB>(applicationName, instance);
+
+        vk::SharedPtrLogicalDevice device
+          (std::make_shared<vk::LogicalDevice>
+            (instance, mSurface.getVkSurfaceKHR()));
       }
       catch(...)
       {

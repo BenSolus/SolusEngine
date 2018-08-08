@@ -21,10 +21,10 @@
  */
 
 /**
- *  @file      vk/glfw/soVkGLFWSurface.hpp
+ *  @file      soVkLogicalDevice.hpp
  *  @author    Bennet Carstensen
  *  @date      2017
- *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
+ *  @copyright Copyright (c) 2017 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
  *             obtaining a copy of this software and associated documentation
@@ -50,45 +50,69 @@
 
 #pragma once
 
-#include <interfaces/soVkSurfaceInterface.hpp>
+#include <soVkPhysicalDevice.hpp>
+#include <soVkSurface.hpp>
 
 namespace so {
 namespace vk {
-
-template<>
-class Surface<GLFW> : public so::vk::SurfaceInterface<GLFW>
+    
+class
+LogicalDevice : public PhysicalDevice,
+                public std::enable_shared_from_this<LogicalDevice>
 {
   public:
-    Surface() : so::vk::SurfaceInterface<GLFW>() {}
+    static std::shared_ptr<LogicalDevice> const SHARED_PTR_NULL_LOGICAL_DEVICE;
 
-    Surface(std::string const& title, SharedPtrInstance instance)
-      : so::vk::SurfaceInterface<GLFW>(title)
-    {
-      
-      if(mWindow not_eq nullptr)
-      {
-        VkResult const result(glfwCreateWindowSurface
-            (instance->getVkInstance(), mWindow, nullptr, &mSurface));
+    LogicalDevice();
 
-        if(result not_eq VK_SUCCESS)
-          THROW_EXCEPTION(std::string("failed to create window surface! "
-                                      "(Error code: ") + std::to_string(result)
-                                      + std::string(")"));
-      }
-    }
+    LogicalDevice(SharedPtrInstance const& device, VkSurfaceKHR surface);
 
-    Surface<GLFW>&
-    operator=(Surface<GLFW>&& other)
+    LogicalDevice(LogicalDevice const& other) = delete;
+
+    LogicalDevice(LogicalDevice&& other) = delete;
+
+    virtual ~LogicalDevice() noexcept;
+
+    LogicalDevice& operator=(LogicalDevice const& other) = delete;
+
+    LogicalDevice&
+    operator=(LogicalDevice&& other) noexcept
     {
       if(this is_eq &other)
         return *this;
 
-      so::vk::SurfaceInterface<GLFW>::operator=
-        (static_cast<so::vk::SurfaceInterface<GLFW>&&>(other));
+      PhysicalDevice::operator=(static_cast<PhysicalDevice&&>(other));
+
+      destroyMembers();
+
+      mDevice        = other.mDevice;
+      mGraphicsQueue = other.mGraphicsQueue;
+      mPresentQueue  = other.mPresentQueue;
+
+      other.mDevice        = VK_NULL_HANDLE;
+      other.mGraphicsQueue = VK_NULL_HANDLE;
+      other.mPresentQueue  = VK_NULL_HANDLE;
 
       return *this;
     }
-}; // class Surface
+
+    inline auto getVkDevice() { return mDevice; }
+
+    inline auto getGraphicsVkQueue() { return mGraphicsQueue; }
+
+    inline auto getPresentVkQueue() { return mPresentQueue; }
+
+  private:
+    VkDevice                mDevice;
+    VkQueue                 mGraphicsQueue;
+    VkQueue                 mPresentQueue;
+
+    void
+    destroyMembers();
+};
+
+using SharedPtrLogicalDevice = std::shared_ptr<so::vk::LogicalDevice>;
 
 } // namespace vk
-} // namespace so
+} //namespace so
+
