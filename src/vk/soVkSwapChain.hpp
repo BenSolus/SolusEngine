@@ -21,9 +21,9 @@
  */
 
 /**
- *  @file      soGLFWSurfaceInterface.hpp
+ *  @file      soVkSwapChain.hpp
  *  @author    Bennet Carstensen
- *  @date      2018
+ *  @date      2017
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
@@ -50,85 +50,93 @@
 
 #pragma once
 
-#include <interfaces/soSurfaceInterface.hpp>
-
-#include <soDefinitions.hpp>
-#include <soException.hpp>
+#include <soVkLogicalDevice.hpp>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include <vector>
+
 namespace so {
+namespace vk {
     
-template<>
 class
-SurfaceInterface<SurfaceBackend::GLFW>
+SwapChain
 {
   public:
-    SurfaceInterface() : mWindow(nullptr) { glfwInit(); }
-    
-    SurfaceInterface(std::string const& title) : SurfaceInterface()
+    SwapChain();
+
+    SwapChain(SharedPtrLogicalDevice const& device,
+              VkSurfaceKHR                  surface,
+              GLFWwindow*                   window,
+              VkSwapchainKHR                oldSwapChain = VK_NULL_HANDLE);
+
+    SwapChain(SwapChain const& other) = delete;
+
+    SwapChain(SwapChain&& other) = delete;
+
+    ~SwapChain() noexcept;
+
+    SwapChain&
+    operator=(SwapChain const& other) = delete;
+
+    SwapChain&
+    operator=(SwapChain&& other) noexcept
     {
-      glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-      glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+      destroyMembers();
 
-      mWindow = glfwCreateWindow(800,
-                                 600,
-                                 title.c_str(),
-                                 nullptr,
-                                 nullptr);
+      mSwapChain            = other.mSwapChain;
+      mSwapChainExtent      = other.mSwapChainExtent;
+      mSwapChainImageFormat = other.mSwapChainImageFormat;
+      mSwapChainImages      = other.mSwapChainImages;
+      mDevice               = other.mDevice;
 
-      if(mWindow is_eq nullptr)
-        throw Exception<std::runtime_error>("Failed to create GLFWwindow.",
-                                            PRETTY_FUNCTION_SIG);
-    }
-
-    SurfaceInterface(SurfaceInterface const& other) = delete;
-
-    SurfaceInterface(SurfaceInterface&& other) = delete;
-
-    ~SurfaceInterface() noexcept { deleteMembers(); }
-
-    SurfaceInterface&
-    operator=(SurfaceInterface const& other) = delete;
-
-    SurfaceInterface&
-    operator=(SurfaceInterface&& other) noexcept
-    {
-      if(this is_eq &other)
-        return *this;
-
-      deleteMembers();
-
-      mWindow = other.mWindow;
-
-      other.mWindow = nullptr;
+      other.mSwapChain            = VK_NULL_HANDLE;
+      other.mSwapChainExtent      = { 0, 0 };
+      other.mSwapChainImageFormat = VK_FORMAT_UNDEFINED;
+      other.mSwapChainImages      = std::vector<VkImage>();
+      other.mDevice               =
+        LogicalDevice::SHARED_PTR_NULL_LOGICAL_DEVICE;
 
       return *this;
     }
 
-    inline auto isClosed() { return glfwWindowShouldClose(mWindow); }
-      
-    inline void pollEvents() { glfwPollEvents(); }
+    inline auto getVkSwapchainKHR() { return mSwapChain; }
 
-    inline auto getGLFWwindow() { return mWindow; }
+    inline auto getVkExtent() { return mSwapChainExtent; }
 
-  protected:
-    GLFWwindow* mWindow;
+    inline auto getVkFormat() { return mSwapChainImageFormat; }
+
+    inline std::vector<VkImage>& getVkImages() { return mSwapChainImages; }
+
+    inline auto getDevice() { return mDevice->shared_from_this(); }
 
   private:
+    VkSwapchainKHR         mSwapChain;
+
+    VkExtent2D             mSwapChainExtent;
+    VkFormat               mSwapChainImageFormat;
+
+    std::vector<VkImage>   mSwapChainImages;
+
+    SharedPtrLogicalDevice mDevice;
+
+    VkSurfaceFormatKHR
+    chooseSwapSurfaceFormat
+      (const std::vector<VkSurfaceFormatKHR>& availableFormats);
+
+    VkPresentModeKHR
+    chooseSwapPresentMode
+      (const std::vector<VkPresentModeKHR> availablePresentModes);
+
+    VkExtent2D
+    chooseSwapExtent(VkSurfaceCapabilitiesKHR const& capabilities,
+                     GLFWwindow*                     window);
+
     void
-    deleteMembers()
-    {
-      if(mWindow not_eq nullptr)
-      {
-        glfwDestroyWindow(mWindow);
+    destroyMembers();
+};
 
-        glfwTerminate();
-
-        mWindow = nullptr;
-      }
-    }
-}; // class SurfaceInterface
-
+} // namespace vk
 } // namespace so
+

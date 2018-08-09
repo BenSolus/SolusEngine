@@ -56,16 +56,16 @@
 #include <soVkInstance.hpp>
 #include <soVkLogicalDevice.hpp>
 #include <soVkSurface.hpp>
+#include <soVkSwapChain.hpp>
 
-namespace so
-{
+namespace so {
 
 template<SurfaceBackend SB>
 class
 Engine<EngineBackend::Vulkan, SB>
 {
   public:
-    Engine() : mDebugCallback(), mSurface() { }
+    Engine() : mDebugCallback(), mSurface(), mSwapChain() { }
 
     Engine(std::string const& applicationName,
            uint32_t    const  applicationVersion)
@@ -84,6 +84,10 @@ Engine<EngineBackend::Vulkan, SB>
         vk::SharedPtrLogicalDevice device
           (std::make_shared<vk::LogicalDevice>
             (instance, mSurface.getVkSurfaceKHR()));
+
+        mSwapChain     = vk::SwapChain(device,
+                                       mSurface.getVkSurfaceKHR(),
+                                       mSurface.getGLFWwindow());
       }
       catch(...)
       {
@@ -109,6 +113,7 @@ Engine<EngineBackend::Vulkan, SB>
   private:
     vk::DebugReportCallbackEXT mDebugCallback;
     vk::Surface<SB>            mSurface;
+    vk::SwapChain              mSwapChain;
 };
 
 } // namespace so

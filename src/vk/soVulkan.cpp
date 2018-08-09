@@ -29,7 +29,6 @@ so::Symbol<VkResult,
            VkDevice*>
 so::vk::createDevice;
 
-
 so::Symbol<void, VkDevice, VkAllocationCallbacks const*>
 so::vk::destroyDevice;
 
@@ -84,12 +83,24 @@ so::Symbol<VkResult,
            VkPresentModeKHR*>
 so::vk::getPhysicalDeviceSurfacePresentModesKHR;
 
-
 so::Symbol<VkResult, VkPhysicalDevice, uint32_t, VkSurfaceKHR, VkBool32*>
 so::vk::getPhysicalDeviceSurfaceSupportKHR;
 
+so::Symbol<VkResult, VkDevice, VkSwapchainKHR, uint32_t*, VkImage*>
+so::vk::getSwapchainImagesKHR;
+
 so::Symbol<void, VkInstance, VkSurfaceKHR, VkAllocationCallbacks const*>
 so::vk::destroySurfaceKHR;
+
+so::Symbol<VkResult,
+           VkDevice,
+           VkSwapchainCreateInfoKHR const*,
+           VkAllocationCallbacks const*,
+           VkSwapchainKHR*>
+so::vk::createSwapchainKHR;
+
+so::Symbol<void, VkDevice, VkSwapchainKHR, VkAllocationCallbacks const*>
+so::vk::destroySwapchainKHR;
 
 so::DynamicLibrary const so::VulkanLibrary
 #if defined(_MSC_VER) || defined(__MINGW32__)
@@ -187,13 +198,34 @@ so::DynamicLibrary const so::VulkanLibrary
                                                 uint32_t,
                                                 VkSurfaceKHR,
                                                 VkBool32*>>
-                    (so::vk::getPhysicalDeviceSurfaceSupportKHR)), 
+                    (so::vk::getPhysicalDeviceSurfaceSupportKHR)),
+   std::make_pair("vkGetSwapchainImagesKHR",
+                  std::reference_wrapper<Symbol<VkResult,
+                                                VkDevice,
+                                                VkSwapchainKHR,
+                                                uint32_t*,
+                                                VkImage*>>
+                    (so::vk::getSwapchainImagesKHR)),
    std::make_pair("vkDestroySurfaceKHR",
                   std::reference_wrapper<Symbol<void,
                                                 VkInstance,
                                                 VkSurfaceKHR,
                                                 VkAllocationCallbacks const*>>
-                    (so::vk::destroySurfaceKHR)));
+                    (so::vk::destroySurfaceKHR)),
+   std::make_pair("vkCreateSwapchainKHR",
+                  std::reference_wrapper<Symbol
+                                          <VkResult,
+                                           VkDevice,
+                                           VkSwapchainCreateInfoKHR const*,
+                                           VkAllocationCallbacks const*,
+                                           VkSwapchainKHR*>>
+                    (so::vk::createSwapchainKHR)),
+   std::make_pair("vkDestroySwapchainKHR",
+                  std::reference_wrapper<Symbol<void,
+                                                VkDevice,
+                                                VkSwapchainKHR,
+                                                VkAllocationCallbacks const*>>
+                    (so::vk::destroySwapchainKHR)));
 
 std::string
 std::to_string(VkResult result)

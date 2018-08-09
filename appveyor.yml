@@ -21,10 +21,10 @@ matrix:
 init:
   - cmd: |-
       mkdir c:\projects\SolusEngine\builds
-      
       git clone https://github.com/glfw/glfw.git .\glfw
-      cd glfw
-      cmake -DBUILD_SHARED_LIBS=ON ..\..
+      mkdir c:\projects\SolusEngine\builds\glfw\build
+      cd glfw\build
+      cmake -DBUILD_SHARED_LIBS=ON ..
       cmake --build .
 before_build:
   - cmd: |-

@@ -128,8 +128,21 @@ extern Symbol<VkResult,
               VkBool32*>
 getPhysicalDeviceSurfaceSupportKHR;
 
+extern Symbol<VkResult, VkDevice,VkSwapchainKHR, uint32_t*, VkImage*>
+getSwapchainImagesKHR;
+
 extern Symbol<void, VkInstance, VkSurfaceKHR, VkAllocationCallbacks const*>
 destroySurfaceKHR;
+
+extern Symbol<VkResult,
+              VkDevice,
+              VkSwapchainCreateInfoKHR const*,
+              VkAllocationCallbacks const*,
+              VkSwapchainKHR*>
+createSwapchainKHR;
+
+extern Symbol<void, VkDevice, VkSwapchainKHR, VkAllocationCallbacks const*>
+destroySwapchainKHR;
 
 } // namespace vk
 } // namespace so

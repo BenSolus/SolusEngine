@@ -77,7 +77,6 @@ so::vk::LogicalDevice::LogicalDevice(SharedPtrInstance const& instance,
   createInfo.queueCreateInfoCount    =
     static_cast<uint32_t>(queueCreateInfos.size());
   createInfo.pEnabledFeatures        = deviceFeatures;
-  crea  teInfo.enabledExtensionCount = 0;
   createInfo.enabledExtensionCount   =
     static_cast<uint32_t>(DEVICE_EXTENSIONS.size());
   createInfo.ppEnabledExtensionNames = DEVICE_EXTENSIONS.data();
