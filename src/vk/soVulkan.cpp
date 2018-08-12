@@ -45,15 +45,6 @@ so::vk::enumerateInstanceLayerProperties;
 so::Symbol<VkResult, VkInstance, uint32_t*, VkPhysicalDevice*>
 so::vk::enumeratePhysicalDevices;
 
-so::Symbol<VkResult,
-           VkInstanceCreateInfo*,
-           VkApplicationInfo*,
-           VkInstance*>
-so::vk::createInstance;
-
-so::Symbol<void, VkInstance, VkAllocationCallbacks const*>
-so::vk::destroyInstance;
-
 so::Symbol<void, VkDevice, uint32_t, uint32_t, VkQueue*>
 so::vk::getDeviceQueue;
 
@@ -88,6 +79,25 @@ so::vk::getPhysicalDeviceSurfaceSupportKHR;
 
 so::Symbol<VkResult, VkDevice, VkSwapchainKHR, uint32_t*, VkImage*>
 so::vk::getSwapchainImagesKHR;
+
+so::Symbol<VkResult,
+           VkDevice,
+           VkImageViewCreateInfo const*,
+           VkAllocationCallbacks const*,
+           VkImageView*>
+so::vk::createImageView;
+
+so::Symbol<void, VkDevice, VkImageView, VkAllocationCallbacks const*>
+so::vk::destroyImageView;
+
+so::Symbol<VkResult,
+           VkInstanceCreateInfo*,
+           VkApplicationInfo*,
+           VkInstance*>
+so::vk::createInstance;
+
+so::Symbol<void, VkInstance, VkAllocationCallbacks const*>
+so::vk::destroyInstance;
 
 so::Symbol<void, VkInstance, VkSurfaceKHR, VkAllocationCallbacks const*>
 so::vk::destroySurfaceKHR;
@@ -137,18 +147,7 @@ so::DynamicLibrary const so::VulkanLibrary
                                                 VkInstance,
                                                 uint32_t*,
                                                 VkPhysicalDevice*>>
-                    (so::vk::enumeratePhysicalDevices)),    
-   std::make_pair("vkCreateInstance",
-                  std::reference_wrapper<Symbol<VkResult,
-                                                VkInstanceCreateInfo*,
-                                                VkApplicationInfo*,
-                                                VkInstance*>>
-                    (so::vk::createInstance)),
-   std::make_pair("vkDestroyInstance",
-                  std::reference_wrapper<Symbol<void,
-                                                VkInstance,
-                                                VkAllocationCallbacks const*>>
-                    (so::vk::destroyInstance)),
+                    (so::vk::enumeratePhysicalDevices)),
    std::make_pair("vkGetDeviceQueue",
                   std::reference_wrapper<Symbol<void,
                                                 VkDevice,
@@ -205,7 +204,31 @@ so::DynamicLibrary const so::VulkanLibrary
                                                 VkSwapchainKHR,
                                                 uint32_t*,
                                                 VkImage*>>
-                    (so::vk::getSwapchainImagesKHR)),
+                    (so::vk::getSwapchainImagesKHR)), 
+   std::make_pair("vkCreateImageView",
+                  std::reference_wrapper<Symbol<VkResult,
+                                                VkDevice,
+                                                VkImageViewCreateInfo const*,
+                                                VkAllocationCallbacks const*,
+                                                VkImageView*>>
+                    (so::vk::createImageView)),
+   std::make_pair("vkDestroyImageView",
+                  std::reference_wrapper<Symbol<void,
+                                                VkDevice,
+                                                VkImageView,
+                                                VkAllocationCallbacks const*>>
+                    (so::vk::destroyImageView)),
+   std::make_pair("vkCreateInstance",
+                  std::reference_wrapper<Symbol<VkResult,
+                                                VkInstanceCreateInfo*,
+                                                VkApplicationInfo*,
+                                                VkInstance*>>
+                    (so::vk::createInstance)),
+   std::make_pair("vkDestroyInstance",
+                  std::reference_wrapper<Symbol<void,
+                                                VkInstance,
+                                                VkAllocationCallbacks const*>>
+                    (so::vk::destroyInstance)),
    std::make_pair("vkDestroySurfaceKHR",
                   std::reference_wrapper<Symbol<void,
                                                 VkInstance,

@@ -21,10 +21,10 @@
  */
 
 /**
- *  @file      soVkLogicalDevice.hpp
+ *  @file      soVkImageViews.hpp
  *  @author    Bennet Carstensen
  *  @date      2017
- *  @copyright Copyright (c) 2017 Bennet Carstensen
+ *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
  *             obtaining a copy of this software and associated documentation
@@ -50,51 +50,52 @@
 
 #pragma once
 
-#include <soVkPhysicalDevice.hpp>
-#include <soVkSurface.hpp>
+#include <soVkLogicalDevice.hpp>
 
 namespace so {
 namespace vk {
     
 class
-LogicalDevice : public PhysicalDevice,
-                public std::enable_shared_from_this<LogicalDevice>
+ImageViews
 {
   public:
-    static std::shared_ptr<LogicalDevice> const SHARED_PTR_NULL_LOGICAL_DEVICE;
+    ImageViews();
 
-    LogicalDevice();
+    ImageViews(SharedPtrLogicalDevice const& device);
 
-    LogicalDevice(SharedPtrInstance const& device, VkSurfaceKHR surface);
+    ImageViews(SharedPtrLogicalDevice const& device,
+               std::vector<VkImage>   const& images,
+               VkFormat                      format,
+               VkImageAspectFlags            aspectFlags);
 
-    LogicalDevice(LogicalDevice const& other) = delete;
+    ImageViews(ImageViews const& other) = delete;
 
-    LogicalDevice(LogicalDevice&& other) = delete;
+    ImageViews(ImageViews&& other) = delete;
 
-    virtual ~LogicalDevice() noexcept;
+    ~ImageViews() noexcept;
 
-    LogicalDevice& operator=(LogicalDevice const& other) = delete;
+    ImageViews&
+    operator=(ImageViews const& other) = delete;
 
-    LogicalDevice&
-    operator=(LogicalDevice&& other) noexcept;
+    ImageViews&
+    operator=(ImageViews&& other) noexcept;
 
-    inline auto getVkDevice() { return mDevice; }
+    inline auto& getVkImageViews() { return mImageViews; }
 
-    inline auto getGraphicsVkQueue() { return mGraphicsQueue; }
-
-    inline auto getPresentVkQueue() { return mPresentQueue; }
+    void
+    addImageViews(std::vector<VkImage> const&   images,
+                  VkFormat                      format,
+                  VkImageAspectFlags            aspectFlags);
 
   private:
-    VkDevice                mDevice;
-    VkQueue                 mGraphicsQueue;
-    VkQueue                 mPresentQueue;
+    std::vector<VkImageView> mImageViews;
+
+    SharedPtrLogicalDevice   mDevice;
 
     void
     destroyMembers();
 };
 
-using SharedPtrLogicalDevice = std::shared_ptr<so::vk::LogicalDevice>;
-
 } // namespace vk
-} //namespace so
+} // namespace so
 

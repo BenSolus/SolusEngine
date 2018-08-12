@@ -52,6 +52,8 @@
 
 #include <soVkLogicalDevice.hpp>
 
+#include <soVkImageViews.hpp>
+
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -81,25 +83,7 @@ SwapChain
     operator=(SwapChain const& other) = delete;
 
     SwapChain&
-    operator=(SwapChain&& other) noexcept
-    {
-      destroyMembers();
-
-      mSwapChain            = other.mSwapChain;
-      mSwapChainExtent      = other.mSwapChainExtent;
-      mSwapChainImageFormat = other.mSwapChainImageFormat;
-      mSwapChainImages      = other.mSwapChainImages;
-      mDevice               = other.mDevice;
-
-      other.mSwapChain            = VK_NULL_HANDLE;
-      other.mSwapChainExtent      = { 0, 0 };
-      other.mSwapChainImageFormat = VK_FORMAT_UNDEFINED;
-      other.mSwapChainImages      = std::vector<VkImage>();
-      other.mDevice               =
-        LogicalDevice::SHARED_PTR_NULL_LOGICAL_DEVICE;
-
-      return *this;
-    }
+    operator=(SwapChain&& other) noexcept;
 
     inline auto getVkSwapchainKHR() { return mSwapChain; }
 
@@ -120,6 +104,8 @@ SwapChain
     std::vector<VkImage>   mSwapChainImages;
 
     SharedPtrLogicalDevice mDevice;
+
+    ImageViews             mImageViews;
 
     VkSurfaceFormatKHR
     chooseSwapSurfaceFormat

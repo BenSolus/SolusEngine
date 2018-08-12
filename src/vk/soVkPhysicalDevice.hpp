@@ -74,7 +74,7 @@ PhysicalDevice
 
     PhysicalDevice(PhysicalDevice&& other) = delete;
 
-    virtual ~PhysicalDevice();
+    virtual ~PhysicalDevice() noexcept;
 
     PhysicalDevice& operator=(PhysicalDevice const& other) = delete;
 
