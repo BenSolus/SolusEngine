@@ -114,6 +114,28 @@ so::vk::LogicalDevice::LogicalDevice(SharedPtrInstance const& instance,
 
 so::vk::LogicalDevice::~LogicalDevice() noexcept { destroyMembers(); }
 
+so::vk::LogicalDevice&
+so::vk::LogicalDevice::operator=(so::vk::LogicalDevice&& other) noexcept
+{
+  if(this is_eq &other)
+    return *this;
+
+  PhysicalDevice::operator=(static_cast<PhysicalDevice&&>(other));
+
+  destroyMembers();
+
+  mDevice        = other.mDevice;
+  mGraphicsQueue = other.mGraphicsQueue;
+  mPresentQueue  = other.mPresentQueue;
+
+  other.mDevice        = VK_NULL_HANDLE;
+  other.mGraphicsQueue = VK_NULL_HANDLE;
+  other.mPresentQueue  = VK_NULL_HANDLE;
+
+  return *this;
+}
+
+
 void
 so::vk::LogicalDevice::destroyMembers()
 {

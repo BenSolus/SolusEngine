@@ -50,15 +50,41 @@
 
 #pragma once
 
+#include <cstddef>
+#include <limits>
+
 #define is_eq ==
 
 #if defined(__GNUC__) || defined(__clang__)
+
 #define PRETTY_FUNCTION_SIG __PRETTY_FUNCTION__
+
 #elif defined(_MSC_VER)
+
 #define PRETTY_FUNCTION_SIG __FUNCSIG__
+
 #elif defined(__func__)
+
 #define PRETTY_FUNCTION_SIG __func__
+
 #else
+
 #define PRETTY_FUNCTION_SIG __FUNCTION__
+
 #endif
+
+namespace so {
+
+  using uindex = std::size_t;
+
+  template<typename T>
+  inline void
+  increment(T& t)
+  {
+    static_assert(std::numeric_limits<T>::is_integer,
+                  "variable 't' is of no integer type");
+
+    ++t;
+  }
+} // namespace so
 

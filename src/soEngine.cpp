@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright (C) 2017-2018 by Bennet Carstensen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,17 +20,13 @@
  * IN THE SOFTWARE.
  */
 
-#include <soDynamicLibrary.hpp>
+#include <soEngine.h>
 
-so::DynamicLibrary::DynamicLibrary() : mIsAvailable(false), mHandle(nullptr) {}
-
-so::DynamicLibrary::~DynamicLibrary() noexcept
+/*
+char const*
+soInit(void* engine)
 {
-#if defined(_MSC_VER) || defined(__MINGW32__)
-
-#else 
-  if(mHandle not_eq nullptr)
-    dlclose(mHandle);
-#endif
+  engine = reinterpret_cast<void*>(new so::Engine<so::EngineBackend::Vulkan>);
 }
+*/
 

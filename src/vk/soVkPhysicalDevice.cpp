@@ -71,8 +71,6 @@ so::vk::PhysicalDevice::PhysicalDevice(VkPhysicalDevice         device,
   : mPhysicalDevice(device), mInstance(instance)
 {}
 
-so::vk::PhysicalDevice::~PhysicalDevice() noexcept {}
-
 so::vk::PhysicalDevice&
 so::vk::PhysicalDevice::operator=(PhysicalDevice&& other) noexcept
 {

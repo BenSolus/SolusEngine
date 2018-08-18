@@ -1,6 +1,6 @@
 
 ###############################################################################
-# Add public interface.                                                       #
+# Assemble library.                                                           #
 ###############################################################################
 
 FILE(GLOB sources "*.hpp" "*.cpp")
@@ -9,16 +9,18 @@ FILE(GLOB glfw "glfw/*.hpp")
 
 ADD_LIBRARY(SoVk SHARED ${sources} ${interfaces} ${glfw})
 
-TARGET_INCLUDE_DIRECTORIES(SoVk PUBLIC ${PROJECT_SOURCE_DIR}/src/cxx)
-TARGET_INCLUDE_DIRECTORIES(SoVk PUBLIC ${PROJECT_SOURCE_DIR}/src/vk)
-
-###############################################################################
-# Set C++14 Standard as required.                                             #
+##############################################################################
+# Set various target properties.                                              #
 ###############################################################################
 
-SET_PROPERTY(TARGET SoVk PROPERTY LINKER_LANGUAGE CXX)
-SET_PROPERTY(TARGET SoVk PROPERTY CXX_STANDARD 14)
-SET_PROPERTY(TARGET SoVk PROPERTY CXX_STANDARD_REQUIRED ON)
+SET_HIGHEST_CXX_STANDARD(SoVk)
+
+###############################################################################
+# Adding various target specific include directories.                         #
+###############################################################################
+
+TARGET_INCLUDE_DIRECTORIES(SoVk PUBLIC  ${PROJECT_SOURCE_DIR}/src/cxx)
+TARGET_INCLUDE_DIRECTORIES(SoVk PRIVATE ${PROJECT_SOURCE_DIR}/src/vk)
 
 ###############################################################################
 # Link with necessary libraries.                                              #

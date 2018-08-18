@@ -64,7 +64,7 @@ PhysicalDevice
   public:
     PhysicalDevice();
 
-    PhysicalDevice
+    explicit PhysicalDevice
       (VkPhysicalDevice device,
        SharedPtrInstance const& instance = Instance::SHARED_PTR_NULL_INSTANCE);
 
@@ -74,7 +74,7 @@ PhysicalDevice
 
     PhysicalDevice(PhysicalDevice&& other) = delete;
 
-    virtual ~PhysicalDevice();
+    virtual ~PhysicalDevice() noexcept = default;
 
     PhysicalDevice& operator=(PhysicalDevice const& other) = delete;
 

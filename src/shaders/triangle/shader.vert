@@ -21,9 +21,9 @@
  */
 
 /**
- *  @file      interfaces/soSurfaceInterface.hpp
+ *  @file      triangle.vert
  *  @author    Bennet Carstensen
- *  @date      2018
+ *  @date      2017
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
@@ -48,32 +48,28 @@
  *             OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#pragma once
+#version 450
+#extension GL_ARB_separate_shader_objects : enable
 
-namespace so
-{
-
-enum class SurfaceBackend
-{
-  None,
-  GLFW
+out gl_PerVertex {
+    vec4 gl_Position;
 };
 
-template <SurfaceBackend SB>
-class SurfaceInterface
-{
-  public:
-    virtual ~SurfaceInterface() = 0;
-};
+layout(location = 0) out vec3 fragColor;
 
-template<>
-class SurfaceInterface<SurfaceBackend::None>
-{
-  public:
-    virtual ~SurfaceInterface() = default;
-};
+vec2 positions[3] = vec2[](
+    vec2(0.0, -0.5),
+    vec2(0.5, 0.5),
+    vec2(-0.5, 0.5)
+);
 
-} // namespace so
+vec3 colors[3] = vec3[](
+    vec3(1.0, 0.0, 0.0),
+    vec3(0.0, 1.0, 0.0),
+    vec3(0.0, 0.0, 1.0)
+);
 
-constexpr so::SurfaceBackend GLFW(so::SurfaceBackend::GLFW);
-
+void main() {
+    gl_Position = vec4(positions[gl_VertexIndex], 0.0, 1.0);
+    fragColor = colors[gl_VertexIndex];
+}

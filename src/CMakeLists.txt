@@ -1,29 +1,35 @@
 
-include(CheckCXXCompilerFlag)
-
 ###############################################################################
-# Add source subdirectories.                                                  #
+# Add source subdirectories which SoEng will depend on.                       #
 ###############################################################################
 
 ADD_SUBDIRECTORY(cxx)
 
+IF(WITH_GLFW)
+  ADD_SUBDIRECTORY(glfw)
+ENDIF()
+
 ADD_SUBDIRECTORY(vk)
 
 ###############################################################################
-# Add public interface.                                                       #
+# Assemble library.                                                           #
 ###############################################################################
 
 FILE(GLOB interfaces "interfaces/*.hpp")
 
-ADD_LIBRARY(SoEng SHARED soEngine.hpp ${interfaces})
+ADD_LIBRARY(SoEng SHARED soEngine.cpp soEngine.h ${interfaces})
 
 ###############################################################################
-# Set C++14 Standard as required.                                             #
+# Set various target properties.                                              #
 ###############################################################################
 
-SET_PROPERTY(TARGET SoEng PROPERTY LINKER_LANGUAGE CXX)
-SET_PROPERTY(TARGET SoEng PROPERTY CXX_STANDARD 14)
-SET_PROPERTY(TARGET SoEng PROPERTY CXX_STANDARD_REQUIRED ON)
+SET_HIGHEST_CXX_STANDARD(SoEng)
+
+###############################################################################
+# Adding various target specific include directories.                         #
+###############################################################################
+
+TARGET_INCLUDE_DIRECTORIES(SoEng PUBLIC ${PROJECT_SOURCE_DIR}/src/vk)
 
 ###############################################################################
 # Link with necessary libraries.                                              #
@@ -39,9 +45,26 @@ IF(NOT IS_DIRECTORY "${PROJECT_BINARY_DIR}/data/shaders")
   FILE(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/data/shaders")
 ENDIF()
 
-ADD_CUSTOM_COMMAND(TARGET SoEng POST_BUILD
-                   COMMAND ${GLSLANGVALIDATOR} -V "${PROJECT_SOURCE_DIR}/src/shaders/*"
-                   WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/data/shaders")
+FILE(GLOB children
+     RELATIVE
+     ${PROJECT_SOURCE_DIR}/src/shaders
+     ${PROJECT_SOURCE_DIR}/src/shaders/*)
+
+FOREACH(child ${children})
+  IF(IS_DIRECTORY "${PROJECT_SOURCE_DIR}/src/shaders/${child}")
+    IF(NOT IS_DIRECTORY "${PROJECT_BINARY_DIR}/data/shaders/${child}") 
+      FILE(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/data/shaders/${child}")
+    ENDIF()
+
+    ADD_CUSTOM_COMMAND(TARGET SoEng
+                       POST_BUILD
+                       COMMAND ${GLSLANGVALIDATOR}
+                               -V
+                               "${PROJECT_SOURCE_DIR}/src/shaders/${child}/*"
+                       WORKING_DIRECTORY
+                       "${PROJECT_BINARY_DIR}/data/shaders/${child}")
+  ENDIF()
+ENDFOREACH()
 
 ###############################################################################
 # Copy compile_commands.json to root directory.                               #
@@ -50,7 +73,8 @@ ADD_CUSTOM_COMMAND(TARGET SoEng POST_BUILD
 IF(CMAKE_EXPORT_COMPILE_COMMANDS EQUAL 1)
   ADD_CUSTOM_COMMAND(TARGET SoEng
                      POST_BUILD
-                     COMMAND ${CMAKE_COMMAND}
+                     COMMAND ${CMAKE_COMMAND} -E copy
                      ${PROJECT_BINARY_DIR}/compile_commands.json
                      ${PROJECT_SOURCE_DIR})
 ENDIF()
+

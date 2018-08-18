@@ -53,6 +53,10 @@
 #include <soVkPhysicalDevice.hpp>
 #include <soVkSurface.hpp>
 
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+#endif
+
 namespace so {
 namespace vk {
     
@@ -71,30 +75,12 @@ LogicalDevice : public PhysicalDevice,
 
     LogicalDevice(LogicalDevice&& other) = delete;
 
-    virtual ~LogicalDevice() noexcept;
+    ~LogicalDevice() noexcept override;
 
     LogicalDevice& operator=(LogicalDevice const& other) = delete;
 
     LogicalDevice&
-    operator=(LogicalDevice&& other) noexcept
-    {
-      if(this is_eq &other)
-        return *this;
-
-      PhysicalDevice::operator=(static_cast<PhysicalDevice&&>(other));
-
-      destroyMembers();
-
-      mDevice        = other.mDevice;
-      mGraphicsQueue = other.mGraphicsQueue;
-      mPresentQueue  = other.mPresentQueue;
-
-      other.mDevice        = VK_NULL_HANDLE;
-      other.mGraphicsQueue = VK_NULL_HANDLE;
-      other.mPresentQueue  = VK_NULL_HANDLE;
-
-      return *this;
-    }
+    operator=(LogicalDevice&& other) noexcept;
 
     inline auto getVkDevice() { return mDevice; }
 
@@ -115,4 +101,8 @@ using SharedPtrLogicalDevice = std::shared_ptr<so::vk::LogicalDevice>;
 
 } // namespace vk
 } //namespace so
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop // ignored "-Wnon-virtual-dtor"
+#endif
 

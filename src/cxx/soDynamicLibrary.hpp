@@ -53,13 +53,24 @@
 #include <soDefinitions.hpp>
 
 #if defined(_MSC_VER) || defined(__MINGW32__)
+
 static_assert(false, "Windows implementation of this module not provided.");
-#else
+
+#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+
 #include <unistd.h>
+
 static_assert(_POSIX_VERSION >= 200112L, "ISO POSIX.1-2001 "
                                          "(_POSIX_VERSION >= 200112L) "
                                          "required.");
+
 #include <dlfcn.h>
+
+#else 
+
+#error "No known implementation to dynamically load libraries for this "
+       "compiler."
+
 #endif
 
 #include <string>
@@ -106,7 +117,7 @@ Symbol
 
       return f(args...);
     }
-
+    
   private:
     void* mSymbol;
 

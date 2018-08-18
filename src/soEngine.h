@@ -21,9 +21,9 @@
  */
 
 /**
- *  @file      interfaces/soSurfaceInterface.hpp
+ *  @file      soEngine.hpp
  *  @author    Bennet Carstensen
- *  @date      2018
+ *  @date      2017
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
@@ -50,30 +50,30 @@
 
 #pragma once
 
-namespace so
+//#ifdef __cplusplus
+
+#include <soVkEngine.hpp>
+
+/*
+#endif // __cplusplus
+
+#ifdef __cplusplus
+
+extern "C"
+
 {
+#endif // __cplusplus
 
-enum class SurfaceBackend
-{
-  None,
-  GLFW
-};
+char const*
+soInit(void* engine);
 
-template <SurfaceBackend SB>
-class SurfaceInterface
-{
-  public:
-    virtual ~SurfaceInterface() = 0;
-};
+void
+soDelete(void* engine);
 
-template<>
-class SurfaceInterface<SurfaceBackend::None>
-{
-  public:
-    virtual ~SurfaceInterface() = default;
-};
+#ifdef __cplusplus
 
-} // namespace so
+} // extern "C"
 
-constexpr so::SurfaceBackend GLFW(so::SurfaceBackend::GLFW);
+#endif // __cplusplus
+*/
 

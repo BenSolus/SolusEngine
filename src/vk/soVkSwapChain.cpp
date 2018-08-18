@@ -32,19 +32,19 @@ so::vk::SwapChain::SwapChain()
     mSwapChainExtent({ 0, 0 }),
     mSwapChainImageFormat(VK_FORMAT_UNDEFINED),
     mSwapChainImages(),
-    mDevice(LogicalDevice::SHARED_PTR_NULL_LOGICAL_DEVICE)
+    mDevice(LogicalDevice::SHARED_PTR_NULL_LOGICAL_DEVICE),
+    mImageViews(),
+    mPipeline()
 {}
 
 so::vk::SwapChain::SwapChain(SharedPtrLogicalDevice const& device,
                              VkSurfaceKHR                  surface,
                              GLFWwindow*                   window,
                              VkSwapchainKHR                oldSwapChain)
-  : mSwapChain(VK_NULL_HANDLE),
-    mSwapChainExtent({ 0, 0 }),
-    mSwapChainImageFormat(VK_FORMAT_UNDEFINED),
-    mSwapChainImages(),
-    mDevice(device)
+  : SwapChain()
 {
+  mDevice = device;
+
   VkDevice         vkDevice(device->getVkDevice());
   VkPhysicalDevice physicalDevice(device->getVkPhysicalDevice());
 
@@ -60,11 +60,14 @@ so::vk::SwapChain::SwapChain(SharedPtrLogicalDevice const& device,
   uint32_t imageCount =
     swapChainSupport.getCapabilities().minImageCount + 1;
 
-  if((swapChainSupport.getCapabilities().maxImageCount > 0) and
-     (imageCount > swapChainSupport.getCapabilities().maxImageCount))
-  {
-    imageCount = swapChainSupport.getCapabilities().maxImageCount;
-  }
+  uint32_t const maxImageCount
+    (swapChainSupport.getCapabilities().maxImageCount);
+  
+  bool const imageLimitDefined(maxImageCount > 0);
+  bool const maxSmallerMin(imageCount > maxImageCount);
+
+  if(imageLimitDefined and maxSmallerMin)
+    imageCount = maxImageCount;
 
   VkSwapchainCreateInfoKHR createInfo = {};
 
@@ -107,7 +110,8 @@ so::vk::SwapChain::SwapChain(SharedPtrLogicalDevice const& device,
 
   if(result not_eq VK_SUCCESS)
     THROW_EXCEPTION("failed to create swap chain (" +
-                    std::to_string(result) + ")");
+                    std::to_string(result) +
+                    ").");
 
   getSwapchainImagesKHR(vkDevice, mSwapChain, &imageCount, nullptr);
   
@@ -120,6 +124,18 @@ so::vk::SwapChain::SwapChain(SharedPtrLogicalDevice const& device,
 
   mSwapChainImageFormat = surfaceFormat.format;
   mSwapChainExtent      = extent;
+
+  try
+  {
+    mImageViews = ImageViews(mDevice,
+                             mSwapChainImages,
+                             mSwapChainImageFormat,
+                             VK_IMAGE_ASPECT_COLOR_BIT);
+  }
+  catch(...)
+  {
+    THROW_NESTED_EXCEPTION("failed to create swap chain.");
+  }
 }
 
 so::vk::SwapChain::~SwapChain() noexcept
@@ -127,23 +143,49 @@ so::vk::SwapChain::~SwapChain() noexcept
   destroyMembers();
 }
 
+so::vk::SwapChain&
+so::vk::SwapChain::operator=(so::vk::SwapChain&& other) noexcept
+{
+  if(this is_eq &other)
+    return *this;
+
+  destroyMembers();
+
+  mSwapChain            = other.mSwapChain;
+  mSwapChainExtent      = other.mSwapChainExtent;
+  mSwapChainImageFormat = other.mSwapChainImageFormat;
+  mSwapChainImages      = other.mSwapChainImages;
+  mDevice               = other.mDevice;
+
+  other.mSwapChain            = VK_NULL_HANDLE;
+  other.mSwapChainExtent      = { 0, 0 };
+  other.mSwapChainImageFormat = VK_FORMAT_UNDEFINED;
+  other.mSwapChainImages      = std::vector<VkImage>();
+  other.mDevice               = LogicalDevice::SHARED_PTR_NULL_LOGICAL_DEVICE;
+
+  return *this;
+}
+
 VkSurfaceFormatKHR
 so::vk::SwapChain::chooseSwapSurfaceFormat
-  (std::vector<VkSurfaceFormatKHR> const& availableFormats)
+(std::vector<VkSurfaceFormatKHR> const& availableFormats)
 {
-  if((availableFormats.size() is_eq 1) and
-     (availableFormats[0].format is_eq VK_FORMAT_UNDEFINED))
-  {
+  bool const onlyOneFormat(availableFormats.size() is_eq 1);
+  bool const formatIsUndefined(availableFormats[0].format is_eq
+                               VK_FORMAT_UNDEFINED);
+
+  if(onlyOneFormat and formatIsUndefined)
     return {VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
-  }
 
   for(auto const& availableFormat : availableFormats)
   {
-    if((availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM) &&
-       (availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR))
-    {
+    bool const hasBGR8BitFormat(availableFormat.format is_eq
+                                VK_FORMAT_B8G8R8A8_UNORM);
+    bool const supportsSRGB(availableFormat.colorSpace is_eq
+                            VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
+
+    if(hasBGR8BitFormat and supportsSRGB)
       return availableFormat;
-    }
   }
 
   return availableFormats[0];
@@ -156,9 +198,9 @@ so::vk::SwapChain::chooseSwapPresentMode
   VkPresentModeKHR bestMode = VK_PRESENT_MODE_FIFO_KHR;
 
   for(auto const& availablePresentMode : availablePresentModes)
-    if(availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
+    if(availablePresentMode is_eq VK_PRESENT_MODE_MAILBOX_KHR)
       return availablePresentMode;
-    else if(availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR)
+    else if(availablePresentMode is_eq VK_PRESENT_MODE_IMMEDIATE_KHR)
       bestMode = availablePresentMode;
 
   return bestMode;
@@ -204,7 +246,7 @@ so::vk::SwapChain::destroyMembers()
 {
   VkDevice device(mDevice->getVkDevice());
 
-  if((mSwapChain != VK_NULL_HANDLE) && (device != VK_NULL_HANDLE))
+  if((mSwapChain not_eq VK_NULL_HANDLE) and (device not_eq VK_NULL_HANDLE))
     destroySwapchainKHR(device, mSwapChain, nullptr);
 }
 

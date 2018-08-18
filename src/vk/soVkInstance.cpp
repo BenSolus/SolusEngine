@@ -133,7 +133,7 @@ so::vk::Instance::getRequiredExtensions()
 
   std::cout << "<INFO> Available GLFW-Extensions:\n";
 
-  for(unsigned int i(0); i < glfwExtensionCount; ++i)
+  for(uindex i(0); i < glfwExtensionCount; ++i)
   {
     std::cout << "<INFO>   " << glfwExtensions[i] << "\n";
 

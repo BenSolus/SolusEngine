@@ -83,12 +83,6 @@ enumerateInstanceLayerProperties;
 extern Symbol<VkResult, VkInstance, uint32_t*, VkPhysicalDevice*>
 enumeratePhysicalDevices;
 
-extern Symbol<VkResult, VkInstanceCreateInfo*, VkApplicationInfo*, VkInstance*>
-createInstance;
-
-extern Symbol<void, VkInstance, VkAllocationCallbacks const*>
-destroyInstance;
-
 extern Symbol<void, VkDevice, uint32_t, uint32_t, VkQueue*>
 getDeviceQueue;
 
@@ -130,6 +124,38 @@ getPhysicalDeviceSurfaceSupportKHR;
 
 extern Symbol<VkResult, VkDevice,VkSwapchainKHR, uint32_t*, VkImage*>
 getSwapchainImagesKHR;
+
+extern Symbol<VkResult,
+              VkDevice,
+              VkImageViewCreateInfo const*,
+              VkAllocationCallbacks const*,
+              VkImageView*>
+createImageView;
+
+extern Symbol<void, VkDevice, VkImageView, VkAllocationCallbacks const*>
+destroyImageView;
+
+extern Symbol<VkResult, VkInstanceCreateInfo*, VkApplicationInfo*, VkInstance*>
+createInstance;
+
+extern Symbol<void, VkInstance, VkAllocationCallbacks const*>
+destroyInstance;
+
+extern Symbol<void, VkDevice, VkPipeline, VkAllocationCallbacks const*>
+destroyPipeline;
+
+extern Symbol<void, VkDevice, VkPipelineLayout, VkAllocationCallbacks const*>
+destroyPipelineLayout;
+
+extern Symbol<VkResult,
+              VkDevice,
+              VkShaderModuleCreateInfo const*,
+              VkAllocationCallbacks const*,
+              VkShaderModule*>
+createShaderModule;
+
+extern Symbol<void, VkDevice, VkShaderModule, VkAllocationCallbacks const*>
+destroyShaderModule;
 
 extern Symbol<void, VkInstance, VkSurfaceKHR, VkAllocationCallbacks const*>
 destroySurfaceKHR;

@@ -21,9 +21,9 @@
  */
 
 /**
- *  @file      interfaces/soSurfaceInterface.hpp
+ *  @file      soVkImageViews.hpp
  *  @author    Bennet Carstensen
- *  @date      2018
+ *  @date      2017
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
@@ -50,30 +50,52 @@
 
 #pragma once
 
-namespace so
-{
+#include <soVkLogicalDevice.hpp>
 
-enum class SurfaceBackend
-{
-  None,
-  GLFW
-};
-
-template <SurfaceBackend SB>
-class SurfaceInterface
+namespace so {
+namespace vk {
+    
+class
+ImageViews
 {
   public:
-    virtual ~SurfaceInterface() = 0;
+    ImageViews();
+
+    ImageViews(SharedPtrLogicalDevice const& device);
+
+    ImageViews(SharedPtrLogicalDevice const& device,
+               std::vector<VkImage>   const& images,
+               VkFormat                      format,
+               VkImageAspectFlags            aspectFlags);
+
+    ImageViews(ImageViews const& other) = delete;
+
+    ImageViews(ImageViews&& other) = delete;
+
+    ~ImageViews() noexcept;
+
+    ImageViews&
+    operator=(ImageViews const& other) = delete;
+
+    ImageViews&
+    operator=(ImageViews&& other) noexcept;
+
+    inline auto& getVkImageViews() { return mImageViews; }
+
+    void
+    addImageViews(std::vector<VkImage> const&   images,
+                  VkFormat                      format,
+                  VkImageAspectFlags            aspectFlags);
+
+  private:
+    std::vector<VkImageView> mImageViews;
+
+    SharedPtrLogicalDevice   mDevice;
+
+    void
+    destroyMembers();
 };
 
-template<>
-class SurfaceInterface<SurfaceBackend::None>
-{
-  public:
-    virtual ~SurfaceInterface() = default;
-};
-
+} // namespace vk
 } // namespace so
-
-constexpr so::SurfaceBackend GLFW(so::SurfaceBackend::GLFW);
 

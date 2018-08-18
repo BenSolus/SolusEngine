@@ -21,9 +21,9 @@
  */
 
 /**
- *  @file      interfaces/soSurfaceInterface.hpp
+ *  @file      soVkShaderModule.hpp
  *  @author    Bennet Carstensen
- *  @date      2018
+ *  @date      2017
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
@@ -48,32 +48,48 @@
  *             OTHER DEALINGS IN THE SOFTWARE.
  */
 
+
+
 #pragma once
 
-namespace so
-{
+#include <soVkLogicalDevice.hpp>
 
-enum class SurfaceBackend
-{
-  None,
-  GLFW
-};
+#include <string>
+#include <vector>
 
-template <SurfaceBackend SB>
-class SurfaceInterface
-{
-  public:
-    virtual ~SurfaceInterface() = 0;
-};
-
-template<>
-class SurfaceInterface<SurfaceBackend::None>
+namespace so {
+namespace vk {
+    
+class
+ShaderModule
 {
   public:
-    virtual ~SurfaceInterface() = default;
+    ShaderModule();
+
+    ShaderModule(SharedPtrLogicalDevice const& device,
+                 std::string            const& file);
+
+    ShaderModule(ShaderModule const& other) = delete;
+
+    ShaderModule(ShaderModule&& other) = delete;
+
+    ~ShaderModule() noexcept;
+
+    ShaderModule& operator=(ShaderModule const& other) = delete;
+
+    ShaderModule&
+    operator=(ShaderModule&& other) noexcept;
+
+    inline auto getVkShaderModule() { return mShaderModule; }
+
+  private:
+    VkShaderModule         mShaderModule;
+
+    SharedPtrLogicalDevice mDevice;
+    
+    void
+    destroy_members();
 };
 
+} // namespace vk
 } // namespace so
-
-constexpr so::SurfaceBackend GLFW(so::SurfaceBackend::GLFW);
-

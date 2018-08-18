@@ -21,9 +21,9 @@
  */
 
 /**
- *  @file      interfaces/soSurfaceInterface.hpp
+ *  @file      soVkPipeline.hpp
  *  @author    Bennet Carstensen
- *  @date      2018
+ *  @date      2017
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
@@ -50,30 +50,63 @@
 
 #pragma once
 
-namespace so
-{
+#include <soVkLogicalDevice.hpp>
 
-enum class SurfaceBackend
-{
-  None,
-  GLFW
-};
-
-template <SurfaceBackend SB>
-class SurfaceInterface
+namespace so {
+namespace vk {
+    
+class
+Pipeline
 {
   public:
-    virtual ~SurfaceInterface() = 0;
-};
+    Pipeline();
 
-template<>
-class SurfaceInterface<SurfaceBackend::None>
-{
-  public:
-    virtual ~SurfaceInterface() = default;
-};
+    Pipeline(SharedPtrLogicalDevice const& device,
+             VkExtent2D                    swapChainExtent,
+             VkRenderPass                  renderPass,
+             VkDescriptorSetLayout&        descriptorSetLayout);
 
+    Pipeline(Pipeline const& other) = delete;
+
+    Pipeline(Pipeline&& other) = delete;
+
+    ~Pipeline() noexcept;
+
+    Pipeline&
+    operator=(Pipeline const& other) = delete;
+
+    Pipeline&
+    operator=(Pipeline&& other) noexcept
+    {
+      if(this == &other)
+        return *this;
+
+      destroyMembers();
+
+      mPipeline       = other.mPipeline;
+      mPipelineLayout = other.mPipelineLayout;
+      mDevice         = other.mDevice;
+
+      other.mPipeline       = VK_NULL_HANDLE;
+      other.mPipelineLayout = VK_NULL_HANDLE;
+      other.mDevice         = LogicalDevice::SHARED_PTR_NULL_LOGICAL_DEVICE;
+
+      return *this;
+    }
+
+    inline auto getVkPipeline() { return mPipeline; }
+ 
+    inline auto getVkPipelineLayout() { return mPipelineLayout; }
+
+  private:
+    VkPipeline                mPipeline;
+    VkPipelineLayout          mPipelineLayout;
+
+    SharedPtrLogicalDevice    mDevice;
+
+    void
+    destroyMembers();
+};
+  
+} // namespace vk
 } // namespace so
-
-constexpr so::SurfaceBackend GLFW(so::SurfaceBackend::GLFW);
-

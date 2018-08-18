@@ -97,7 +97,7 @@ Engine<EngineBackend::Vulkan, SB>
       }
     }
 
-    ~Engine() noexcept { }
+    ~Engine() noexcept = default;
 
     void
     createSurface(std::string const& title = "soEngine (Vulkan backend)")
