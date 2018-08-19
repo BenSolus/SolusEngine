@@ -9,7 +9,9 @@ IF(WITH_GLFW)
   ADD_SUBDIRECTORY(glfw)
 ENDIF()
 
-ADD_SUBDIRECTORY(vk)
+IF(WITH_VULKAN)
+  ADD_SUBDIRECTORY(vk)
+ENDIF()
 
 ###############################################################################
 # Assemble library.                                                           #

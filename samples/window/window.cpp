@@ -1,12 +1,11 @@
 
-#include <soEngine.hpp>
+#include <soEngine.h>
 
 int
 main() 
 {
   try
-  {
-  
+  {  
     so::Engine<so::EngineBackend::Vulkan, GLFW> engine
       ("Hello GLFWwindow", VK_MAKE_VERSION(0, 0, 1));
 

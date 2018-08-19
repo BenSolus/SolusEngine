@@ -8,11 +8,9 @@ platform:
 
 environment:
   matrix:
-    - arch: Win64
-      generator: "Visual Studio 14"
+    - generator: "Visual Studio 14 2015 Win64"
       config: Debug
-    - arch: Win64
-      generator: "Visual Studio 14"
+    - generator: "Visual Studio 14 2015 Win64"
       config: Release
 
 matrix:
@@ -20,20 +18,25 @@ matrix:
 
 init:
   - cmd: |-
-      mkdir c:\projects\SolusEngine\builds
+      cmake --version
+
+  - cmd: |-
+      mkdir .\builds
+      cd builds
       git clone https://github.com/glfw/glfw.git .\glfw
-      mkdir c:\projects\SolusEngine\builds\glfw\build
+      mkdir .\glfw\build
       cd glfw\build
-      cmake -DBUILD_SHARED_LIBS=ON ..
-      cmake --build .
+      cmake -DBUILD_SHARED_LIBS=ON .. -G %generator%
+      cmake --build . --config %config% --target install
+
 before_build:
   - cmd: |-
-      mkdir builds\%config%
+      mkdir .\build
       cd build
-      cmake --version
-      cmake ..\.. -G -DEXAMPLES:BOOL=ON %generator%
+      cmake .. -G %generator% -DEXAMPLES:BOOL=ON
 
 build:
-  project: c:\projects\SolusEngine\builds\%config%\SolusEngine.sln
+  project: c:\projects\SolusEngine\build\SolusEngine.sln
   verbosity: minimal
   parallel: true
+

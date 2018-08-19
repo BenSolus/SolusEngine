@@ -55,7 +55,7 @@ before_install:
   ### Install OpenGL Mathematics
   - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/g-truc/glm.git; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd glm; fi
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo cmake CMakeLists.txt; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo cmake -DGLM_TEST_ENABLE_CXX_11=ON CMakeLists.txt; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo make; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo make install; fi
 
@@ -70,14 +70,43 @@ before_install:
 
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ../..; fi
 
-  ### Install Vulkan ICD loader and validation layers
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/Vulkan-LoaderAndValidationLayers; fi
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd Vulkan-LoaderAndValidationLayers; fi
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then ./update_external_sources.sh; fi
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then cmake -H. -Bdbuild -DCMAKE_BUILD_TYPE=Debug; fi
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd dbuild || exit 1; fi
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then make; fi
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo make install; fi
+  ### Install Vulkan header files
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/Vulkan-Headers.git fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd Vulkan-Headers; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then mkdir build; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd build || exit 1; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cmake ..; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo cmake --build . --target install; fi
+
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ../..; fi
+
+  ### Install Vulkan loader
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/Vulkan-Loader.git; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd Vulkan-Loader; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then mkdir build; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd build || exit 1; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cmake -DCMAKE_BUILD_TYPE=Debug -DVULKAN_HEADERS_INSTALL_DIR=/usr/local/include ..; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo cmake --build . --target install; fi
+
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ../..; fi
+
+  ### Install Vulkan validation layers
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/Vulkan-ValidationLayers.git
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd Vulkan-ValidationLayers; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then mkdir build; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd build || exit 1; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cmake -DCMAKE_BUILD_TYPE=Debug -DVULKAN_HEADERS_INSTALL_DIR=/usr/local/include -DGLSLANG_INSTALL_DIR=/usr/local/include ..; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo cmake --build . --target install; fi
+
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ../..; fi
+
+  ### Install Vulkan utilities and tools
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/Vulkan-Tools.git
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd Vulkan-Tools; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then mkdir build; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd build || exit 1; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cmake -DCMAKE_BUILD_TYPE=Debug ..; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo cmake --build . --target install; fi
 
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ../..; fi
 
