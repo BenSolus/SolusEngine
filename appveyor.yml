@@ -26,14 +26,14 @@ init:
       git clone https://github.com/glfw/glfw.git .\glfw
       mkdir .\glfw\build
       cd glfw\build
-      cmake -DBUILD_SHARED_LIBS=ON .. -G %generator%
+      cmake -DBUILD_SHARED_LIBS=ON .. -G "%generator%"
       cmake --build . --config %config% --target install
 
 before_build:
   - cmd: |-
       mkdir .\build
       cd build
-      cmake .. -G %generator% -DEXAMPLES:BOOL=ON
+      cmake .. -G "%generator%" -DEXAMPLES:BOOL=ON
 
 build:
   project: c:\projects\SolusEngine\build\SolusEngine.sln
