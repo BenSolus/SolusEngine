@@ -12,6 +12,9 @@ SET(EXAMPLES    OFF CACHE BOOL "Whether to build examples.")
 SET(WITH_VULKAN ON  CACHE BOOL "Whether to build Vulkan-Module.")
 SET(WITH_GLFW   ON  CACHE BOOL "Whether to build GLFW-Module.")
 
+STRING(REGEX MATCH "Clang" CMAKE_COMPILER_IS_CLANG "${CMAKE_C_COMPILER_ID}")
+
+
 ###############################################################################
 # Setup for various paths                                                     #
 ###############################################################################
@@ -37,6 +40,7 @@ ENDIF()
 # Adding various include directories                                          #
 ###############################################################################
 
+INCLUDE_DIRECTORIES(SYSTEM ${PROJECT_SOURCE_DIR}/3rdparty/json)
 INCLUDE_DIRECTORIES(SYSTEM ${PROJECT_SOURCE_DIR}/3rdparty/stb)
 
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src)

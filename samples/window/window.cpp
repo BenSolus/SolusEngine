@@ -6,10 +6,10 @@ main()
 {
   try
   {  
-    so::Engine<so::EngineBackend::Vulkan, GLFW> engine
+    so::Engine engine
       ("Hello GLFWwindow", VK_MAKE_VERSION(0, 0, 1));
 
-    while(not engine.surfaceIsClosed())
+    while(not engine.windowIsClosed())
       engine.surfacePollEvents();
   
   }

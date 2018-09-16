@@ -21,9 +21,9 @@
  */
 
 /**
- *  @file      vk/glfw/soVkGLFWSurface.hpp
+ *  @file      soStdFilesystem.hpp
  *  @author    Bennet Carstensen
- *  @date      2017
+ *  @date      2018
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
@@ -50,45 +50,23 @@
 
 #pragma once
 
-#include <interfaces/soVkSurfaceInterface.hpp>
+#include <filesystem>
 
 namespace so {
-namespace vk {
 
-template<>
-class Surface<GLFW> : public so::vk::SurfaceInterface<GLFW>
+class Path : public std::filesystem::path
+{
+	public:
+    Path(string_type&& source, format fmt = auto_format);
+};
+
+class DirectoryIterator : public std::filesystem::directory_iterator
 {
   public:
-    Surface() : so::vk::SurfaceInterface<GLFW>() {}
+    explicit DirectoryIterator(so::Path const& p);
 
-    Surface(std::string const& title, SharedPtrInstance instance)
-      : so::vk::SurfaceInterface<GLFW>(title)
-    {
-      
-      if(mWindow not_eq nullptr)
-      {
-        VkResult const result(glfwCreateWindowSurface
-            (instance->getVkInstance(), mWindow, nullptr, &mSurface));
+};
 
-        if(result not_eq VK_SUCCESS)
-          THROW_EXCEPTION(std::string("failed to create window surface! "
-                                      "(Error code: ") + std::to_string(result)
-                                      + std::string(")"));
-      }
-    }
 
-    Surface<GLFW>&
-    operator=(Surface<GLFW>&& other)
-    {
-      if(this is_eq &other)
-        return *this;
+} //namespace so
 
-      so::vk::SurfaceInterface<GLFW>::operator=
-        (static_cast<so::vk::SurfaceInterface<GLFW>&&>(other));
-
-      return *this;
-    }
-}; // class Surface
-
-} // namespace vk
-} // namespace so

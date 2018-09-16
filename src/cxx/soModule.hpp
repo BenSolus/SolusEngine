@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2018 by Bennet Carstensen
+ * Copyright (C) 2017 by Bennet Carstensen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,10 +21,10 @@
  */
 
 /**
- *  @file      soGLFWSurfaceInterface.hpp
+ *  @file      soModule.hpp
  *  @author    Bennet Carstensen
- *  @date      2018
- *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
+ *  @date      2017
+ *  @copyright Copyright (c) 2017 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
  *             obtaining a copy of this software and associated documentation
@@ -50,85 +50,123 @@
 
 #pragma once
 
-#include <interfaces/soSurfaceInterface.hpp>
+#include <soDynamicLibrary.hpp>
 
-#include <soDefinitions.hpp>
-#include <soException.hpp>
+#include <soFileSystem.hpp>
+#include <soJSON.hpp>
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+#include <map>
 
-namespace so {
-    
-template<>
+namespace so
+{
+
+enum class
+EngineBackend
+{
+  Vulkan
+};
+
+std::string
+to_string(EngineBackend backend);
+
 class
-SurfaceInterface<SurfaceBackend::GLFW>
+VoidReturn
 {
   public:
-    SurfaceInterface() : mWindow(nullptr) { glfwInit(); }
-    
-    SurfaceInterface(std::string const& title) : SurfaceInterface()
+    static VoidReturn const&
+    getVoidReturn();
+
+    VoidReturn(VoidReturn const& other) = delete;
+
+    VoidReturn(VoidReturn&& other) noexcept = delete;
+
+    ~VoidReturn() noexcept = default;
+
+    VoidReturn& operator=(VoidReturn const& other) = delete;
+
+    VoidReturn& operator=(VoidReturn&& other) = delete;
+ 
+  private:
+    VoidReturn() = default;
+     
+};
+
+class
+Module
+{
+  using Symbols = std::vector<base::Symbol>;
+  
+  public:
+    Module();
+
+    Module(Path const& configFile, EngineBackend const backend);
+
+    Module(Module const& other) = delete;
+
+    Module(Module&& other) noexcept;
+
+    ~Module() noexcept = default;
+
+    Module& operator=(Module const& other) = delete;
+
+    Module& operator=(Module&& other) noexcept = delete;
+
+    template<typename... Args>
+    void
+    operator()(index const idx, VoidReturn const& voidReturn, Args... args)
     {
-      glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-      glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+      (void) voidReturn;
 
-      mWindow = glfwCreateWindow(800,
-                                 600,
-                                 title.c_str(),
-                                 nullptr,
-                                 nullptr);
+      auto const pos(static_cast<Symbols::size_type>(idx));
 
-      if(mWindow is_eq nullptr)
-        throw Exception<std::runtime_error>("Failed to create GLFWwindow.",
-                                            PRETTY_FUNCTION_SIG);
+      static_cast<so::Symbol<void, Args...>&>(mSymbols[pos])(args...);
     }
 
-    SurfaceInterface(SurfaceInterface const& other) = delete;
-
-    SurfaceInterface(SurfaceInterface&& other) = delete;
-
-    ~SurfaceInterface() noexcept { deleteMembers(); }
-
-    SurfaceInterface&
-    operator=(SurfaceInterface const& other) = delete;
-
-    SurfaceInterface&
-    operator=(SurfaceInterface&& other) noexcept
+    template<typename Ret, typename... Args>
+    void
+    operator()(index const idx, Ret& ret, Args... args)
     {
-      if(this is_eq &other)
-        return *this;
+      auto const pos(static_cast<Symbols::size_type>(idx));
 
-      deleteMembers();
-
-      mWindow = other.mWindow;
-
-      other.mWindow = nullptr;
-
-      return *this;
+      ret = static_cast<so::Symbol<Ret, Args...>&>(mSymbols[pos])(args...);
     }
 
-    inline auto isClosed() { return glfwWindowShouldClose(mWindow); }
-      
-    inline void pollEvents() { glfwPollEvents(); }
+    template<typename Ret, typename... Args>
+    void
+    operator()(index const idx, Ret& ret, Args... args) const
+    {
+      auto const pos(static_cast<Symbols::size_type>(idx));
 
-    inline auto getGLFWwindow() { return mWindow; }
+      ret = static_cast<so::Symbol<Ret, Args...>&>(mSymbols[pos])(args...);
+    }
 
-  protected:
-    GLFWwindow* mWindow;
+
+    base::Symbol const&
+    operator[](index const idx);
+
+    base::Symbol const&
+    getSymbol(index const idx);
+
+    std::string const&
+    getName();
+
+    bool
+    isAvailable();
 
   private:
+    std::string    mName;
+
+    DynamicLibrary mLibrary;
+    mutable Symbols        mSymbols;
+
+    bool           mIsAvailable;
+
+    void 
+    loadLibrary(JSON const& platformSpecifics);
+
     void
-    deleteMembers()
-    {
-      if(mWindow not_eq nullptr)
-      {
-        glfwDestroyWindow(mWindow);
-
-        glfwTerminate();
-
-        mWindow = nullptr;
-      }
-    }
-}; // class SurfaceInterface
+    loadSymbols(JSON const& implementation);
+};
 
 } // namespace so
+

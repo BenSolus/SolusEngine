@@ -90,5 +90,13 @@ getBinDir()
   return root;
 }
 
+so::Path const&
+so::getBinaryDir()
+{
+  static so::Path const BinaryDir(getBinDir());
+
+  return BinaryDir;
+}
+
 std::string const BIN_DIR(getBinDir());
 

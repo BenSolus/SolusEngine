@@ -21,9 +21,9 @@
  */
 
 /**
- *  @file      soEngineInterface.hpp
+ *  @file      soGLFWSurface.h
  *  @author    Bennet Carstensen
- *  @date      2017
+ *  @date      2018
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
@@ -50,28 +50,51 @@
 
 #pragma once
 
-#include <interfaces/soSurfaceInterface.hpp>
+#include "soVulkanSurface.hpp"
 
-#include <string>
+#include "soDefinitions.hpp"
+#include "soReturnT.hpp"
 
-namespace so
+#ifdef __cplusplus
+
+extern "C"
 {
 
-enum class EngineBackend
-{
-  None,
-  Vulkan
-};
+#endif // __cplusplus
 
-template <EngineBackend  EB = EngineBackend::None,
-          SurfaceBackend SB = SurfaceBackend::None>
-class Engine
-{
-  public:
-    virtual ~Engine() = 0;
+char const*
+soVkGLFWSurfaceInitialize(void** surface);
 
-    virtual void createSurface(std::string const& title) = 0; 
-};
+char const*
+soVkGLFWGetInstanceExtensions(void const*    surface,
+                              char const***  extensions,
+                              so::size_type* count);
 
-} // namespace so
+void
+soVkGLFWSurfaceTerminate(void* surface);
+
+so::return_t
+soVkGLFWSurfaceCreateWindow(void*                surface,
+                            std::string   const& title,
+                            so::size_type const  width,
+                            so::size_type const  height);
+
+so::return_t
+soVkGLFWSurfaceCreateSurface(void* surface, VkInstance instance);
+
+VkSurfaceKHR
+soVkGLFWSurfaceGetVkSurfaceKHR(void const* surface);
+
+bool
+soVkGLFWSurfaceWindowIsClosed(void* surface);
+
+void
+soVkGLFWSurfacePollEvents();
+
+#ifdef __cplusplus
+
+} // extern "C"
+
+#endif // __cplusplus
+
 

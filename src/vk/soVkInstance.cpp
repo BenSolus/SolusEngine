@@ -39,7 +39,8 @@ so::vk::SharedPtrInstance const so::vk::Instance::SHARED_PTR_NULL_INSTANCE
 so::vk::Instance::Instance() : mInstance(VK_NULL_HANDLE) {}
 
 so::vk::Instance::Instance(std::string const& applicationName,
-                           uint32_t    const  applicationVersion)
+                           uint32_t    const  applicationVersion,
+                           Extensions  const& additionalExtensions)
   : Instance()
 {
   if(ENABLE_VALIDATION_LAYERS and not checkValidationLayerSupport())
@@ -61,6 +62,19 @@ so::vk::Instance::Instance(std::string const& applicationName,
 
   auto extensions(getRequiredExtensions());
 
+  extensions.insert(extensions.end(),
+                    additionalExtensions.begin(),
+                    additionalExtensions.end());
+
+  std::cout << "<INFO> Requested extensions:\n";
+
+  for(auto extension : extensions)
+  {
+    std::cout << "<INFO>   " << extension << '\n';
+  }
+
+  std::cout << extensions.size() << '\n';
+
   createInfo.enabledExtensionCount   =
     static_cast<uint32_t>(extensions.size());
   createInfo.ppEnabledExtensionNames = extensions.data();
@@ -71,7 +85,9 @@ so::vk::Instance::Instance(std::string const& applicationName,
       static_cast<uint32_t>(VALIDATION_LAYERS.size());
     createInfo.ppEnabledLayerNames = VALIDATION_LAYERS.data();
   } else
+  {
     createInfo.enabledLayerCount   = 0;
+  }
 
   if(createInstance(&createInfo, nullptr, &mInstance) not_eq VK_SUCCESS)
     THROW_EXCEPTION("failed to create instance!");
@@ -82,7 +98,9 @@ so::vk::Instance::Instance(std::string const& applicationName,
 so::vk::Instance::~Instance() noexcept
 {
   if(mInstance not_eq VK_NULL_HANDLE)
+  { 
     destroyInstance(mInstance, nullptr);
+  }
 }
 
 bool
@@ -124,23 +142,7 @@ so::vk::Instance::checkValidationLayerSupport()
 std::vector<char const*>
 so::vk::Instance::getRequiredExtensions()
 {
-  uint32_t glfwExtensionCount(0);
-
-  std::vector<char const*> extensions;
-
-  char const** glfwExtensions(glfwGetRequiredInstanceExtensions
-                                (&glfwExtensionCount));
-
-  std::cout << "<INFO> Available GLFW-Extensions:\n";
-
-  for(uindex i(0); i < glfwExtensionCount; ++i)
-  {
-    std::cout << "<INFO>   " << glfwExtensions[i] << "\n";
-
-    extensions.push_back(glfwExtensions[i]);
-  }
-
-  std::cout << "\n";
+  std::vector<char const*> extensions(0);
 
   if(ENABLE_VALIDATION_LAYERS)
     extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);

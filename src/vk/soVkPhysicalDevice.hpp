@@ -51,7 +51,6 @@
 #pragma once
 
 #include <soVkInstance.hpp>
-#include <soVkSurface.hpp>
 
 extern const std::vector<const char*> DEVICE_EXTENSIONS;
 

@@ -51,6 +51,7 @@
 #pragma once
 
 #include <soDefinitions.hpp>
+#include <soFileSystem.hpp>
 
 #if defined(_MSC_VER) || defined(__MINGW32__)
 
@@ -68,30 +69,63 @@ static_assert(_POSIX_VERSION >= 200112L, "ISO POSIX.1-2001 "
 
 #else 
 
-#error "No known implementation to dynamically load libraries for this "
+#error "No known implementation to dynamically loading libraries for this "
        "compiler."
 
 #endif
 
+#include <iostream>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace so {
+namespace base {
 
-template<typename Ret, typename... Args>
 class
 Symbol
 {
   public:
-    Symbol() : mSymbol(nullptr) {}
+    Symbol();
+    
+    Symbol(void* symbol);
 
-    Symbol(Symbol const& other) : mSymbol(other.mSymbol) {}
-
-    Symbol(Symbol& other) noexcept = delete;
+    Symbol(Symbol const& other) = delete;
+    
+    Symbol(Symbol&& other) noexcept;
  
-    Symbol(void* symbol) : mSymbol(symbol) {}
+    virtual ~Symbol() noexcept;
 
-    ~Symbol() { mSymbol = nullptr; }
+    Symbol& operator=(Symbol const& other) = delete;
+
+    Symbol&
+    operator=(Symbol&& other) noexcept;
+
+    bool
+    isValid();
+
+  protected:
+    void* mSymbol;
+};
+
+} // namespace base
+
+template<typename Ret, typename... Args>
+class
+Symbol : public base::Symbol
+{
+  public:
+    Symbol() : base::Symbol() {}
+
+    Symbol(Symbol const& other) = delete;
+   
+    Symbol(Symbol&& other) noexcept
+      : base::Symbol(static_cast<base::Symbol&&>(other))
+    {}
+ 
+    Symbol(void* symbol) : base::Symbol(symbol) {}
+
+    ~Symbol() noexcept = default;
 
     Symbol& operator=(Symbol const& other) = delete;
 
@@ -101,10 +135,8 @@ Symbol
       if(this is_eq &other)
         return *this;
 
-      mSymbol = other.mSymbol;
-
-      other.mSymbol = nullptr;
-
+      base::Symbol::operator=(static_cast<base::Symbol&&>(other));
+    
       return *this;
     }
 
@@ -117,16 +149,29 @@ Symbol
 
       return f(args...);
     }
-    
-  private:
-    void* mSymbol;
+
+    Ret
+    operator()(Args... args) const
+    {
+      Ret(*f)(Args...)(nullptr);
+
+      *reinterpret_cast<void**>(&f) = mSymbol;
+
+      return f(args...);
+    }
 
 }; // class Symbol
 
 class
 DynamicLibrary
 {
+  using nameSymbolPair = std::pair<char const*, base::Symbol&>;
+
   public:
+    DynamicLibrary();
+
+    DynamicLibrary(Path& file);
+
     template<typename Ret, typename... IN, typename... NEXT>
     DynamicLibrary(char const*                                 filename,
                    std::pair<char const*, Symbol<Ret, IN...>&> symbol,
@@ -142,26 +187,36 @@ DynamicLibrary
 
       if(mHandle not_eq nullptr)
         loadSymbols(symbol, next...);
-#endif 
+#endif
     } 
+
+    DynamicLibrary(char const*                  file,
+                   std::vector<nameSymbolPair>& symbols);
 
     DynamicLibrary(DynamicLibrary const& other) = delete;
 
-    DynamicLibrary(DynamicLibrary&& other) noexcept = delete;
+    DynamicLibrary(DynamicLibrary&& other) noexcept;
 
-    ~DynamicLibrary() noexcept;
+    virtual ~DynamicLibrary() noexcept;
 
     DynamicLibrary& operator=(DynamicLibrary const& other) = delete;
 
-    DynamicLibrary& operator=(DynamicLibrary&& other) noexcept = delete;
+    DynamicLibrary&
+    operator=(DynamicLibrary&& other) noexcept;
 
-    inline auto isAvailable() const { return mIsAvailable; }
+    base::Symbol
+    loadSymbol(std::string const& symbol);
+
+    inline auto isComplete() { return mIsComplete; }
+
+    inline auto isComplete() const { return mIsComplete; }
 
   private:
-    bool  mIsAvailable;
+    bool  mIsComplete;
     void* mHandle;
-
-    DynamicLibrary();
+ 
+    void
+    loadSymbol(nameSymbolPair& symbol);
 
     template<typename Ret, typename... IN, typename... NEXT>
     void
@@ -181,7 +236,10 @@ DynamicLibrary
 #endif
     }
 
-    void loadSymbols() { mIsAvailable = true; }
+    void
+    deleteMembers();
+
+    void loadSymbols() { mIsComplete = true; }
 }; // class DynamicLibrary
 
 } // namespace so

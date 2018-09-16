@@ -1,0 +1,52 @@
+{
+  "name": "GLFW",
+  "platform-specifics":
+  [
+    {
+      "os"   : "Linux",
+      "file" : "lib/libSoGLFW.so"
+    }
+  ],
+  "implementations":
+  [
+    {
+      "name"    : "Vulkan",
+      "symbols" :
+      [
+        {
+          "symbol" : "soVkGLFWSurfaceInitialize",
+          "index"  : 0
+        },
+        {
+          "symbol" : "soVkGLFWSurfaceTerminate",
+          "index"  : 1
+        },
+        {
+          "symbol" : "soVkGLFWGetInstanceExtensions",
+          "index"  : 2
+        },
+        {
+          "symbol" : "soVkGLFWSurfaceCreateWindow",
+          "index"  : 3
+        },
+        {
+          "symbol" : "soVkGLFWSurfaceCreateSurface",
+          "index"  : 4
+        },
+        {
+          "symbol" : "soVkGLFWSurfaceGetVkSurfaceKHR",
+          "index"  : 5
+        },
+        {
+          "symbol" : "soVkGLFWSurfaceWindowIsClosed",
+          "index"  : 6
+        },
+        {
+          "symbol" : "soVkGLFWSurfacePollEvents",
+          "index"  : 7
+        }
+      ] 
+    }
+  ]
+}
+

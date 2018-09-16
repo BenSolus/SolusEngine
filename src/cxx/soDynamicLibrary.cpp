@@ -22,15 +22,181 @@
 
 #include <soDynamicLibrary.hpp>
 
-so::DynamicLibrary::DynamicLibrary() : mIsAvailable(false), mHandle(nullptr) {}
+#include <soException.hpp>
 
-so::DynamicLibrary::~DynamicLibrary() noexcept
+so::base::Symbol::Symbol() : mSymbol(nullptr) {}
+
+so::base::Symbol::Symbol(Symbol&& other) noexcept
+  : mSymbol(other.mSymbol)
+{
+  other.mSymbol = nullptr;
+}
+
+so::base::Symbol::Symbol(void* symbol) : mSymbol(symbol) {}
+
+so::base::Symbol::~Symbol() noexcept { mSymbol = nullptr; }
+
+so::base::Symbol&
+so::base::Symbol::operator=(Symbol&& other) noexcept
+{
+  if(this is_eq &other)
+    return *this;
+
+  mSymbol = other.mSymbol;
+
+  other.mSymbol = nullptr;
+
+  return *this;
+}
+
+bool
+so::base::Symbol::isValid()
+{
+  return mSymbol != nullptr;
+}
+
+so::DynamicLibrary::DynamicLibrary() : mIsComplete(false), mHandle(nullptr) {}
+
+so::DynamicLibrary::DynamicLibrary(Path& file)
+  : DynamicLibrary()
 {
 #if defined(_MSC_VER) || defined(__MINGW32__)
 
-#else 
+#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+
+  mHandle = dlopen(file.c_str(), RTLD_NOW);
+
+  mIsComplete = mHandle not_eq nullptr;
+    
+  (void) dlerror();
+
+#else
+
+#endif 
+
+}
+
+so::DynamicLibrary::DynamicLibrary(char const*                  file,
+                                   std::vector<nameSymbolPair>& symbols)
+  : DynamicLibrary()
+{
+#if defined(_MSC_VER) || defined(__MINGW32__)
+
+#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+
+  mHandle = dlopen(file, RTLD_NOW);
+
+  (void) dlerror();
+
+  if(mHandle not_eq nullptr)
+  { 
+    mIsComplete = true;
+
+    for(auto& symbol : symbols)
+      loadSymbol(symbol);
+  }
+
+#else
+
+#endif 
+}
+
+so::DynamicLibrary::DynamicLibrary(DynamicLibrary&& other) noexcept
+  : mIsComplete(other.mIsComplete), mHandle(other.mHandle)
+{
+  other.mIsComplete = false;
+  other.mHandle     = nullptr;
+}
+
+so::DynamicLibrary::~DynamicLibrary() noexcept
+{
+  deleteMembers();
+}
+
+so::DynamicLibrary&
+so::DynamicLibrary::operator=(DynamicLibrary&& other) noexcept
+{
+  if(this is_eq &other)
+    return *this;
+
+  deleteMembers();
+
+  mIsComplete = other.mIsComplete;
+  mHandle     = other.mHandle;
+
+  other.mIsComplete = false;
+  other.mHandle     = nullptr;
+
+  return *this;
+}
+
+so::base::Symbol
+so::DynamicLibrary::loadSymbol(std::string const& symbol)
+{
+#if defined(_MSC_VER) || defined(__MINGW32__)
+
+#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+  
+  void* symbolAddress(dlsym(mHandle, symbol.c_str()));
+
+  char const* lastError(dlerror());
+
+  if(lastError is_eq nullptr)
+    return base::Symbol(symbolAddress);
+  else
+  {
+    std::string warning("<WARNING> Couldn't load symbol '");
+
+    warning += symbol;
+    warning += "': ";
+    warning += lastError;
+    warning += ".\n";
+
+    std::cerr << warning;
+
+    mIsComplete = false;
+
+    return base::Symbol();
+  }
+
+#else
+
+#endif  
+}
+
+
+void
+so::DynamicLibrary::loadSymbol(nameSymbolPair& symbol)
+{
+#if defined(_MSC_VER) || defined(__MINGW32__)
+
+#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+
+  void* symbolAddress(dlsym(mHandle, std::get<0>(symbol)));
+
+  if(dlerror() is_eq nullptr)
+    std::get<1>(symbol) = base::Symbol(symbolAddress);
+  else
+    mIsComplete = false;
+
+#else
+
+#endif
+ 
+}
+
+void
+so::DynamicLibrary::deleteMembers()
+{
+#if defined(_MSC_VER) || defined(__MINGW32__)
+
+#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+
   if(mHandle not_eq nullptr)
     dlclose(mHandle);
+
+#else 
+
 #endif
 }
 

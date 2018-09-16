@@ -62,6 +62,9 @@ This project, "SolusEngine",
     [Vulkan Tutorial](https://vulkan-tutorial.com/) by
     [Alexander Overvoorde](https://github.com/Overv), used under
     [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/),
+*   uses [JSON for Modern C++](https://github.com/nlohmann/json) by
+    [Niels Lohmann](http:/nlohmann.me), used under the
+    [MIT License](https://opensource.org/licenses/MIT).
 *   uses [stb](https://github.com/nothings/stb)(_image.h) for image processing
     by [Sean Barrett](https://github.com/nothings), used under
     [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/).

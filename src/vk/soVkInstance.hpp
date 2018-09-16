@@ -69,13 +69,16 @@ namespace vk {
 class
 Instance : public std::enable_shared_from_this<Instance>
 {
+  using Extensions = std::vector<char const*>;
+
   public:
     static std::shared_ptr<Instance> const SHARED_PTR_NULL_INSTANCE;
 
     Instance();
 
     Instance(std::string const& applicationName,
-             uint32_t    const  applicationVersion);
+             uint32_t    const  applicationVersion,
+             Extensions  const& additionalExtensions);
  
     Instance(Instance const& other) = delete;
 

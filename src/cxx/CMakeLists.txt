@@ -3,9 +3,15 @@
 # Assemble library.                                                           #
 ###############################################################################
 
-FILE(GLOB CXX_SOURCES "*.hpp" "*.cpp")
+FILE(GLOB ALL_SOURCES "*.hpp" "*.cpp")
 
-ADD_LIBRARY(SoCxx SHARED ${CXX_SOURCES})
+IF(CXX17_FOUND)
+  FILE(GLOB STD_BACKEND_SOURCES "std/*.hpp" "std/*.cpp")
+
+  LIST(APPEND ALL_SOURCES ${STD_BACKEND_SOURCES})
+ENDIF()
+
+ADD_LIBRARY(SoCxx SHARED ${ALL_SOURCES})
 
 ###############################################################################
 # Set various target properties.                                              #
@@ -24,4 +30,10 @@ TARGET_INCLUDE_DIRECTORIES(SoCxx PRIVATE ${PROJECT_SOURCE_DIR}/src/cxx)
 ###############################################################################
 
 TARGET_LINK_LIBRARIES(SoCxx ${CMAKE_DL_LIBS})
+
+IF(CXX17_FOUND)
+  IF(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_CLANG)
+	  TARGET_LINK_LIBRARIES(SoCxx stdc++fs) 
+  ENDIF()
+ENDIF()
 

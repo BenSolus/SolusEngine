@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 by Bennet Carstensen
+ * Copyright (C) 2017-2018 by Bennet Carstensen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,10 +21,10 @@
  */
 
 /**
- *  @file      soFileSystem.hpp
+ *  @file      soVulkanSurface.hpp
  *  @author    Bennet Carstensen
- *  @date      2017
- *  @copyright Copyright (c) 2017 Bennet Carstensen
+ *  @date      2018
+ *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
  *             obtaining a copy of this software and associated documentation
@@ -50,28 +50,26 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
+#include <soDynamicLibrary.hpp>
 
-#if __cplusplus >= 201703L
-
-#include <std/soStdFilesystem.hpp>
-
-#else
-
-#include <boost/soBoostFilesystem.hpp>
-
-#endif
+#include <vulkan/vulkan.h>
 
 namespace so {
 
-Path const&
-getBinaryDir();
+extern DynamicLibrary const VulkanLibrary;
 
-std::vector<char>
-readBinaryFile(std::string const& filename);
+namespace vk {
 
+extern Symbol<void, VkInstance, VkSurfaceKHR, VkAllocationCallbacks const*>
+destroySurfaceKHR;
+
+} // namespace vk
 } // namespace so
 
-extern std::string const BIN_DIR;
+namespace std {
 
+string
+to_string(VkResult result);
+
+} // namespace std
+ 

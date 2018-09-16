@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 by Bennet Carstensen
+ * Copyright (C) 2017-2018 by Bennet Carstensen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,10 +21,10 @@
  */
 
 /**
- *  @file      soFileSystem.hpp
+ *  @file      soVkGLFWSurface.hpp
  *  @author    Bennet Carstensen
- *  @date      2017
- *  @copyright Copyright (c) 2017 Bennet Carstensen
+ *  @date      2018
+ *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
  *             obtaining a copy of this software and associated documentation
@@ -48,30 +48,59 @@
  *             OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#pragma once
+#include "soGLFWBaseSurface.hpp"
 
-#include <vector>
-#include <string>
+#include "soVulkanSurface.hpp"
 
-#if __cplusplus >= 201703L
-
-#include <std/soStdFilesystem.hpp>
-
-#else
-
-#include <boost/soBoostFilesystem.hpp>
-
-#endif
+#include "soReturnT.hpp"
 
 namespace so {
+namespace vk {
 
-Path const&
-getBinaryDir();
+class
+GLFWSurface : public base::Surface
+{
+  public:
+    GLFWSurface();
 
-std::vector<char>
-readBinaryFile(std::string const& filename);
+    explicit GLFWSurface(VkInstance const instance);
 
+    explicit GLFWSurface(std::string const& title);
+
+    GLFWSurface(GLFWSurface const& other) = delete;
+
+    GLFWSurface(GLFWSurface&& other) = delete;
+
+    ~GLFWSurface() noexcept;
+
+    GLFWSurface&
+    operator=(GLFWSurface const& other) = delete;
+
+    GLFWSurface&
+    operator=(GLFWSurface&& other) noexcept;
+
+    char const**
+    getInstanceExtensions(size_type* count) const;
+
+    return_t
+    createWindow(std::string const& title,
+                 size_type   const  width,
+                 size_type   const  height);
+
+    return_t
+    createSurface(VkInstance instance);
+
+    inline auto getVkSurfaceKHR() const { return mSurface; }
+  
+  private:
+    VkSurfaceKHR mSurface;
+
+    VkInstance   mInstance;
+
+    void
+    deleteMembers();
+
+}; // GLFWSurface
+
+} // namespace vk
 } // namespace so
-
-extern std::string const BIN_DIR;
-

@@ -50,19 +50,18 @@
 
 #pragma once
 
-#include <interfaces/soEngineInterface.hpp>
-
 #include <soVkDebugReportCallbackEXT.hpp>
 #include <soVkInstance.hpp>
 #include <soVkLogicalDevice.hpp>
 #include <soVkSurface.hpp>
 #include <soVkSwapChain.hpp>
 
+#include <soException.hpp>
+
 namespace so {
 
-template<SurfaceBackend SB>
 class
-Engine<EngineBackend::Vulkan, SB>
+Engine
 {
   public:
     Engine() : mDebugCallback(), mSurface(), mSwapChain() { }
@@ -73,13 +72,26 @@ Engine<EngineBackend::Vulkan, SB>
     {
       try
       {
+        mSurface.initialize();
+ 
         vk::SharedPtrInstance instance
           (std::make_shared<vk::Instance>
-            (applicationName, applicationVersion));
+            (applicationName,
+             applicationVersion,
+             mSurface.getInstanceExtensions()));
 
         mDebugCallback = vk::DebugReportCallbackEXT(instance);
-          
-        mSurface       = vk::Surface<SB>(applicationName, instance);
+
+        mSurface.setSharedPtrInstance(instance);
+
+        if(mSurface.createWindow(applicationName) not_eq success)
+          THROW_EXCEPTION("Failed to create window");
+
+        if(mSurface.createSurface() not_eq success)
+          THROW_EXCEPTION("Failed to create surface");
+
+        //mSurface.initialize();
+        //mSurface       = vk::Surface(applicationName, instance);
 
         vk::SharedPtrLogicalDevice device
           (std::make_shared<vk::LogicalDevice>
@@ -102,17 +114,17 @@ Engine<EngineBackend::Vulkan, SB>
     void
     createSurface(std::string const& title = "soEngine (Vulkan backend)")
     {
-      mSurface = std::move(vk::Surface<SB>(title,
-                                           mSurface.getSharedPtrInstance()));
+      mSurface = std::move(vk::Surface(title,
+                                       mSurface.getSharedPtrInstance()));
     }
 
-    inline auto surfaceIsClosed() { return mSurface.isClosed(); } 
+    inline auto windowIsClosed() { return mSurface.windowIsClosed(); } 
 
     inline void surfacePollEvents() { mSurface.pollEvents(); } 
 
   private:
     vk::DebugReportCallbackEXT mDebugCallback;
-    vk::Surface<SB>            mSurface;
+    vk::Surface                mSurface;
     vk::SwapChain              mSwapChain;
 };
 

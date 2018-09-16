@@ -20,10 +20,41 @@ init:
   - cmd: |-
       cmake --version
 
+      #  - cmd: |-
+      #    set NINJA_URL="https://github.com/ninja-build/ninja/releases/download/v1.6.0/ninja-win.zip"
+      # appveyor DownloadFile %NINJA_URL% -FileName ninja.zip
+      #  7z x ninja.zip -oC:\projects\deps\ninja > nul
+      #  set PATH=C:\projects\deps\ninja;%PATH%
+
   - cmd: |-
-      mkdir .\builds
-      cd builds
-      git clone https://github.com/glfw/glfw.git .\glfw
+      cd c:\projects\deps
+      git clone https://github.com/g-truc/glm.git;
+      mkdir .\glm\build
+      cd glm\build
+      cmake -DGLM_TEST_ENABLE_CXX_11=ON .. -G "%generator%"
+      cmake --build . --config %config% --target install
+      set PATH="C:\Program Files\GLM\bin;%PATH%"
+
+  - cmd: |-
+      cd c:\projects\deps
+      git clone https://github.com/KhronosGroup/glslang.git
+      mkdir .\glslang\build
+      cd glslang\build
+      cmake .. G "%generator%"
+      cmake --build . --config %config% --target install
+      set PATH="C:\Program Files\glslang\bin;%PATH%"
+
+  - cmd: |-
+      cd c:\projects\deps
+      git clone https://github.com/KhronosGroup/Vulkan-Headers.git
+      mkdir .\Vulkan-Headers\build
+      cd Vulkan-Headers\build
+      cmake .. G "%generator%"
+      cmake --build . --config %config% --target install
+
+  - cmd: |-
+      cd c:\projects\ 
+      git clone https://github.com/glfw/glfw.git
       mkdir .\glfw\build
       cd glfw\build
       cmake -DBUILD_SHARED_LIBS=ON .. -G "%generator%"

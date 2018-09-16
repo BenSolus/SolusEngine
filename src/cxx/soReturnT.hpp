@@ -21,7 +21,7 @@
  */
 
 /**
- *  @file      interfaces/soSurfaceInterface.hpp
+ *  @file      soReturnT.hpp
  *  @author    Bennet Carstensen
  *  @date      2018
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
@@ -50,30 +50,16 @@
 
 #pragma once
 
-namespace so
-{
+namespace so {
 
-enum class SurfaceBackend
+enum class return_t
 {
-  None,
-  GLFW
+  success,
+  failure
 };
 
-template <SurfaceBackend SB>
-class SurfaceInterface
-{
-  public:
-    virtual ~SurfaceInterface() = 0;
-};
+constexpr return_t success = return_t::success;
 
-template<>
-class SurfaceInterface<SurfaceBackend::None>
-{
-  public:
-    virtual ~SurfaceInterface() = default;
-};
+constexpr return_t failure = return_t::failure;
 
 } // namespace so
-
-constexpr so::SurfaceBackend GLFW(so::SurfaceBackend::GLFW);
-

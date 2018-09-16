@@ -48,4 +48,139 @@
  *             OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <glfw/soVkGLFWSurface.hpp>
+#pragma once
+
+#include "soVkInstance.hpp"
+
+#include "soModule.hpp"
+#include "soReturnT.hpp"
+
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+
+namespace so {
+namespace vk {
+
+class
+SurfaceBackend
+{
+  using SurfaceHandle = void*;
+
+  public:
+    SurfaceBackend();
+
+    explicit SurfaceBackend(Path const& config);
+
+    SurfaceBackend(std::string const& title, SharedPtrInstance instance);
+
+    SurfaceBackend(SurfaceBackend const& other) = delete;
+
+    SurfaceBackend(SurfaceBackend&& other) noexcept;
+
+    ~SurfaceBackend() noexcept;
+
+    SurfaceBackend&
+    operator=(SurfaceBackend const& other) = delete;
+
+    SurfaceBackend&
+    operator=(SurfaceBackend&& other) noexcept = default;
+
+    void
+    initialize();
+
+    std::vector<char const*>
+    getInstanceExtensions() const;
+
+    return_t
+    createWindow(std::string const& title,
+                 size_type   const  width,
+                 size_type   const  height);
+
+    return_t
+    createSurface(VkInstance instance);
+
+    VkSurfaceKHR
+    getVkSurfaceKHR();
+
+    bool
+    windowIsClosed();
+
+    void
+    pollEvents();
+
+    std::string const&
+    getName();
+
+    bool
+    isAvailable();
+
+  private:
+    Module        mModule;
+
+    SurfaceHandle mHandle;
+};
+
+class
+Surface
+{
+	using Backends = std::vector<SurfaceBackend>;
+  
+  public:
+    Surface();
+
+		Surface(std::string const& title, SharedPtrInstance instance);
+
+    Surface(Surface const& other) = delete;
+
+    Surface(Surface&& other) noexcept = delete;
+
+    ~Surface() noexcept = default;
+
+    Surface&
+    operator=(Surface const& other) = delete;
+
+    Surface&
+    operator=(Surface&& other) noexcept = default;
+
+    void
+    initialize();
+
+    std::vector<char const*>
+    getInstanceExtensions();
+
+    return_t
+    createWindow(std::string const& title,
+                 size_type   const  width  = 800,
+                 size_type   const  height = 600);
+
+    return_t
+    createSurface();
+
+		bool
+		windowIsClosed();
+
+		void
+		pollEvents();
+
+		VkSurfaceKHR
+    getVkSurfaceKHR();
+
+		GLFWwindow*
+    getGLFWwindow();
+
+    void
+    setSharedPtrInstance(SharedPtrInstance instance);
+
+    SharedPtrInstance
+		getSharedPtrInstance();
+
+	private:
+    Backends          mBackends;
+
+    index             mActiveBackend;
+
+    SharedPtrInstance mInstance;
+};
+
+} // namespace vk
+} // namespace so

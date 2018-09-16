@@ -75,6 +75,10 @@
 
 namespace so {
 
+  using size_type = std::size_t;
+
+  using index  = std::ptrdiff_t;
+  
   using uindex = std::size_t;
 
   template<typename T>

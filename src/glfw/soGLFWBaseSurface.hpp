@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 by Bennet Carstensen
+ * Copyright (C) 2017-2018 by Bennet Carstensen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,10 +21,10 @@
  */
 
 /**
- *  @file      soFileSystem.hpp
+ *  @file      soGLFWBaseSurface.hpp
  *  @author    Bennet Carstensen
- *  @date      2017
- *  @copyright Copyright (c) 2017 Bennet Carstensen
+ *  @date      2018
+ *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
  *             obtaining a copy of this software and associated documentation
@@ -50,28 +50,52 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
+#include <soDefinitions.hpp>
+#include <soException.hpp>
 
-#if __cplusplus >= 201703L
-
-#include <std/soStdFilesystem.hpp>
-
-#else
-
-#include <boost/soBoostFilesystem.hpp>
-
-#endif
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
 
 namespace so {
+namespace base {
 
-Path const&
-getBinaryDir();
+class
+Surface
+{
+  public:
+    Surface();    
+    
+    explicit Surface(std::string const& title);
 
-std::vector<char>
-readBinaryFile(std::string const& filename);
+    Surface(Surface const& other) = delete;
 
+    Surface(Surface&& other) = delete;
+
+    virtual ~Surface() noexcept;
+
+    Surface&
+    operator=(Surface const& other) = delete;
+
+    Surface&
+    operator=(Surface&& other) noexcept; 
+
+    inline auto windowIsClosed() { return glfwWindowShouldClose(mWindow); }
+
+    inline void pollEvents() { }
+
+    inline auto getGLFWwindow() { return mWindow; }
+
+  protected:
+    bool        mIsInitialized;
+
+    GLFWwindow* mWindow;
+
+  private:
+    void
+    deleteMembers();
+    
+}; // class Surface
+
+} // namespace base
 } // namespace so
-
-extern std::string const BIN_DIR;
 

@@ -71,7 +71,7 @@ before_install:
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ../..; fi
 
   ### Install Vulkan header files
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/Vulkan-Headers.git fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/Vulkan-Headers.git; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd Vulkan-Headers; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then mkdir build; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd build || exit 1; fi
@@ -91,7 +91,7 @@ before_install:
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ../..; fi
 
   ### Install Vulkan validation layers
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/Vulkan-ValidationLayers.git
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/Vulkan-ValidationLayers.git; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd Vulkan-ValidationLayers; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then mkdir build; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd build || exit 1; fi
@@ -101,7 +101,7 @@ before_install:
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ../..; fi
 
   ### Install Vulkan utilities and tools
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/Vulkan-Tools.git
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/Vulkan-Tools.git; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd Vulkan-Tools; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then mkdir build; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd build || exit 1; fi
