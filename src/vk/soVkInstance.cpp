@@ -20,18 +20,15 @@
  * IN THE SOFTWARE.
  */
 
-#include <soVkInstance.hpp>
+#include "soVkInstance.hpp"
 
-#include <soDefinitions.hpp>
-#include <soException.hpp>
-
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+#include "soDefinitions.hpp"
+#include "soException.hpp"
 
 #include <cstring>
 
-std::vector<char const*> const VALIDATION_LAYERS
-  ({ "VK_LAYER_LUNARG_standard_validation" });
+std::array<char const*, 1> const VALIDATION_LAYERS
+  { "VK_LAYER_LUNARG_standard_validation" };
 
 so::vk::SharedPtrInstance const so::vk::Instance::SHARED_PTR_NULL_INSTANCE
   (std::make_shared<so::vk::Instance>());
@@ -46,7 +43,7 @@ so::vk::Instance::Instance(std::string const& applicationName,
   if(ENABLE_VALIDATION_LAYERS and not checkValidationLayerSupport())
     THROW_EXCEPTION("Validation layers requested, but not vailable!");
 
-  VkApplicationInfo* appInfo(new VkApplicationInfo({}));
+  VkApplicationInfo* appInfo{ new VkApplicationInfo({}) };
 
   appInfo->sType               = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   appInfo->pApplicationName    = applicationName.c_str();
@@ -55,12 +52,12 @@ so::vk::Instance::Instance(std::string const& applicationName,
   appInfo->engineVersion       = VK_MAKE_VERSION(1, 0, 0);
   appInfo->apiVersion          = VK_API_VERSION_1_0;
 
-  VkInstanceCreateInfo createInfo({});
+  VkInstanceCreateInfo createInfo{ };
 
   createInfo.sType            = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
   createInfo.pApplicationInfo = appInfo;
 
-  auto extensions(getRequiredExtensions());
+  auto extensions{ getRequiredExtensions() };
 
   extensions.insert(extensions.end(),
                     additionalExtensions.begin(),
@@ -87,7 +84,7 @@ so::vk::Instance::Instance(std::string const& applicationName,
     createInfo.enabledLayerCount   = 0;
   }
 
-  if(createInstance(&createInfo, nullptr, &mInstance) not_eq VK_SUCCESS)
+  if(vkCreateInstance(&createInfo, nullptr, &mInstance) not_eq VK_SUCCESS)
     THROW_EXCEPTION("failed to create instance!");
 
   delete appInfo;
@@ -97,7 +94,7 @@ so::vk::Instance::~Instance() noexcept
 {
   if(mInstance not_eq VK_NULL_HANDLE)
   { 
-    destroyInstance(mInstance, nullptr);
+    vkDestroyInstance(mInstance, nullptr);
   }
 }
 
@@ -108,30 +105,37 @@ so::vk::Instance::checkValidationLayerSupport()
 
   // TODO: Handle enumerateInstanceLayerProperties output
 
-  enumerateInstanceLayerProperties(&layerCount, nullptr);
+  vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
   std::vector<VkLayerProperties> availableLayers(layerCount);
 
-  enumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+  vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 
   std::cout << "<INFO> Available Vulkan layers:\n";
-  for(auto const& layerProperties : availableLayers)
-    std::cout << "<INFO>   " << layerProperties.layerName << "\n";
   
+  for(auto const& layerProperties : availableLayers)
+  {
+    std::cout << "<INFO>   " << layerProperties.layerName << "\n";
+  }
 
   for(char const* layerName : VALIDATION_LAYERS)
   {
-    bool layerFound = false;
+    bool layerFound{ false };
 
     for(auto const& layerProperties : availableLayers)
+    {
       if(std::strcmp(layerName, layerProperties.layerName) is_eq 0)
       {
         layerFound = true;
         break;
       }
+    }
 
     if(not layerFound)
+    {
       return false;
+  
+    }
   }
 
   return true;
@@ -140,7 +144,7 @@ so::vk::Instance::checkValidationLayerSupport()
 std::vector<char const*>
 so::vk::Instance::getRequiredExtensions()
 {
-  std::vector<char const*> extensions(0);
+  std::vector<char const*> extensions;
 
   if(ENABLE_VALIDATION_LAYERS)
     extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);

@@ -1,4 +1,10 @@
 
+################################################################################
+# Find packages                                                               #
+###############################################################################
+
+FIND_PACKAGE(Vulkan    REQUIRED)
+
 ###############################################################################
 # Assemble library.                                                           #
 ###############################################################################
@@ -19,4 +25,12 @@ SET_HIGHEST_CXX_STANDARD(SoVk)
 
 TARGET_INCLUDE_DIRECTORIES(SoVk PUBLIC  ${PROJECT_SOURCE_DIR}/src/cxx)
 TARGET_INCLUDE_DIRECTORIES(SoVk PRIVATE ${PROJECT_SOURCE_DIR}/src/vk)
+
+TARGET_INCLUDE_DIRECTORIES(SoVk PUBLIC ${Vulkan_INCLUDE_DIRS})
+
+###############################################################################
+# Link with necessary libraries.                                              #
+###############################################################################
+
+TARGET_LINK_LIBRARIES(SoVk ${Vulkan_LIBRARIES})
 

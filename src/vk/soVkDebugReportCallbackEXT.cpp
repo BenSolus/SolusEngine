@@ -54,7 +54,7 @@ so::vk::DebugReportCallbackEXT::DebugReportCallbackEXT
   createInfo.pfnCallback = debugCallback;
 
   auto func(reinterpret_cast<PFN_vkCreateDebugReportCallbackEXT>
-    (getInstanceProcAddr(instance->getVkInstance(),
+    (vkGetInstanceProcAddr(instance->getVkInstance(),
                          "vkCreateDebugReportCallbackEXT")));
 
   if(func not_eq nullptr)
@@ -96,15 +96,17 @@ so::vk::DebugReportCallbackEXT::operator=
 void
 so::vk::DebugReportCallbackEXT::deleteMembers()
 {
-  VkInstance const instance(mInstance->getVkInstance());
+  VkInstance instance(mInstance->getVkInstance());
 
   if((mCallback not_eq nullptr) and (instance not_eq VK_NULL_HANDLE))
   {
     auto func(reinterpret_cast<PFN_vkDestroyDebugReportCallbackEXT>
-      (getInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT")));
+      (vkGetInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT")));
 
     if(func not_eq nullptr)
+    {
       func(instance, mCallback, nullptr);
+    }
   }
 }
 

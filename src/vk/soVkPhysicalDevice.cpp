@@ -46,14 +46,14 @@ so::vk::PhysicalDevice::PhysicalDevice(SharedPtrInstance const& instance,
 
   uint32_t   deviceCount(0);
 
-  enumeratePhysicalDevices(vkInstance, &deviceCount, nullptr);
+  vkEnumeratePhysicalDevices(vkInstance, &deviceCount, nullptr);
 
   if(deviceCount is_eq 0)
     THROW_EXCEPTION("failed to find GPUs with Vulkan ""support!");
 
   std::vector<VkPhysicalDevice> devices(deviceCount);
 
-  enumeratePhysicalDevices(vkInstance, &deviceCount, devices.data());
+  vkEnumeratePhysicalDevices(vkInstance, &deviceCount, devices.data());
 
   for(auto const& device : devices)
   {
@@ -93,23 +93,25 @@ so::vk::PhysicalDevice::checkDeviceExtensionSupport(VkPhysicalDevice device)
 {
   uint32_t extensionCount;
 
-  enumerateDeviceExtensionProperties(device,
-                                     nullptr,
-                                     &extensionCount,
-                                     nullptr);
+  vkEnumerateDeviceExtensionProperties(device,
+                                       nullptr,
+                                       &extensionCount,
+                                       nullptr);
 
   std::vector<VkExtensionProperties> availableExtensions(extensionCount);
 
-  enumerateDeviceExtensionProperties(device,
-                                     nullptr,
-                                     &extensionCount,
-                                     availableExtensions.data());
+  vkEnumerateDeviceExtensionProperties(device,
+                                       nullptr,
+                                       &extensionCount,
+                                       availableExtensions.data());
 
   std::set<std::string> requiredExtensions(DEVICE_EXTENSIONS.begin(),
                                            DEVICE_EXTENSIONS.end());
 
   for(auto const& extension : availableExtensions)
+  {
     requiredExtensions.erase(extension.extensionName);
+  }
 
   return requiredExtensions.empty();
 }
@@ -134,9 +136,9 @@ so::vk::PhysicalDevice::isDeviceSuitable(VkPhysicalDevice        device,
 
   VkPhysicalDeviceFeatures supportedFeatures;
 
-  getPhysicalDeviceFeatures(device, &supportedFeatures);
+  vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
 
   return indices.isComplete() &&
          extensionsSupported  &&
-         supportedFeatures.samplerAnisotropy;
+         static_cast<bool>(supportedFeatures.samplerAnisotropy);
 }

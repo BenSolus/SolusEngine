@@ -50,7 +50,7 @@
 
 #pragma once
 
-#include <soVulkan.hpp>
+#include <vulkan/vulkan.h>
 
 #include <vector>
 

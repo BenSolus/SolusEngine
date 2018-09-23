@@ -43,6 +43,8 @@ TARGET_LINK_LIBRARIES(SoEng SoVk SoCxx)
 # Compile shaders.                                                            #
 ###############################################################################
 
+FIND_PACKAGE(VulkanSDK REQUIRED)
+
 IF(NOT IS_DIRECTORY "${PROJECT_BINARY_DIR}/data/shaders")
   FILE(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/data/shaders")
 ENDIF()

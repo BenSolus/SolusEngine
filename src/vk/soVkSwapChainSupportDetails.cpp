@@ -30,36 +30,36 @@ so::vk::SwapChainSupportDetails::SwapChainSupportDetails
   (VkPhysicalDevice device, VkSurfaceKHR surface)
   : mCapabilities({ }), mFormats({ }), mPresentModes({ })
 {
-  getPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &mCapabilities);
+  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &mCapabilities);
 
   uint32_t formatCount;
 
-  getPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
+  vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
 
   if(formatCount not_eq 0)
   {
     mFormats.resize(formatCount);
 
-    getPhysicalDeviceSurfaceFormatsKHR(device,
-                                       surface,
-                                       &formatCount,
-                                       mFormats.data());
+    vkGetPhysicalDeviceSurfaceFormatsKHR(device,
+                                         surface,
+                                         &formatCount,
+                                         mFormats.data());
   }
 
   uint32_t presentModeCount;
 
-  getPhysicalDeviceSurfacePresentModesKHR(device,
-                                          surface,
-                                          &presentModeCount,
-                                          nullptr);
+  vkGetPhysicalDeviceSurfacePresentModesKHR(device,
+                                            surface,
+                                            &presentModeCount,
+                                            nullptr);
 
   if(presentModeCount not_eq 0)
   {
     mPresentModes.resize(presentModeCount);
 
-    getPhysicalDeviceSurfacePresentModesKHR(device,
-                                            surface,
-                                            &presentModeCount,
-                                            mPresentModes.data());
+    vkGetPhysicalDeviceSurfacePresentModesKHR(device,
+                                              surface,
+                                              &presentModeCount,
+                                              mPresentModes.data());
   }
 }

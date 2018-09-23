@@ -103,21 +103,21 @@ so::vk::SwapChain::SwapChain(SharedPtrLogicalDevice const& device,
   createInfo.clipped        = VK_TRUE;
   createInfo.oldSwapchain   = oldSwapChain;
 
-  VkResult const result(createSwapchainKHR(vkDevice,
-                                           &createInfo,
-                                           nullptr,
-                                           &mSwapChain));
+  VkResult const result(vkCreateSwapchainKHR(vkDevice,
+                                             &createInfo,
+                                             nullptr,
+                                             &mSwapChain));
 
   if(result not_eq VK_SUCCESS)
     THROW_EXCEPTION("failed to create swap chain (" +
                     std::to_string(result) +
                     ").");
 
-  getSwapchainImagesKHR(vkDevice, mSwapChain, &imageCount, nullptr);
+  vkGetSwapchainImagesKHR(vkDevice, mSwapChain, &imageCount, nullptr);
   
   mSwapChainImages.resize(imageCount);
 
-  getSwapchainImagesKHR(vkDevice,
+  vkGetSwapchainImagesKHR(vkDevice,
                         mSwapChain,
                         &imageCount,
                         mSwapChainImages.data());
@@ -250,6 +250,8 @@ so::vk::SwapChain::destroyMembers()
   VkDevice device(mDevice->getVkDevice());
 
   if((mSwapChain not_eq VK_NULL_HANDLE) and (device not_eq VK_NULL_HANDLE))
-    destroySwapchainKHR(device, mSwapChain, nullptr);
+  {
+    vkDestroySwapchainKHR(device, mSwapChain, nullptr);
+  }
 }
 

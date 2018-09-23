@@ -52,8 +52,6 @@
 
 #include "soVkSurface.hpp"
 
-#include "soVulkan.hpp"
-
 namespace so {
 namespace vk {
     

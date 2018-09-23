@@ -50,18 +50,18 @@
 
 #pragma once
 
-#include <soVulkan.hpp>
+#include <vulkan/vulkan.hpp>
 
 #include <memory>
 #include <vector>
 
 #ifdef NDEBUG
-constexpr bool ENABLE_VALIDATION_LAYERS(false);
+constexpr bool ENABLE_VALIDATION_LAYERS{ false };
 #else
-constexpr bool ENABLE_VALIDATION_LAYERS(true);
+constexpr bool ENABLE_VALIDATION_LAYERS{ true };
 #endif
 
-extern const std::vector<char const*> VALIDATION_LAYERS;
+extern std::array<char const*, 1> const VALIDATION_LAYERS;
 
 namespace so {
 namespace vk {
@@ -95,7 +95,7 @@ Instance : public std::enable_shared_from_this<Instance>
     inline void setVkInstance(VkInstance instance) { mInstance = instance; }
 
   private:
-    VkInstance mInstance;
+    VkInstance mInstance{ VK_NULL_HANDLE };
 
     std::vector<const char*>
     getRequiredExtensions();

@@ -62,10 +62,10 @@ so::vk::ImageViews::ImageViews(SharedPtrLogicalDevice const& device,
     createInfo.subresourceRange.baseArrayLayer = 0;
     createInfo.subresourceRange.layerCount     = 1;
 
-    VkResult const result(createImageView(device->getVkDevice(),
-                                          &createInfo,
-                                          nullptr,
-                                          &mImageViews[i]));
+    VkResult const result(vkCreateImageView(device->getVkDevice(),
+                                            &createInfo,
+                                            nullptr,
+                                            &mImageViews[i]));
 
     if(result not_eq VK_SUCCESS)
       THROW_EXCEPTION("failed to create image views (" +
@@ -126,10 +126,10 @@ so::vk::ImageViews::addImageViews(std::vector<VkImage> const& images,
     createInfo.subresourceRange.baseArrayLayer = 0;
     createInfo.subresourceRange.layerCount     = 1;
 
-    VkResult const result(createImageView(mDevice->getVkDevice(),
-                                          &createInfo,
-                                          nullptr,
-                                          &mImageViews[i]));
+    VkResult const result(vkCreateImageView(mDevice->getVkDevice(),
+                                            &createInfo,
+                                            nullptr,
+                                            &mImageViews[i]));
 
     if(result not_eq VK_SUCCESS)
       THROW_EXCEPTION("failed to create image view (" +
@@ -144,7 +144,11 @@ so::vk::ImageViews::destroyMembers()
   VkDevice device(mDevice->getVkDevice());
 
   if(device not_eq VK_NULL_HANDLE)
+  {  
     for(uindex i(0); i < mImageViews.size(); increment(i))
-      destroyImageView(device, mImageViews[i], nullptr);
+    {
+      vkDestroyImageView(device, mImageViews[i], nullptr);
+    }
+  }
 }
 

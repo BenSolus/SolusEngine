@@ -51,10 +51,10 @@ so::vk::ShaderModule::ShaderModule(SharedPtrLogicalDevice const& device,
   createInfo.codeSize = shaderCode.size();
   createInfo.pCode    = reinterpret_cast<uint32_t const*>(shaderCode.data());
 
-  VkResult const result(createShaderModule(device->getVkDevice(),
-                                           &createInfo,
-                                           nullptr,
-                                           &mShaderModule));
+  VkResult const result(vkCreateShaderModule(device->getVkDevice(),
+                                             &createInfo,
+                                             nullptr,
+                                             &mShaderModule));
 
   if(result not_eq VK_SUCCESS)
     THROW_EXCEPTION("failed to create shader module (" +
@@ -91,6 +91,8 @@ so::vk::ShaderModule::destroy_members()
   VkDevice device(mDevice->getVkDevice());
 
   if((mShaderModule not_eq VK_NULL_HANDLE) and (device not_eq VK_NULL_HANDLE))
-    destroyShaderModule(device, mShaderModule, nullptr);
+  {
+    vkDestroyShaderModule(device, mShaderModule, nullptr);
+  }
 }
 

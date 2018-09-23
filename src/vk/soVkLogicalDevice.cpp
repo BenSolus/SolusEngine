@@ -20,11 +20,11 @@
  * IN THE SOFTWARE.
  */
 
-#include <soVkLogicalDevice.hpp>
+#include "soVkLogicalDevice.hpp"
 
-#include <soVkQueueFamilyIndices.hpp>
+#include "soVkQueueFamilyIndices.hpp"
 
-#include <soException.hpp>
+#include "soException.hpp"
 
 #include <set>
 
@@ -89,10 +89,10 @@ so::vk::LogicalDevice::LogicalDevice(SharedPtrInstance const& instance,
   } else
       createInfo.enabledLayerCount = 0;
 
-  VkResult const result(createDevice(mPhysicalDevice,
-                                     &createInfo,
-                                     nullptr,
-                                     &mDevice));
+  VkResult const result(vkCreateDevice(mPhysicalDevice,
+                                       &createInfo,
+                                       nullptr,
+                                       &mDevice));
 
   delete deviceFeatures;
   delete queuePriority;
@@ -102,14 +102,15 @@ so::vk::LogicalDevice::LogicalDevice(SharedPtrInstance const& instance,
                     std::to_string(result) +
                     ").");
 
-  getDeviceQueue(mDevice,
-                 static_cast<uint32_t>(indices.getGraphicsFamily()),
-                 0,
-                 &mGraphicsQueue);
-  getDeviceQueue(mDevice,
-                 static_cast<uint32_t>(indices.getPresentFamily()),
-                 0,
-                 &mPresentQueue);
+  vkGetDeviceQueue(mDevice,
+                   static_cast<uint32_t>(indices.getGraphicsFamily()),
+                   0,
+                   &mGraphicsQueue);
+  
+  vkGetDeviceQueue(mDevice,
+                   static_cast<uint32_t>(indices.getPresentFamily()),
+                   0,
+                   &mPresentQueue);
 }
 
 so::vk::LogicalDevice::~LogicalDevice() noexcept { destroyMembers(); }
@@ -140,7 +141,9 @@ void
 so::vk::LogicalDevice::destroyMembers()
 {
   if(mDevice not_eq VK_NULL_HANDLE)
-    destroyDevice(mDevice, nullptr);
+  {
+    vkDestroyDevice(mDevice, nullptr);
+  }
 }
 
 so::vk::SharedPtrLogicalDevice const

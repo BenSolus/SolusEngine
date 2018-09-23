@@ -20,12 +20,12 @@
  * IN THE SOFTWARE.
  */
 
-#include <soVkPipeline.hpp>
+#include "soVkPipeline.hpp"
 
-#include <soVkShaderModule.hpp>
+#include "soVkShaderModule.hpp"
 
-#include <soException.hpp>
-#include <soFileSystem.hpp>
+#include "soException.hpp"
+#include "soFileSystem.hpp"
 
 so::vk::Pipeline::Pipeline()
   : mPipeline(VK_NULL_HANDLE),
@@ -95,9 +95,13 @@ so::vk::Pipeline::destroyMembers()
   if(device not_eq VK_NULL_HANDLE)
   {
     if(mPipeline not_eq VK_NULL_HANDLE)
-      destroyPipeline(device, mPipeline, nullptr);
+    { 
+      vkDestroyPipeline(device, mPipeline, nullptr);
+    }
 
     if(mPipelineLayout not_eq VK_NULL_HANDLE)
-     destroyPipelineLayout(device, mPipelineLayout, nullptr);
+    {
+      vkDestroyPipelineLayout(device, mPipelineLayout, nullptr);
+    }
   }
 }
