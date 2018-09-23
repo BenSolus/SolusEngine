@@ -70,13 +70,21 @@ before_install:
 
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ../..; fi
 
+  ### Install SPIRV-Headers
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/SPIRV-Headers.git; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then mkdir -p SPIRV-Headers/build; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd SPIRV-Headers/build; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cmake -DCMAKE_BUILD_TYPE=Release ..; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo cmake --build . --target install; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ../..; fi
+
   ### Install SPIRV-Tools
   - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/SPIRV-Tools.git; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd SPIRV-Tools; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then git checkout tags/v2018.5; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then mkdir -p build; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd build; fi
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then cmake ..; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cmake -DCMAKE_BUILD_TYPE=Release ..; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo cmake --build . --target install; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ../..; fi
   

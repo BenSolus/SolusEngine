@@ -20,12 +20,12 @@
  * IN THE SOFTWARE.
  */
 
-#include <soVkSwapChain.hpp>
+#include "soVkSwapChain.hpp"
 
-#include <soVkQueueFamilyIndices.hpp>
-#include <soVkSwapChainSupportDetails.hpp>
+#include "soVkQueueFamilyIndices.hpp"
+#include "soVkSwapChainSupportDetails.hpp"
 
-#include <soException.hpp>
+#include "soException.hpp"
 
 so::vk::SwapChain::SwapChain()
   : mSwapChain(VK_NULL_HANDLE),
@@ -38,8 +38,7 @@ so::vk::SwapChain::SwapChain()
 {}
 
 so::vk::SwapChain::SwapChain(SharedPtrLogicalDevice const& device,
-                             VkSurfaceKHR                  surface,
-                             GLFWwindow*                   window,
+                             Surface                const& surface, 
                              VkSwapchainKHR                oldSwapChain)
   : SwapChain()
 {
@@ -48,14 +47,15 @@ so::vk::SwapChain::SwapChain(SharedPtrLogicalDevice const& device,
   VkDevice         vkDevice(device->getVkDevice());
   VkPhysicalDevice physicalDevice(device->getVkPhysicalDevice());
 
-  SwapChainSupportDetails swapChainSupport(physicalDevice, surface);
+  SwapChainSupportDetails swapChainSupport(physicalDevice,
+                                           surface.getVkSurfaceKHR());
 
   VkSurfaceFormatKHR surfaceFormat
     (chooseSwapSurfaceFormat(swapChainSupport.getFormats()));
   VkPresentModeKHR presentMode
     (chooseSwapPresentMode(swapChainSupport.getPresentModes()));
   VkExtent2D extent(chooseSwapExtent(swapChainSupport.getCapabilities(),
-                                     window));
+                                     surface));
 
   uint32_t imageCount =
     swapChainSupport.getCapabilities().minImageCount + 1;
@@ -72,7 +72,7 @@ so::vk::SwapChain::SwapChain(SharedPtrLogicalDevice const& device,
   VkSwapchainCreateInfoKHR createInfo = {};
 
   createInfo.sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-  createInfo.surface          = surface;
+  createInfo.surface          = surface.getVkSurfaceKHR();
   createInfo.minImageCount    = imageCount;
   createInfo.imageFormat      = surfaceFormat.format;
   createInfo.imageColorSpace  = surfaceFormat.colorSpace;
@@ -193,7 +193,7 @@ so::vk::SwapChain::chooseSwapSurfaceFormat
 
 VkPresentModeKHR
 so::vk::SwapChain::chooseSwapPresentMode
-  (std::vector<VkPresentModeKHR> const availablePresentModes)
+  (std::vector<VkPresentModeKHR> const& availablePresentModes)
 {
   VkPresentModeKHR bestMode = VK_PRESENT_MODE_FIFO_KHR;
 
@@ -208,16 +208,19 @@ so::vk::SwapChain::chooseSwapPresentMode
 
 VkExtent2D
 so::vk::SwapChain::chooseSwapExtent
-  (const VkSurfaceCapabilitiesKHR& capabilities, GLFWwindow* window)
+  (VkSurfaceCapabilitiesKHR const& capabilities, Surface const& surface)
 {
-  if(capabilities.currentExtent.width not_eq
-     std::numeric_limits<uint32_t>::max())
+  uint32_t const widthCapabilities{ capabilities.currentExtent.width };
+
+  if(widthCapabilities not_eq std::numeric_limits<uint32_t>::max())
+  {
     return capabilities.currentExtent;
+  }
   else
   {
-    int width, height;
+    size_type width, height;
 
-    glfwGetWindowSize(window, &width, &height);
+    surface.getWindowSize(width, height);
 
     VkExtent2D actualExtent =
     {

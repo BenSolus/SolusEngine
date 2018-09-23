@@ -24,6 +24,8 @@
 
 #include <soDefinitions.hpp>
 
+void error_callback(int error, char const* description);
+
 void error_callback(int error, char const* description)
 { 
   (void) error;
@@ -79,6 +81,18 @@ so::base::Surface::operator=(Surface&& other) noexcept
   other.mWindow        = nullptr;
 
   return *this;
+}
+
+void
+so::base::Surface::getWindowSize(size_type& width, size_type& height)
+{
+  int iWidth{ -1 };
+  int iHeight{ -1 };
+
+  glfwGetWindowSize(mWindow, &iWidth, &iHeight);
+
+  width  = static_cast<size_type>(iWidth);
+  height = static_cast<size_type>(iHeight);
 }
 
 void

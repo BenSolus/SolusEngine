@@ -102,7 +102,10 @@ Surface
 		pollEvents();
 
 		VkSurfaceKHR
-    getVkSurfaceKHR();
+    getVkSurfaceKHR() const;
+
+    void
+    getWindowSize(size_type& width, size_type& height) const;
 
     GLFWwindow*
     getGLFWwindow()

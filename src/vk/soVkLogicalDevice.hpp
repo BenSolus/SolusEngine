@@ -69,7 +69,7 @@ LogicalDevice : public PhysicalDevice,
 
     LogicalDevice();
 
-    LogicalDevice(SharedPtrInstance const& device, VkSurfaceKHR surface);
+    LogicalDevice(SharedPtrInstance const& device, Surface const& surface);
 
     LogicalDevice(LogicalDevice const& other) = delete;
 

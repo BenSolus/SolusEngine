@@ -24,8 +24,8 @@
 
 #include <vector>
 
-so::vk::QueueFamilyIndices::QueueFamilyIndices(VkPhysicalDevice device,
-                                               VkSurfaceKHR     surface)
+so::vk::QueueFamilyIndices::QueueFamilyIndices(VkPhysicalDevice        device,
+                                               Surface          const& surface)
   : QueueFamilyIndices()
 {
   QueueFamilyIndices indices;
@@ -55,7 +55,7 @@ so::vk::QueueFamilyIndices::QueueFamilyIndices(VkPhysicalDevice device,
 
     getPhysicalDeviceSurfaceSupportKHR(device,
                                        static_cast<uint32_t>(i),
-                                       surface,
+                                       surface.getVkSurfaceKHR(),
                                        &presentSupport);
 
     if((queueCount > 0) and presentSupport)

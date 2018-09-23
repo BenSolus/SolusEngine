@@ -36,7 +36,7 @@ so::vk::LogicalDevice::LogicalDevice()
 {}
 
 so::vk::LogicalDevice::LogicalDevice(SharedPtrInstance const& instance,
-                                      VkSurfaceKHR             surface)
+                                     Surface           const& surface)
   : PhysicalDevice(instance, surface),
     mDevice(VK_NULL_HANDLE),
     mGraphicsQueue(VK_NULL_HANDLE),

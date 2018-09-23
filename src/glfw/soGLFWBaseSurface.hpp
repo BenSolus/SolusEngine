@@ -83,6 +83,9 @@ Surface
 
     inline void pollEvents() { }
 
+    void
+    getWindowSize(size_type& width, size_type& height);
+
     inline auto getGLFWwindow() { return mWindow; }
 
   protected:

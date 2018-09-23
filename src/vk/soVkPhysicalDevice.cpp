@@ -39,7 +39,7 @@ so::vk::PhysicalDevice::PhysicalDevice()
 {}
 
 so::vk::PhysicalDevice::PhysicalDevice(SharedPtrInstance const& instance,
-                                       VkSurfaceKHR             surface)
+                                       Surface           const& surface)
   : mPhysicalDevice(VK_NULL_HANDLE), mInstance(instance)
 {
   VkInstance vkInstance(instance->getVkInstance());
@@ -56,11 +56,13 @@ so::vk::PhysicalDevice::PhysicalDevice(SharedPtrInstance const& instance,
   enumeratePhysicalDevices(vkInstance, &deviceCount, devices.data());
 
   for(auto const& device : devices)
+  {
     if(isDeviceSuitable(device, surface))
     {
       mPhysicalDevice = device;
       break;
     }
+  }
 
   if(mPhysicalDevice is_eq VK_NULL_HANDLE)
     THROW_EXCEPTION("failed to find a suitable GPU!");
@@ -113,8 +115,8 @@ so::vk::PhysicalDevice::checkDeviceExtensionSupport(VkPhysicalDevice device)
 }
 
 bool
-so::vk::PhysicalDevice::isDeviceSuitable(VkPhysicalDevice device,
-                                         VkSurfaceKHR     surface)
+so::vk::PhysicalDevice::isDeviceSuitable(VkPhysicalDevice        device,
+                                         Surface          const& surface)
 {
   QueueFamilyIndices indices(device, surface);
 

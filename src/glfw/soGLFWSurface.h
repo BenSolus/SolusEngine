@@ -91,6 +91,11 @@ soVkGLFWSurfaceWindowIsClosed(void* surface);
 void
 soVkGLFWSurfacePollEvents();
 
+void
+soGLFWSurfaceGetWindowSize(void*          surface,
+                           so::size_type* width,
+                           so::size_type* height);
+
 #ifdef __cplusplus
 
 } // extern "C"

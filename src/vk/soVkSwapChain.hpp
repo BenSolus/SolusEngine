@@ -50,13 +50,11 @@
 
 #pragma once
 
-#include <soVkLogicalDevice.hpp>
+#include "soVkImageViews.hpp"
+#include "soVkLogicalDevice.hpp"
+#include "soVkPipeline.hpp"
+#include "soVkSurface.hpp"
 
-#include <soVkImageViews.hpp>
-#include <soVkPipeline.hpp>
-
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 
 #include <vector>
 
@@ -70,8 +68,7 @@ SwapChain
     SwapChain();
 
     SwapChain(SharedPtrLogicalDevice const& device,
-              VkSurfaceKHR                  surface,
-              GLFWwindow*                   window,
+              Surface const&                surface, 
               VkSwapchainKHR                oldSwapChain = VK_NULL_HANDLE);
 
     SwapChain(SwapChain const& other) = delete;
@@ -111,15 +108,15 @@ SwapChain
 
     VkSurfaceFormatKHR
     chooseSwapSurfaceFormat
-      (const std::vector<VkSurfaceFormatKHR>& availableFormats);
+      (std::vector<VkSurfaceFormatKHR> const& availableFormats);
 
     VkPresentModeKHR
     chooseSwapPresentMode
-      (const std::vector<VkPresentModeKHR> availablePresentModes);
+      (std::vector<VkPresentModeKHR> const& availablePresentModes);
 
     VkExtent2D
     chooseSwapExtent(VkSurfaceCapabilitiesKHR const& capabilities,
-                     GLFWwindow*                     window);
+                     Surface                  const& surface);
 
     void
     destroyMembers();

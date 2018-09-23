@@ -50,7 +50,8 @@
 
 #pragma once
 
-#include <soVkInstance.hpp>
+#include "soVkInstance.hpp"
+#include "soVkSurface.hpp"
 
 extern const std::vector<const char*> DEVICE_EXTENSIONS;
 
@@ -67,7 +68,7 @@ PhysicalDevice
       (VkPhysicalDevice device,
        SharedPtrInstance const& instance = Instance::SHARED_PTR_NULL_INSTANCE);
 
-    PhysicalDevice(SharedPtrInstance const& instance, VkSurfaceKHR surface);
+    PhysicalDevice(SharedPtrInstance const& instance, Surface const& surface);
 
     PhysicalDevice(PhysicalDevice const& other) = delete;
 
@@ -91,7 +92,7 @@ PhysicalDevice
     checkDeviceExtensionSupport(VkPhysicalDevice device);
 
     bool
-    isDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface);
+    isDeviceSuitable(VkPhysicalDevice device, Surface const& surface);
 
 }; // class PhysicalDevice
 

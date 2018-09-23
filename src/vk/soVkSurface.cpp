@@ -241,6 +241,16 @@ so::vk::Surface::Impl
       getModule()(7, VoidReturn::getVoidReturn());
     }
 
+    void
+    getWindowSize(size_type& width, size_type& height)
+    {
+      auto& module{ getModule() };
+
+      auto  handle{ getHandle() };
+
+      module(8, VoidReturn::getVoidReturn(), handle, &width, &height);
+    }
+
     std::string const&
     getName()
     {
@@ -280,7 +290,7 @@ so::vk::Surface::Surface()
     mInstance(Instance::SHARED_PTR_NULL_INSTANCE)
 {}
 
-so::vk::Surface::~Surface() = default;
+so::vk::Surface::~Surface() noexcept = default;
 
 void
 so::vk::Surface::initialize()
@@ -321,9 +331,15 @@ so::vk::Surface::pollEvents()
 }
 
 VkSurfaceKHR
-so::vk::Surface::getVkSurfaceKHR()
+so::vk::Surface::getVkSurfaceKHR() const
 {
   return mPImpl->getVkSurfaceKHR();
+}
+
+void
+so::vk::Surface::getWindowSize(size_type& width, size_type& height) const
+{
+  mPImpl->getWindowSize(width, height);
 }
 
 void

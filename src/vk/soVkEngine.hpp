@@ -95,11 +95,9 @@ Engine
 
         vk::SharedPtrLogicalDevice device
           (std::make_shared<vk::LogicalDevice>
-            (instance, mSurface.getVkSurfaceKHR()));
+            (instance, mSurface));
 
-        mSwapChain     = vk::SwapChain(device,
-                                       mSurface.getVkSurfaceKHR(),
-                                       mSurface.getGLFWwindow());
+        mSwapChain     = vk::SwapChain(device, mSurface);
       }
       catch(...)
       {

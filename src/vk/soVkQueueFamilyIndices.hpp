@@ -50,7 +50,9 @@
 
 #pragma once
 
-#include <soVulkan.hpp>
+#include "soVkSurface.hpp"
+
+#include "soVulkan.hpp"
 
 namespace so {
 namespace vk {
@@ -61,7 +63,7 @@ QueueFamilyIndices
   public:
     QueueFamilyIndices() : mGraphicsFamily(-1), mPresentFamily(-1) {}
 
-    QueueFamilyIndices(VkPhysicalDevice device, VkSurfaceKHR surface);
+    QueueFamilyIndices(VkPhysicalDevice device, Surface const& surface);
 
     inline auto getGraphicsFamily() { return mGraphicsFamily; }
 

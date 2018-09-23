@@ -103,3 +103,10 @@ soVkGLFWSurfacePollEvents()
   glfwPollEvents(); 
 }
 
+void
+soGLFWSurfaceGetWindowSize(void*          surface,
+                           so::size_type* width,
+                           so::size_type* height)
+{
+  static_cast<so::vk::GLFWSurface*>(surface)->getWindowSize(*width, *height);
+}

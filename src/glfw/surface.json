@@ -44,8 +44,12 @@
         {
           "symbol" : "soVkGLFWSurfacePollEvents",
           "index"  : 7
+        },
+        {
+          "symbol" : "soGLFWSurfaceGetWindowSize",
+          "index"  : 8
         }
-      ] 
+      ]
     }
   ]
 }
