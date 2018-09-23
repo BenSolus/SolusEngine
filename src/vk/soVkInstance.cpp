@@ -73,8 +73,6 @@ so::vk::Instance::Instance(std::string const& applicationName,
     std::cout << "<INFO>   " << extension << '\n';
   }
 
-  std::cout << extensions.size() << '\n';
-
   createInfo.enabledExtensionCount   =
     static_cast<uint32_t>(extensions.size());
   createInfo.ppEnabledExtensionNames = extensions.data();

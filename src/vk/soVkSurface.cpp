@@ -26,216 +26,272 @@
 
 #include <regex>
 
-so::vk::SurfaceBackend::SurfaceBackend()
-  : mModule(), mHandle(nullptr)
-{}
-
-so::vk::SurfaceBackend::SurfaceBackend(Path const& config)
-  : mModule(config, EngineBackend::Vulkan), mHandle(nullptr)
-{}
-
-so::vk::SurfaceBackend::SurfaceBackend(SurfaceBackend&& other) noexcept
-  : mModule(std::move(other.mModule)), mHandle(other.mHandle)
+class
+so::vk::Surface::Impl
 {
-  other.mHandle = nullptr;
-}
+    using SurfaceHandle    = void*;
+    using SurfaceProviders =
+            std::vector<std::pair<Module, SurfaceHandle>>;
 
-so::vk::SurfaceBackend::~SurfaceBackend() noexcept
-{
-  if(mModule.isAvailable())
-    mModule(1, VoidReturn::getVoidReturn(), mHandle);
-}
+  public:
+    Impl() : mProviders(0)
+    {
+      Path const configPath
+                   { getBinaryDir() / "data" / "backends" / "surface" };
 
-void
-so::vk::SurfaceBackend::initialize()
-{
-  char const* error;
+      std::regex const match{ "(.*).json$" };
+
+      for(auto const& file : DirectoryIterator{ configPath })
+      {
+        so::Path const config{ file.path() };
+
+        if(std::regex_match(config.string(), match))
+        {
+          mProviders.push_back({ Module(config, EngineBackend::Vulkan),
+                                 nullptr });
+        }
+      }
+    }
+
+    Impl(Impl const& other) = delete;
+
+    Impl(Impl&& other) noexcept = delete;
+
+    ~Impl() noexcept
+    {
+      for(auto& provider: mProviders)
+        if(provider.first.isAvailable())
+          provider.first(1, VoidReturn::getVoidReturn(), provider.second);
+    }
+
+    Impl&
+    operator=(Impl const& other) = delete;
+
+    Impl&
+    operator=(Impl&& other) noexcept = delete;
+
+    void
+    initialize()
+    {
+      bool   atLeastOneValidBackend(false);
+  
+      index idx(0);
+  
+      for(auto& provider : mProviders)
+      {
+        if(provider.first.isAvailable())
+        {
+          try
+          {
+          std::string verbose("<VERBOSE> Starting initialization of surface "
+                              "provider '");
+
+          verbose += provider.first.getName();
+          verbose += "' for engine backend 'Vulkan'.\n";
+
+          std::cout << verbose;
+
+          char const* error;
  
-  mModule(0, error, &mHandle);
+          provider.first(0, error, &provider.second);
 
-  if(error not_eq nullptr)
-    THROW_EXCEPTION(error); 
-}
+          if(error not_eq nullptr)
+            THROW_EXCEPTION(error);
 
-std::vector<char const*>
-so::vk::SurfaceBackend::getInstanceExtensions() const
-{
-  char const*  error{ nullptr };
-  char const** extensions{ nullptr };
-  size_type    count;
+          verbose  = "<VERBOSE> Initialized surface provider '";
 
-  mModule(2, error, mHandle, &extensions, &count);
+          verbose += provider.first.getName();
+          verbose += "' for engine backend 'Vulkan'.\n";
 
-  if(error not_eq nullptr)
-  {
-    THROW_EXCEPTION(error);
-  }
+          std::cout << verbose;
 
-  std::vector<char const*> extensionVector(extensions, extensions + count);
+          if(not atLeastOneValidBackend)
+          {
+            mCurrentProvider       = idx;
+          
+            atLeastOneValidBackend = true;
 
-  return extensionVector;
-}
+            verbose  = "<VERBOSE> Using surface provider '";
+          
+            verbose += provider.first.getName();
+            verbose += "' in engine backend 'Vulkan'.\n";
 
-so::return_t
-so::vk::SurfaceBackend::createWindow(std::string const& title,
-                                     size_type   const  width,
-                                     size_type   const  height)
-{
-  return_t result{ failure };
+            std::cout << verbose;
+          }
+          }
+          catch(...)
+          {
+          std::string warning("<WARNING> Failed initialization of surface "
+                              " backend '");
 
-  mModule(3, result, mHandle, title, width, height);
+          warning += provider.first.getName();
+          warning += "' for engine backend 'Vulkan'.\n";
 
-  return result;
-}
+          std::cerr << warning;
+          }
+        }
 
-so::return_t
-so::vk::SurfaceBackend::createSurface(VkInstance instance)
-{
-  return_t result{ failure };
+        ++idx;
+      }
 
-  mModule(4, result, mHandle, instance);
+      if(not atLeastOneValidBackend)
+      {
+        THROW_EXCEPTION("Couldn't initialize any surface provider.");
+      }
 
-  return result;
-}
+    }
 
-VkSurfaceKHR
-so::vk::SurfaceBackend::getVkSurfaceKHR()
-{
-  VkSurfaceKHR surface;
+    std::vector<char const*>
+    getInstanceExtensions() const
+    {
+      std::vector<char const*> allProviderInstanceExtensions;
 
-  mModule(5, surface, mHandle);
+      for(auto const& provider : mProviders)
+      {
+        char const*  error{ nullptr };
+        char const** extensions{ nullptr };
+        size_type    count;
 
-  return surface;
-}
+        provider.first(2, error, provider.second, &extensions, &count);
 
-bool
-so::vk::SurfaceBackend::windowIsClosed()
-{
-  bool isClosed(true);
+        if(error not_eq nullptr)
+        {
+          THROW_EXCEPTION(error);
+        }
 
-  mModule(6, isClosed, mHandle);
+        std::vector<char const*> providerInstanceExtensions
+                                   { extensions, extensions + count };
+                
+        allProviderInstanceExtensions.insert
+                                        (allProviderInstanceExtensions.end(),
+                                         providerInstanceExtensions.begin(),
+                                         providerInstanceExtensions.end());
+      }
 
-  return isClosed;
-}
+      return allProviderInstanceExtensions;
+    }
 
-void
-so::vk::SurfaceBackend::pollEvents()
-{
-  mModule(7, VoidReturn::getVoidReturn());
-}
+    return_t
+    createWindow(std::string const& title,
+                 size_type   const  width,
+                 size_type   const  height)
+    {
+      auto const idx{ static_cast<SurfaceProviders::size_type>
+                        (mCurrentProvider) };
 
-std::string const&
-so::vk::SurfaceBackend::getName()
-{
-  return mModule.getName();
-}
+      auto& module{ mProviders[idx].first };
 
-bool
-so::vk::SurfaceBackend::isAvailable()
-{
-  return mModule.isAvailable();
-}
+      auto  handle{ mProviders[idx].second };
+      
+      return_t result{ failure };
+
+      module(3, result, handle, title, width, height);
+
+      return result;
+    }
+
+    return_t
+    createSurface(VkInstance instance)
+    {
+      auto const idx{ static_cast<SurfaceProviders::size_type>
+                        (mCurrentProvider) };
+
+      auto& module{ mProviders[idx].first };
+
+      auto  handle{ mProviders[idx].second };
+ 
+      return_t result{ failure };
+
+      module(4, result, handle, instance);
+
+      return result;
+    }
+
+    VkSurfaceKHR
+    getVkSurfaceKHR()
+    {
+      auto& module{ getModule() };
+      
+      auto  handle{ getHandle() };
+
+      VkSurfaceKHR surface;
+
+      module(5, surface, handle);
+
+      return surface;
+    }
+
+    bool
+    windowIsClosed()
+    {
+      auto& module{ getModule() };
+      
+      auto  handle{ getHandle() };
+
+      bool isClosed(true);
+
+      module(6, isClosed, handle);
+
+      return isClosed;
+    }
+
+    void
+    pollEvents()
+    {
+      getModule()(7, VoidReturn::getVoidReturn());
+    }
+
+    std::string const&
+    getName()
+    {
+      return getModule().getName();
+    }
+
+    bool
+    isAvailable()
+    {
+      return getModule().isAvailable();
+    }
+
+  private:
+    SurfaceProviders mProviders{ 0 };
+
+    index            mCurrentProvider{ -1 };
+
+    inline Module&
+    getModule()
+    {
+      auto idx{ static_cast<SurfaceProviders::size_type>(mCurrentProvider) };
+
+      return mProviders[idx].first;
+    }
+
+    inline SurfaceHandle
+    getHandle()
+    {
+      auto idx{ static_cast<SurfaceProviders::size_type>(mCurrentProvider) };
+
+      return mProviders[idx].second;
+    }
+};
 
 so::vk::Surface::Surface()
-  : mBackends(0),
-    mActiveBackend(0),
+  : mPImpl(std::make_unique<Impl>()),
     mInstance(Instance::SHARED_PTR_NULL_INSTANCE)
-{
-  Path const configPath(getBinaryDir() / "data" / "backends" / "surface");
+{}
 
-  for(auto const& file : DirectoryIterator(configPath))
-  {
-    std::regex const match("(.*).json$");
-
-    so::Path const config(file.path());
-
-    if(std::regex_match(config.string(), match))
-    {
-      mBackends.push_back(SurfaceBackend(config));    	
-    }
-  }
-}
+so::vk::Surface::~Surface() = default;
 
 void
 so::vk::Surface::initialize()
 {
-  bool   atLeastOneValidBackend(false);
-  
-  index idx(0);
-  
-  for(auto& backend : mBackends)
-  {
-    if(backend.isAvailable())
-    {
-      try
-      {
-        std::string verbose("<VERBOSE> Starting initialization of surface "
-                            "backend '");
-
-        verbose += backend.getName();
-        verbose += "' for engine backend 'Vulkan'.\n";
-
-        std::cout << verbose;
-
-        backend.initialize();
-
-        verbose  = "<VERBOSE> Initialized surface backend '";
-
-        verbose += backend.getName();
-        verbose += "' for engine backend 'Vulkan'.\n";
-
-        std::cout << verbose;
-
-        if(not atLeastOneValidBackend)
-        {
-          mActiveBackend         = idx;
-          
-          atLeastOneValidBackend = true;
-
-          verbose  = "<VERBOSE> Using surface backend '";
-          
-          verbose += backend.getName();
-          verbose += "' in engine backend 'Vulkan'.\n";
-
-          std::cout << verbose;
-        }
-      }
-      catch(...)
-      {
-        std::string warning("<WARNING> Failed initialization of surface "
-                            " backend '");
-
-        warning += backend.getName();
-        warning += "' for engine backend 'Vulkan'.\n";
-
-        std::cerr << warning;
-      }
-    }
-
-    ++idx;
-  }
-
-  if(not atLeastOneValidBackend)
-  {
-    THROW_EXCEPTION("Couldn't initialize any surface backend.");
-  }
+  mPImpl->initialize();
 }
 
 std::vector<char const*>
 so::vk::Surface::getInstanceExtensions()
 {
-  std::vector<char const*> allInstanceExtensions(0);
-
-  for(auto const& backend : mBackends)
-  {
-    auto const backendInstanceExtensions(backend.getInstanceExtensions());
-
-    allInstanceExtensions.insert(allInstanceExtensions.end(),
-                                 backendInstanceExtensions.begin(),
-                                 backendInstanceExtensions.end());
-  }
-
-  return allInstanceExtensions;
+  return mPImpl->getInstanceExtensions();
 }
 
 so::return_t
@@ -243,47 +299,31 @@ so::vk::Surface::createWindow(std::string const& title,
                               size_type   const  width,
                               size_type   const  height)
 {
-  auto const idx{ static_cast<Backends::size_type>(mActiveBackend) };
-
-  return mBackends[idx].createWindow(title, width, height);
+  return mPImpl->createWindow(title, width, height);
 }
 
 so::return_t
 so::vk::Surface::createSurface()
 {
-  auto const idx{ static_cast<Backends::size_type>(mActiveBackend) };
-
-  return mBackends[idx].createSurface(mInstance->getVkInstance());
+  return mPImpl->createSurface(mInstance->getVkInstance());
 }
 
 bool
 so::vk::Surface::windowIsClosed()
-{
-  auto const idx{ static_cast<Backends::size_type>(mActiveBackend) };
-  
-  return mBackends[idx].windowIsClosed();
+{ 
+  return mPImpl->windowIsClosed();
 }
 
 void
 so::vk::Surface::pollEvents()
 {
-  auto const idx{ static_cast<Backends::size_type>(mActiveBackend) };
-  
-  mBackends[idx].pollEvents();
+  mPImpl->pollEvents();
 }
 
 VkSurfaceKHR
 so::vk::Surface::getVkSurfaceKHR()
 {
-  auto const idx{ static_cast<Backends::size_type>(mActiveBackend) };
-
-  return mBackends[idx].getVkSurfaceKHR();
-}
-
-GLFWwindow*
-so::vk::Surface::getGLFWwindow()
-{
-  return nullptr;
+  return mPImpl->getVkSurfaceKHR();
 }
 
 void

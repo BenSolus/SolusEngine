@@ -70,6 +70,16 @@ before_install:
 
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ../..; fi
 
+  ### Install SPIRV-Tools
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/SPIRV-Tools.git; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd SPIRV-Tools; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then git checkout tags/v2018.5; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then mkdir -p build; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd build; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cmake ..; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo cmake --build . --target install; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ../..; fi
+  
   ### Install Vulkan header files
   - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/Vulkan-Headers.git; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd Vulkan-Headers; fi

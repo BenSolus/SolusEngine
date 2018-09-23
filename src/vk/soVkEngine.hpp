@@ -111,13 +111,6 @@ Engine
 
     ~Engine() noexcept = default;
 
-    void
-    createSurface(std::string const& title = "soEngine (Vulkan backend)")
-    {
-      mSurface = std::move(vk::Surface(title,
-                                       mSurface.getSharedPtrInstance()));
-    }
-
     inline auto windowIsClosed() { return mSurface.windowIsClosed(); } 
 
     inline void surfacePollEvents() { mSurface.pollEvents(); } 

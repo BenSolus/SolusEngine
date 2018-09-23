@@ -62,69 +62,8 @@ namespace so {
 namespace vk {
 
 class
-SurfaceBackend
-{
-  using SurfaceHandle = void*;
-
-  public:
-    SurfaceBackend();
-
-    explicit SurfaceBackend(Path const& config);
-
-    SurfaceBackend(std::string const& title, SharedPtrInstance instance);
-
-    SurfaceBackend(SurfaceBackend const& other) = delete;
-
-    SurfaceBackend(SurfaceBackend&& other) noexcept;
-
-    ~SurfaceBackend() noexcept;
-
-    SurfaceBackend&
-    operator=(SurfaceBackend const& other) = delete;
-
-    SurfaceBackend&
-    operator=(SurfaceBackend&& other) noexcept = default;
-
-    void
-    initialize();
-
-    std::vector<char const*>
-    getInstanceExtensions() const;
-
-    return_t
-    createWindow(std::string const& title,
-                 size_type   const  width,
-                 size_type   const  height);
-
-    return_t
-    createSurface(VkInstance instance);
-
-    VkSurfaceKHR
-    getVkSurfaceKHR();
-
-    bool
-    windowIsClosed();
-
-    void
-    pollEvents();
-
-    std::string const&
-    getName();
-
-    bool
-    isAvailable();
-
-  private:
-    Module        mModule;
-
-    SurfaceHandle mHandle;
-};
-
-class
 Surface
 {
-	using Backends = std::vector<SurfaceBackend>;
-  
   public:
     Surface();
 
@@ -134,13 +73,13 @@ Surface
 
     Surface(Surface&& other) noexcept = delete;
 
-    ~Surface() noexcept = default;
+    ~Surface() noexcept;
 
     Surface&
     operator=(Surface const& other) = delete;
 
     Surface&
-    operator=(Surface&& other) noexcept = default;
+    operator=(Surface&& other) noexcept = delete;
 
     void
     initialize();
@@ -165,8 +104,11 @@ Surface
 		VkSurfaceKHR
     getVkSurfaceKHR();
 
-		GLFWwindow*
-    getGLFWwindow();
+    GLFWwindow*
+    getGLFWwindow()
+    {
+      return nullptr;
+    }
 
     void
     setSharedPtrInstance(SharedPtrInstance instance);
@@ -175,11 +117,11 @@ Surface
 		getSharedPtrInstance();
 
 	private:
-    Backends          mBackends;
+    class Impl;
 
-    index             mActiveBackend;
+    std::unique_ptr<Impl> mPImpl;
 
-    SharedPtrInstance mInstance;
+    SharedPtrInstance     mInstance;
 };
 
 } // namespace vk
