@@ -66,48 +66,11 @@ Engine
   public:
     Engine() : mDebugCallback(), mSurface(), mSwapChain() { }
 
-    Engine(std::string const& applicationName,
-           uint32_t    const  applicationVersion)
-      : Engine()
-    {
-      try
-      {
-        mSurface.initialize();
- 
-        vk::SharedPtrInstance instance
-          (std::make_shared<vk::Instance>
-            (applicationName,
-             applicationVersion,
-             mSurface.getInstanceExtensions()));
-
-        mDebugCallback = vk::DebugReportCallbackEXT(instance);
-
-        mSurface.setSharedPtrInstance(instance);
-
-        if(mSurface.createWindow(applicationName) not_eq success)
-          THROW_EXCEPTION("Failed to create window");
-
-        if(mSurface.createSurface() not_eq success)
-          THROW_EXCEPTION("Failed to create surface");
-
-        //mSurface.initialize();
-        //mSurface       = vk::Surface(applicationName, instance);
-
-        vk::SharedPtrLogicalDevice device
-          (std::make_shared<vk::LogicalDevice>
-            (instance, mSurface));
-
-        mSwapChain     = vk::SwapChain(device, mSurface);
-      }
-      catch(...)
-      {
-        THROW_NESTED_EXCEPTION("failed to create the Solus Engine.");
-        //throw so::Exception<std::exception>("TEST", PRETTY_FUNCTION_SIG);
-        //throw EXCEPTION("failed to create the Solus Engine!");
-      }
-    }
-
     ~Engine() noexcept = default;
+
+    so::return_t
+    initialize(std::string const& applicationName,
+               uint32_t    const  applicationVersion);
 
     inline auto windowIsClosed() { return mSurface.windowIsClosed(); } 
 

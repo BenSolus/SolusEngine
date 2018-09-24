@@ -58,8 +58,9 @@ enum class return_t
   failure
 };
 
-constexpr return_t success = return_t::success;
-
-constexpr return_t failure = return_t::failure;
-
 } // namespace so
+
+constexpr so::return_t success = so::return_t::success;
+
+constexpr so::return_t failure = so::return_t::failure;
+

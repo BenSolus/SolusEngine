@@ -52,7 +52,7 @@
 
 //#ifdef __cplusplus
 
-#include <soVkEngine.hpp>
+#include "soVkEngine.hpp"
 
 /*
 #endif // __cplusplus

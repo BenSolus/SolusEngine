@@ -98,6 +98,70 @@ so::vk::Instance::~Instance() noexcept
   }
 }
 
+so::return_t
+so::vk::Instance::initialize(std::string const& applicationName,
+                             uint32_t    const  applicationVersion,
+                             Extensions  const& additionalExtensions)
+{
+  if(ENABLE_VALIDATION_LAYERS and not checkValidationLayerSupport())
+  {
+    return failure;
+    // THROW_EXCEPTION("Validation layers requested, but not vailable!");
+  }
+
+  std::unique_ptr<VkApplicationInfo> 
+    appInfo{ std::make_unique<VkApplicationInfo>() };
+
+  // VkApplicationInfo* appInfo{ new VkApplicationInfo({}) };
+
+  appInfo->sType               = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+  appInfo->pApplicationName    = applicationName.c_str();
+  appInfo->applicationVersion  = applicationVersion;
+  appInfo->pEngineName         = "SolusEngine (Vulkan backend)";
+  appInfo->engineVersion       = VK_MAKE_VERSION(1, 0, 0);
+  appInfo->apiVersion          = VK_API_VERSION_1_0;
+
+  VkInstanceCreateInfo createInfo{ };
+
+  createInfo.sType            = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+  createInfo.pApplicationInfo = appInfo.get();
+
+  auto extensions{ getRequiredExtensions() };
+
+  extensions.insert(extensions.end(),
+                    additionalExtensions.begin(),
+                    additionalExtensions.end());
+
+  std::cout << "<INFO> Requested extensions:\n";
+
+  for(auto extension : extensions)
+  {
+    std::cout << "<INFO>   " << extension << '\n';
+  }
+
+  createInfo.enabledExtensionCount   =
+    static_cast<uint32_t>(extensions.size());
+  createInfo.ppEnabledExtensionNames = extensions.data();
+
+  if(ENABLE_VALIDATION_LAYERS)
+  {
+    createInfo.enabledLayerCount   =
+      static_cast<uint32_t>(VALIDATION_LAYERS.size());
+    createInfo.ppEnabledLayerNames = VALIDATION_LAYERS.data();
+  } else
+  {
+    createInfo.enabledLayerCount   = 0;
+  }
+
+  if(vkCreateInstance(&createInfo, nullptr, &mInstance) not_eq VK_SUCCESS)
+  { 
+    return failure;
+    // THROW_EXCEPTION("failed to create instance!");
+  }
+
+  return success;
+}
+
 bool
 so::vk::Instance::checkValidationLayerSupport()
 {
@@ -147,7 +211,9 @@ so::vk::Instance::getRequiredExtensions()
   std::vector<char const*> extensions;
 
   if(ENABLE_VALIDATION_LAYERS)
+  {
     extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+  }
 
   return extensions;
 }

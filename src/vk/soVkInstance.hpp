@@ -50,6 +50,8 @@
 
 #pragma once
 
+#include "soReturnT.hpp"
+
 #include <vulkan/vulkan.hpp>
 
 #include <memory>
@@ -89,6 +91,11 @@ Instance : public std::enable_shared_from_this<Instance>
     Instance& operator=(Instance const& other) = delete;
 
     Instance& operator=(Instance&& other) = delete;
+
+    return_t
+    initialize(std::string const& applicationName,
+               uint32_t    const  applicationVersion,
+               Extensions  const& additionalExtensions);
 
     inline auto getVkInstance() { return mInstance; }
 
