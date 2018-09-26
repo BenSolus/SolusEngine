@@ -73,7 +73,6 @@ before_install:
   - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/SPIRV-Tools.git; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd SPIRV-Tools; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/SPIRV-Headers.git ./external/spirv-headers; fi
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then sed  -i -e '/#include/i#include <cmath>\n' layers/parameter_validation_utils.cpp; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then mkdir -p build; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd build; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cmake -DSPIRV_WERROR=OFF -DCMAKE_BUILD_TYPE=Release ..; fi
@@ -103,6 +102,7 @@ before_install:
   ### Install Vulkan validation layers
   - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/Vulkan-ValidationLayers.git; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd Vulkan-ValidationLayers; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then sed  -i -e '/#include/i#include <cmath>\n' layers/parameter_validation_utils.cpp; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then mkdir build; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd build || exit 1; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cmake -DCMAKE_BUILD_TYPE=Debug -DVULKAN_HEADERS_INSTALL_DIR=/usr/local/include -DGLSLANG_INSTALL_DIR=/usr/local/include ..; fi
