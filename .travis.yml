@@ -72,7 +72,8 @@ before_install:
   ### Install SPIRV-Tools
   - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/SPIRV-Tools.git; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd SPIRV-Tools; fi
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/SPIRV-Headers.git ./external/spirv-headers; fi 
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/SPIRV-Headers.git ./external/spirv-headers; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then sed  -i -e '/#include/i#include <cmath>\n' layers/parameter_validation_utils.cpp; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then mkdir -p build; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd build; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cmake -DSPIRV_WERROR=OFF -DCMAKE_BUILD_TYPE=Release ..; fi
