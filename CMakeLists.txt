@@ -9,11 +9,14 @@ PROJECT(SolusEngine)
 
 SET(EXAMPLES    OFF CACHE BOOL "Whether to build examples.")
 
+SET(FORCE_CXX11 OFF CACHE BOOL "Whether to force build with ISO C++11.")
+SET(FORCE_CXX14 OFF CACHE BOOL "Whether to force build with ISO C++14.")
+SET(FORCE_CXX17 OFF CACHE BOOL "Whether to force build with ISO C++17.")
+
 SET(WITH_VULKAN ON  CACHE BOOL "Whether to build Vulkan-Module.")
 SET(WITH_GLFW   ON  CACHE BOOL "Whether to build GLFW-Module.")
 
 STRING(REGEX MATCH "Clang" CMAKE_COMPILER_IS_CLANG "${CMAKE_C_COMPILER_ID}")
-
 
 ###############################################################################
 # Setup for various paths                                                     #
@@ -59,42 +62,65 @@ ENDIF()
 
 include(CheckCXXCompilerFlag)
 
-IF(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR
-   ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"))
-   CHECK_CXX_COMPILER_FLAG("-std=c++17" CXX17_FOUND)
-ELSE()
-  MESSAGE(FATAL_ERROR "Compiler not supported.")
-ENDIF()
-
-IF(CXX17_FOUND)
-  SET(CXX14_FOUND 1)
-  SET(CXX11_FOUND 1)
-ELSE()
-  IF(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR
-     ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"))
-    CHECK_CXX_COMPILER_FLAG("-std=c++14" CXX14_FOUND)
+IF(FORCE_CXX11)
+  
+  IF(FORCE_CXX14)
+    MESSAGE(FATAL_ERROR "Forcing ISO C++11 and C++14 standard. Only enforce one standard.")
+  ELSEIF(FORCE_CXX17)
+    MESSAGE(FATAL_ERROR "Forcing ISO C++11 and C++17 standard. Only enforce one standard.")
   ENDIF()
-    IF(CXX14_FOUND)
-      SET(CXX11_FOUND 1)
-  ELSE()
-    IF(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR
-       ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"))
-      CHECK_CXX_COMPILER_FLAG("-std=c++11" CXX11_FOUND)
-    ENDIF()
 
-    IF(NOT CXX11_FOUND)
-      MESSAGE(FATAL_ERROR "Minimum C++ ISO standard of C++11 not supported by \
-      compiler")
+  CHECK_CXX_COMPILER_FLAG("-std=c++11" CXX11_FOUND)
+
+  IF(NOT CXX11_FOUND)
+    MESSAGE(FATAL_ERROR "Forcing ISO C++11 standard but the compiler is not supporting this standard.")
+  ENDIF()
+
+ELSEIF(FORCE_CXX14)
+  
+  IF(FORCE_CXX17)
+    MESSAGE(FATAL_ERROR "Forcing ISO C++14 and C++17 standard. Only enforce one standard.")
+  ENDIF()
+
+  CHECK_CXX_COMPILER_FLAG("-std=c++14" CXX14_FOUND)
+
+  IF(NOT CXX14_FOUND)
+    MESSAGE(FATAL_ERROR "Forcing ISO C++14 standard but the compiler is not supporting this standard.")
+  ENDIF()
+
+ELSEIF(FORCE_CXX17)
+  
+  CHECK_CXX_COMPILER_FLAG("-std=c++17" CXX17_FOUND)
+
+  IF(NOT CXX17_FOUND)
+    MESSAGE(FATAL_ERROR "Forcing ISO C++17 standard but the compiler is not supporting this standard.")
+  ENDIF()
+
+ELSEIF(CMAKE_COMPILER_IS_CLANG OR CMAKE_COMPILER_IS_GNUCC)
+  
+  CHECK_CXX_COMPILER_FLAG("-std=c++17" CXX17_FOUND)
+
+  IF(NOT CXX17_FOUND)
+
+    CHECK_CXX_COMPILER_FLAG("-std=c++14" CXX14_FOUND)
+ 
+    IF(NOT CXX14_FOUND)
+
+      CHECK_CXX_COMPILER_FLAG("-std=c++11" CXX11_FOUND)
+    
+      IF(NOT CXX11_FOUND)
+        MESSAGE(FATAL_ERROR "Minimum C++ ISO standard of C++11 not supported by compiler")
+      ENDIF()
     ENDIF()
-  ENDIF() 
+  ENDIF()
 ENDIF()
 
 FUNCTION(SET_HIGHEST_CXX_STANDARD ARG)
   IF(CXX17_FOUND)
     SET_PROPERTY(TARGET ${ARG} PROPERTY CXX_STANDARD 17)
   ELSEIF(CXX14_FOUND)
-    SET_PROPERTY(TARGET ${ARG} PROPERTY CXX_STANDARD 14)
-  ELSE()
+    SET_PROPERTY(TARGET ${ARG} PROPERTY CXX_STANDARD 14) 
+  ELSE() 
     SET_PROPERTY(TARGET ${ARG} PROPERTY CXX_STANDARD 11)
   ENDIF()
 

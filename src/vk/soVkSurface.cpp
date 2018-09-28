@@ -23,6 +23,7 @@
 #include <soVkSurface.hpp>
 
 #include <soException.hpp>
+#include "cxx/soMemory.hpp"
 
 #include <regex>
 
@@ -286,7 +287,7 @@ so::vk::Surface::Impl
 };
 
 so::vk::Surface::Surface()
-  : mPImpl(std::make_unique<Impl>()),
+  : mPImpl(makeUnique<Impl>()),
     mInstance(Instance::SHARED_PTR_NULL_INSTANCE)
 {}
 

@@ -72,7 +72,7 @@ Engine
     initialize(std::string const& applicationName,
                uint32_t    const  applicationVersion);
 
-    inline auto windowIsClosed() { return mSurface.windowIsClosed(); } 
+    inline bool windowIsClosed() { return mSurface.windowIsClosed(); } 
 
     inline void surfacePollEvents() { mSurface.pollEvents(); } 
 

@@ -80,7 +80,8 @@ ImageViews
     ImageViews&
     operator=(ImageViews&& other) noexcept;
 
-    inline auto& getVkImageViews() { return mImageViews; }
+    inline std::vector<VkImageView>&
+    getVkImageViewsRef() { return mImageViews; }
 
     void
     addImageViews(std::vector<VkImage> const&   images,

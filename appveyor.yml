@@ -23,7 +23,7 @@ init:
 
   - cmd: |-
       cd c:\projects\deps
-      git clone https://github.com/g-truc/glm.git;
+      git clone https://github.com/g-truc/glm.git
       mkdir .\glm\build
       cd glm\build
       cmake -DGLM_TEST_ENABLE_CXX_11=ON .. -G "%generator%"

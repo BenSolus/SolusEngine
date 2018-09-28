@@ -21,9 +21,9 @@
  */
 
 /**
- *  @file      soVkShaderModule.hpp
+ *  @file      cxx/soMemory.hpp
  *  @author    Bennet Carstensen
- *  @date      2017
+ *  @date      2018
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
@@ -48,48 +48,62 @@
  *             OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
-
 #pragma once
 
-#include <soVkLogicalDevice.hpp>
+#include "cxx/soDefinitions.hpp"
 
-#include <string>
-#include <vector>
+#include <memory>
 
 namespace so {
-namespace vk {
-    
-class
-ShaderModule
+
+namespace internal {
+
+template <typename T>
+struct UniqueIf
 {
-  public:
-    ShaderModule();
-
-    ShaderModule(SharedPtrLogicalDevice const& device,
-                 std::string            const& file);
-
-    ShaderModule(ShaderModule const& other) = delete;
-
-    ShaderModule(ShaderModule&& other) = delete;
-
-    ~ShaderModule() noexcept;
-
-    ShaderModule& operator=(ShaderModule const& other) = delete;
-
-    ShaderModule&
-    operator=(ShaderModule&& other) noexcept;
-
-    inline VkShaderModule getVkShaderModule() { return mShaderModule; }
-
-  private:
-    VkShaderModule         mShaderModule;
-
-    SharedPtrLogicalDevice mDevice;
-    
-    void
-    destroy_members();
+  using scalar = std::unique_ptr<T>;
 };
 
-} // namespace vk
+template <typename T>
+struct UniqueIf<T[]>
+{
+  using arrayUnknownBound = std::unique_ptr<T[]>;
+};
+
+template <typename T, size_type N>
+struct UniqueIf<T[N]>
+{
+  using arrayKnownBound = void;
+};
+
+} // namespace internal
+
+#if (__cplusplus > 201103L || defined(_MSC_VER)) && \
+     !(defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ == 8))
+
+using makeUnique = std::make_unique;
+
+#else
+
+template <typename T, typename... Args>
+typename internal::UniqueIf<T>::scalar
+makeUnique(Args&&... args)
+{
+  return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
+template <typename T>
+typename internal::UniqueIf<T>::arrayUnknownBound
+makeUnique(size_type n)
+{
+  return std::unique_ptr<T>(new typename std::remove_extent<T>[n]());
+}
+
+template <typename T, typename... Args>
+typename internal::UniqueIf<T>::arrayKnownBound
+makeUnique(Args&&... args) = delete;
+
+#endif
+
 } // namespace so
+

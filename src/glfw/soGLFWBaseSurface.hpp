@@ -79,14 +79,14 @@ Surface
     Surface&
     operator=(Surface&& other) noexcept; 
 
-    inline auto windowIsClosed() { return glfwWindowShouldClose(mWindow); }
+    inline bool windowIsClosed() { return glfwWindowShouldClose(mWindow); }
 
     inline void pollEvents() { }
 
     void
     getWindowSize(size_type& width, size_type& height);
 
-    inline auto getGLFWwindow() { return mWindow; }
+    inline GLFWwindow* getGLFWwindow() { return mWindow; }
 
   protected:
     bool        mIsInitialized;

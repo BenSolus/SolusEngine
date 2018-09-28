@@ -63,11 +63,11 @@ QueueFamilyIndices
 
     QueueFamilyIndices(VkPhysicalDevice device, Surface const& surface);
 
-    inline auto getGraphicsFamily() { return mGraphicsFamily; }
+    inline int getGraphicsFamily() { return mGraphicsFamily; }
 
     inline void setGraphicsFamily(int value) { mGraphicsFamily = value; }
 
-    inline auto getPresentFamily() { return mPresentFamily; }
+    inline int getPresentFamily() { return mPresentFamily; }
 
     inline void setPresentFamily(int value) { mPresentFamily = value; }
 

@@ -82,11 +82,11 @@ LogicalDevice : public PhysicalDevice,
     LogicalDevice&
     operator=(LogicalDevice&& other) noexcept;
 
-    inline auto getVkDevice() { return mDevice; }
+    inline VkDevice getVkDevice() { return mDevice; }
 
-    inline auto getGraphicsVkQueue() { return mGraphicsQueue; }
+    inline VkQueue getGraphicsVkQueue() { return mGraphicsQueue; }
 
-    inline auto getPresentVkQueue() { return mPresentQueue; }
+    inline VkQueue getPresentVkQueue() { return mPresentQueue; }
 
   private:
     VkDevice                mDevice;

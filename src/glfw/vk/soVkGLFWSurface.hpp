@@ -90,7 +90,7 @@ GLFWSurface : public base::Surface
     return_t
     createSurface(VkInstance instance);
 
-    inline auto getVkSurfaceKHR() const { return mSurface; }
+    inline VkSurfaceKHR getVkSurfaceKHR() const { return mSurface; }
   
   private:
     VkSurfaceKHR mSurface;

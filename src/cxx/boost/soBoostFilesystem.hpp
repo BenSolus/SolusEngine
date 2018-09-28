@@ -21,9 +21,9 @@
  */
 
 /**
- *  @file      soVkShaderModule.hpp
+ *  @file      soBoostFileSystem.hpp
  *  @author    Bennet Carstensen
- *  @date      2017
+ *  @date      2018
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
@@ -48,48 +48,15 @@
  *             OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
-
 #pragma once
 
-#include <soVkLogicalDevice.hpp>
-
-#include <string>
-#include <vector>
+#include <boost/filesystem.hpp>
 
 namespace so {
-namespace vk {
-    
-class
-ShaderModule
-{
-  public:
-    ShaderModule();
 
-    ShaderModule(SharedPtrLogicalDevice const& device,
-                 std::string            const& file);
+using Path = boost::filesystem::path;
 
-    ShaderModule(ShaderModule const& other) = delete;
+using DirectoryIterator = boost::filesystem::directory_iterator;
 
-    ShaderModule(ShaderModule&& other) = delete;
+} // namespace s0
 
-    ~ShaderModule() noexcept;
-
-    ShaderModule& operator=(ShaderModule const& other) = delete;
-
-    ShaderModule&
-    operator=(ShaderModule&& other) noexcept;
-
-    inline VkShaderModule getVkShaderModule() { return mShaderModule; }
-
-  private:
-    VkShaderModule         mShaderModule;
-
-    SharedPtrLogicalDevice mDevice;
-    
-    void
-    destroy_members();
-};
-
-} // namespace vk
-} // namespace so

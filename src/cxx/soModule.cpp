@@ -157,7 +157,7 @@ so::Module::loadLibrary(JSON const& platformSpecifics)
   {
     std::string warning("<WARNING> Couldn't load library file \n<WARNING>  ");
 
-    warning += file;
+    warning += file.string();
     warning += ",\n<WARNING> needed by module '";
     warning += mName;
     warning += "'. Don't use this module.\n";

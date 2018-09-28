@@ -24,6 +24,7 @@
 
 #include "soDefinitions.hpp"
 #include "soException.hpp"
+#include "cxx/soMemory.hpp"
 
 #include <cstring>
 
@@ -110,7 +111,7 @@ so::vk::Instance::initialize(std::string const& applicationName,
   }
 
   std::unique_ptr<VkApplicationInfo> 
-    appInfo{ std::make_unique<VkApplicationInfo>() };
+    appInfo{ makeUnique<VkApplicationInfo>() };
 
   // VkApplicationInfo* appInfo{ new VkApplicationInfo({}) };
 

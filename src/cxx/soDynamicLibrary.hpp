@@ -207,9 +207,9 @@ DynamicLibrary
     base::Symbol
     loadSymbol(std::string const& symbol);
 
-    inline auto isComplete() { return mIsComplete; }
+    inline bool isComplete() { return mIsComplete; }
 
-    inline auto isComplete() const { return mIsComplete; }
+    inline bool isComplete() const { return mIsComplete; }
 
   private:
     bool  mIsComplete;

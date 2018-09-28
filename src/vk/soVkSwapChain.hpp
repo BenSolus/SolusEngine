@@ -83,15 +83,16 @@ SwapChain
     SwapChain&
     operator=(SwapChain&& other) noexcept;
 
-    inline auto getVkSwapchainKHR() { return mSwapChain; }
+    inline VkSwapchainKHR getVkSwapchainKHR() { return mSwapChain; }
 
-    inline auto getVkExtent() { return mSwapChainExtent; }
+    inline VkExtent2D getVkExtent() { return mSwapChainExtent; }
 
-    inline auto getVkFormat() { return mSwapChainImageFormat; }
+    inline VkFormat getVkFormat() { return mSwapChainImageFormat; }
 
     inline std::vector<VkImage>& getVkImages() { return mSwapChainImages; }
 
-    inline auto getDevice() { return mDevice->shared_from_this(); }
+    inline SharedPtrLogicalDevice
+    getDevice() { return mDevice->shared_from_this(); }
 
   private:
     VkSwapchainKHR         mSwapChain;

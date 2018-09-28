@@ -80,9 +80,10 @@ PhysicalDevice
 
     PhysicalDevice& operator=(PhysicalDevice&& other) noexcept;
     
-    inline auto getVkPhysicalDevice() { return mPhysicalDevice; }
+    inline VkPhysicalDevice getVkPhysicalDevice() { return mPhysicalDevice; }
 
-    inline auto getInstance() { return mInstance->shared_from_this(); }
+    inline SharedPtrInstance
+    getInstance() { return mInstance->shared_from_this(); }
 
   protected:
     VkPhysicalDevice  mPhysicalDevice;

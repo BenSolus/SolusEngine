@@ -94,9 +94,9 @@ Pipeline
       return *this;
     }
 
-    inline auto getVkPipeline() { return mPipeline; }
+    inline VkPipeline getVkPipeline() { return mPipeline; }
  
-    inline auto getVkPipelineLayout() { return mPipelineLayout; }
+    inline VkPipelineLayout getVkPipelineLayout() { return mPipelineLayout; }
 
   private:
     VkPipeline                mPipeline;

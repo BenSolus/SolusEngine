@@ -97,7 +97,7 @@ Instance : public std::enable_shared_from_this<Instance>
                uint32_t    const  applicationVersion,
                Extensions  const& additionalExtensions);
 
-    inline auto getVkInstance() { return mInstance; }
+    inline VkInstance getVkInstance() { return mInstance; }
 
     inline void setVkInstance(VkInstance instance) { mInstance = instance; }
 
