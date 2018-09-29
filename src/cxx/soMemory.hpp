@@ -50,11 +50,18 @@
 
 #pragma once
 
-#include "cxx/soDefinitions.hpp"
+#include "soDefinitions.hpp"
 
 #include <memory>
 
 namespace so {
+
+#if (__cplusplus > 201103L || defined(_MSC_VER)) && \
+     !(defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ == 8))
+
+using std::make_unique;
+
+#else
 
 namespace internal {
 
@@ -78,30 +85,23 @@ struct UniqueIf<T[N]>
 
 } // namespace internal
 
-#if (__cplusplus > 201103L || defined(_MSC_VER)) && \
-     !(defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ == 8))
-
-using makeUnique = std::make_unique;
-
-#else
-
 template <typename T, typename... Args>
 typename internal::UniqueIf<T>::scalar
-makeUnique(Args&&... args)
+make_unique(Args&&... args)
 {
   return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
 
 template <typename T>
 typename internal::UniqueIf<T>::arrayUnknownBound
-makeUnique(size_type n)
+make_unique(size_type n)
 {
   return std::unique_ptr<T>(new typename std::remove_extent<T>[n]());
 }
 
 template <typename T, typename... Args>
 typename internal::UniqueIf<T>::arrayKnownBound
-makeUnique(Args&&... args) = delete;
+make_unique(Args&&... args) = delete;
 
 #endif
 

@@ -35,7 +35,7 @@ debugCallback(VkDebugReportFlagsEXT      flags,
               void*                      userData);
 
 so::vk::DebugReportCallbackEXT::DebugReportCallbackEXT()
-  : mCallback(nullptr), mInstance(Instance::SHARED_PTR_NULL_INSTANCE)
+  : mCallback(nullptr), mInstance(Instance::getSharedPtrNullInstance())
 {}
 
 so::vk::DebugReportCallbackEXT::DebugReportCallbackEXT
@@ -87,10 +87,9 @@ so::vk::DebugReportCallbackEXT::operator=
   mInstance = other.mInstance;
 
   other.mCallback = nullptr;
-  other.mInstance = Instance::SHARED_PTR_NULL_INSTANCE;
+  other.mInstance = Instance::getSharedPtrNullInstance();
 
   return *this;
-
 }
 
 void

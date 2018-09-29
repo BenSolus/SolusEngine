@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2017 by Bennet Carstensen
+ * Copyright (C) 2017-2018 by Bennet Carstensen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in
@@ -15,23 +15,23 @@
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
  */
 
 /**
- *  @file      soEngine.hpp
+ *  @file      cxx/gsl/soGSLSpan.hpp
  *  @author    Bennet Carstensen
- *  @date      2017
+ *  @date      2018
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
  *             obtaining a copy of this software and associated documentation
  *             files (the "Software"), to deal in the Software without
  *             restriction, including without limitation the rights to use,
- *             copy, modify, merge, publish, distribute, sublicense, and/or sell
- *             copies of the Software, and to permit persons to whom the
+ *             copy, modify, merge, publish, distribute, sublicense, and/or
+ *             sell copies of the Software, and to permit persons to whom the
  *             Software is furnished to do so, subject to the following
  *             conditions:
  *
@@ -48,36 +48,54 @@
  *             OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#pragma once
-
-#include <soVkDebugReportCallbackEXT.hpp>
-#include <soVkInstance.hpp>
-#include <soVkLogicalDevice.hpp>
-#include <soVkSurface.hpp>
-#include <soVkSwapChain.hpp>
+#include <span>
 
 namespace so {
 
-class
-Engine
-{
-  public:
-    Engine();
-
-    ~Engine() noexcept = default;
-
-    so::return_t
-    initialize(std::string const& applicationName,
-               uint32_t    const  applicationVersion);
-
-    inline bool windowIsClosed() { return mSurface.windowIsClosed(); } 
-
-    inline void surfacePollEvents() { mSurface.pollEvents(); } 
-
-  private:
-    vk::DebugReportCallbackEXT mDebugCallback;
-    vk::Surface                mSurface;
-    vk::SwapChain              mSwapChain;
-};
+template<class ElemenetType, std::ptrdiff_t Extent>
+class Span;
 
 } // namespace so
+
+template<class ElemenetType, std::ptrdiff_t Extent>
+std::ostream&
+operator<<(std::ostream& stream, so::Span<ElemenetType, Extent> const& span);
+
+namespace std {
+
+template<std::ptrdiff_t Extent>
+int
+strcmp(char const* lhs, so::Span<char const, Extent>& rhs);
+
+} // namespace std
+
+namespace so {
+
+template<class ElemenetType, std::ptrdiff_t Extent>
+class Span : public gsl::span<ElemenetType, Extent>
+{
+  public:
+    friend std::ostream&
+    operator<<<ElemenetType, Extent>(std::ostream& stream,
+                                     Span<ElemenetType, Extent> const& span);
+
+}; // class Span
+
+} // namespace so
+
+template<std::ptrdiff_t Extent>
+std::ostream&
+operator<<(std::ostream& stream, so::Span<char const, Extent> const& span)
+{
+  stream << span.data();
+  
+  return stream;
+}
+
+template<std::ptrdiff_t Extent>
+int
+std::strcmp(char const* lhs, so::Span<char const, Extent>& rhs)
+{
+  return std::strcmp(lhs, rhs.data());
+}
+

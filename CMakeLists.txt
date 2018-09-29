@@ -38,25 +38,6 @@ IF(CMAKE_BUILD_TYPE MATCHES Debug)
 ENDIF()
 
 ###############################################################################
-# Adding various include directories                                          #
-###############################################################################
-
-INCLUDE_DIRECTORIES(SYSTEM ${PROJECT_SOURCE_DIR}/3rdparty/json)
-INCLUDE_DIRECTORIES(SYSTEM ${PROJECT_SOURCE_DIR}/3rdparty/stb)
-
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src)
-
-INCLUDE_DIRECTORIES(${assimp_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${GLFW_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${GLM_REQUIRED})
-
-IF(CMAKE_BUILD_TYPE MATCHES Debug)
-  INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/tests)
-
-  INCLUDE_DIRECTORIES(${GTEST_INCLUDE_DIRS})
-ENDIF()
-
-###############################################################################
 # Set available C++ Standard. Minimum C++11.                                  #
 ###############################################################################
 
@@ -126,6 +107,29 @@ FUNCTION(SET_HIGHEST_CXX_STANDARD ARG)
 
   SET_PROPERTY(TARGET ${ARG} PROPERTY CXX_STANDARD_REQUIRED ON)
 ENDFUNCTION()
+
+###############################################################################
+# Adding various include directories                                          #
+###############################################################################
+
+IF(NOT CXX11_FOUND)
+  INCLUDE_DIRECTORIES(SYSTEM ${PROJECT_SOURCE_DIR}/3rdparty/gsl)
+ENDIF()
+
+INCLUDE_DIRECTORIES(SYSTEM ${PROJECT_SOURCE_DIR}/3rdparty/json)
+INCLUDE_DIRECTORIES(SYSTEM ${PROJECT_SOURCE_DIR}/3rdparty/stb)
+
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src)
+
+INCLUDE_DIRECTORIES(${assimp_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${GLFW_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${GLM_REQUIRED})
+
+IF(CMAKE_BUILD_TYPE MATCHES Debug)
+  INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/tests)
+
+  INCLUDE_DIRECTORIES(${GTEST_INCLUDE_DIRS})
+ENDIF()
 
 ###############################################################################
 # Set default compiler flags                                                  #

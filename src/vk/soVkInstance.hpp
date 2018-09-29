@@ -74,23 +74,20 @@ Instance : public std::enable_shared_from_this<Instance>
   using Extensions = std::vector<char const*>;
 
   public:
-    static std::shared_ptr<Instance> const SHARED_PTR_NULL_INSTANCE;
+    static std::shared_ptr<Instance> const
+    getSharedPtrNullInstance();
 
     Instance();
-
-    Instance(std::string const& applicationName,
-             uint32_t    const  applicationVersion,
-             Extensions  const& additionalExtensions);
  
     Instance(Instance const& other) = delete;
 
-    Instance(Instance&& other) = delete;
+    Instance(Instance&& other) noexcept = delete;
 
     ~Instance() noexcept;
 
     Instance& operator=(Instance const& other) = delete;
 
-    Instance& operator=(Instance&& other) = delete;
+    Instance& operator=(Instance&& other) noexcept = delete;
 
     return_t
     initialize(std::string const& applicationName,
@@ -109,10 +106,11 @@ Instance : public std::enable_shared_from_this<Instance>
 
     bool
     checkValidationLayerSupport();
-};
+
+}; // class Instance
 
 using SharedPtrInstance = std::shared_ptr<Instance>;
 
 } // namespace vk
-} //namespace so
+} // namespace so
 

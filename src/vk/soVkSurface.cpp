@@ -287,8 +287,8 @@ so::vk::Surface::Impl
 };
 
 so::vk::Surface::Surface()
-  : mPImpl(makeUnique<Impl>()),
-    mInstance(Instance::SHARED_PTR_NULL_INSTANCE)
+  : mPImpl(make_unique<Impl>()),
+    mInstance(Instance::getSharedPtrNullInstance())
 {}
 
 so::vk::Surface::~Surface() noexcept = default;

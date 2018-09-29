@@ -28,7 +28,7 @@ init:
       cd glm\build
       cmake -DGLM_TEST_ENABLE_CXX_11=ON .. -G "%generator%"
       cmake --build . --config %config% --target install
-      set PATH="C:\Program Files\GLM\bin;%PATH%"
+      set "PATH=C:\Program Files\GLM\bin;%PATH%"
 
   - cmd: |-
       cd c:\projects\deps
@@ -37,7 +37,7 @@ init:
       cd glslang\build
       cmake .. G "%generator%"
       cmake --build . --config %config% --target install
-      set PATH="C:\Program Files\glslang\bin;%PATH%"
+      set "PATH=C:\Program Files\glslang\bin;%PATH%"
 
   - cmd: |-
       cd c:\projects\deps

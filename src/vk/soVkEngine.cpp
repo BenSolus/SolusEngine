@@ -22,6 +22,12 @@
 
 #include "soVkEngine.hpp"
 
+so::Engine::Engine()
+  : mDebugCallback(),
+    mSurface(),
+    mSwapChain()
+{}
+
 so::return_t
 so::Engine::initialize(std::string const& applicationName,
                        uint32_t    const  applicationVersion)

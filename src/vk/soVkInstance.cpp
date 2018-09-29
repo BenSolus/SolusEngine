@@ -22,74 +22,26 @@
 
 #include "soVkInstance.hpp"
 
-#include "soDefinitions.hpp"
-#include "soException.hpp"
+#include "cxx/soDefinitions.hpp"
 #include "cxx/soMemory.hpp"
+#include "cxx/soSpan.hpp"
 
 #include <cstring>
+#include <iostream>
 
 std::array<char const*, 1> const VALIDATION_LAYERS
   { "VK_LAYER_LUNARG_standard_validation" };
 
-so::vk::SharedPtrInstance const so::vk::Instance::SHARED_PTR_NULL_INSTANCE
-  (std::make_shared<so::vk::Instance>());
+std::shared_ptr<so::vk::Instance> const
+so::vk::Instance::getSharedPtrNullInstance()
+{
+  static std::shared_ptr<so::vk::Instance> 
+    sharedPtrNullInstance{ std::make_shared<so::vk::Instance>() };
+
+  return sharedPtrNullInstance;
+}
 
 so::vk::Instance::Instance() : mInstance(VK_NULL_HANDLE) {}
-
-so::vk::Instance::Instance(std::string const& applicationName,
-                           uint32_t    const  applicationVersion,
-                           Extensions  const& additionalExtensions)
-  : Instance()
-{
-  if(ENABLE_VALIDATION_LAYERS and not checkValidationLayerSupport())
-    THROW_EXCEPTION("Validation layers requested, but not vailable!");
-
-  VkApplicationInfo* appInfo{ new VkApplicationInfo({}) };
-
-  appInfo->sType               = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-  appInfo->pApplicationName    = applicationName.c_str();
-  appInfo->applicationVersion  = applicationVersion;
-  appInfo->pEngineName         = "SolusEngine (Vulkan backend)";
-  appInfo->engineVersion       = VK_MAKE_VERSION(1, 0, 0);
-  appInfo->apiVersion          = VK_API_VERSION_1_0;
-
-  VkInstanceCreateInfo createInfo{ };
-
-  createInfo.sType            = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-  createInfo.pApplicationInfo = appInfo;
-
-  auto extensions{ getRequiredExtensions() };
-
-  extensions.insert(extensions.end(),
-                    additionalExtensions.begin(),
-                    additionalExtensions.end());
-
-  std::cout << "<INFO> Requested extensions:\n";
-
-  for(auto extension : extensions)
-  {
-    std::cout << "<INFO>   " << extension << '\n';
-  }
-
-  createInfo.enabledExtensionCount   =
-    static_cast<uint32_t>(extensions.size());
-  createInfo.ppEnabledExtensionNames = extensions.data();
-
-  if(ENABLE_VALIDATION_LAYERS)
-  {
-    createInfo.enabledLayerCount   =
-      static_cast<uint32_t>(VALIDATION_LAYERS.size());
-    createInfo.ppEnabledLayerNames = VALIDATION_LAYERS.data();
-  } else
-  {
-    createInfo.enabledLayerCount   = 0;
-  }
-
-  if(vkCreateInstance(&createInfo, nullptr, &mInstance) not_eq VK_SUCCESS)
-    THROW_EXCEPTION("failed to create instance!");
-
-  delete appInfo;
-}
 
 so::vk::Instance::~Instance() noexcept
 {
@@ -111,7 +63,7 @@ so::vk::Instance::initialize(std::string const& applicationName,
   }
 
   std::unique_ptr<VkApplicationInfo> 
-    appInfo{ makeUnique<VkApplicationInfo>() };
+    appInfo{ make_unique<VkApplicationInfo>() };
 
   // VkApplicationInfo* appInfo{ new VkApplicationInfo({}) };
 
@@ -119,8 +71,8 @@ so::vk::Instance::initialize(std::string const& applicationName,
   appInfo->pApplicationName    = applicationName.c_str();
   appInfo->applicationVersion  = applicationVersion;
   appInfo->pEngineName         = "SolusEngine (Vulkan backend)";
-  appInfo->engineVersion       = VK_MAKE_VERSION(1, 0, 0);
-  appInfo->apiVersion          = VK_API_VERSION_1_0;
+  appInfo->engineVersion       = 1u << 22u;
+  appInfo->apiVersion          = 1u << 22u;
 
   VkInstanceCreateInfo createInfo{ };
 
@@ -168,7 +120,7 @@ so::vk::Instance::checkValidationLayerSupport()
 {
   uint32_t layerCount;
 
-  // TODO: Handle enumerateInstanceLayerProperties output
+  // TODO(BenSolus): Handle enumerateInstanceLayerProperties output
 
   vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
@@ -177,10 +129,14 @@ so::vk::Instance::checkValidationLayerSupport()
   vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 
   std::cout << "<INFO> Available Vulkan layers:\n";
-  
+ 
+  constexpr std::ptrdiff_t arraySize{ VK_MAX_EXTENSION_NAME_SIZE };
+
   for(auto const& layerProperties : availableLayers)
   {
-    std::cout << "<INFO>   " << layerProperties.layerName << "\n";
+    Span<char const, arraySize> layerName{ layerProperties.layerName };
+
+    std::cout << "<INFO>   " << layerName << '\n';
   }
 
   for(char const* layerName : VALIDATION_LAYERS)
@@ -189,7 +145,9 @@ so::vk::Instance::checkValidationLayerSupport()
 
     for(auto const& layerProperties : availableLayers)
     {
-      if(std::strcmp(layerName, layerProperties.layerName) is_eq 0)
+      Span<char const, arraySize> otherLayerName{ layerProperties.layerName };
+
+      if(std::strcmp(layerName, otherLayerName) is_eq 0)
       {
         layerFound = true;
         break;
@@ -198,8 +156,7 @@ so::vk::Instance::checkValidationLayerSupport()
 
     if(not layerFound)
     {
-      return false;
-  
+      return false; 
     }
   }
 

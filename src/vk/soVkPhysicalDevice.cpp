@@ -35,7 +35,7 @@ std::vector<char const*> const DEVICE_EXTENSIONS
 
 so::vk::PhysicalDevice::PhysicalDevice()
   : mPhysicalDevice(VK_NULL_HANDLE),
-    mInstance(Instance::SHARED_PTR_NULL_INSTANCE)
+    mInstance(Instance::getSharedPtrNullInstance())
 {}
 
 so::vk::PhysicalDevice::PhysicalDevice(SharedPtrInstance const& instance,
@@ -83,7 +83,7 @@ so::vk::PhysicalDevice::operator=(PhysicalDevice&& other) noexcept
   mInstance       = other.mInstance;
 
   other.mPhysicalDevice = VK_NULL_HANDLE;
-  other.mInstance       = Instance::SHARED_PTR_NULL_INSTANCE;
+  other.mInstance       = Instance::getSharedPtrNullInstance();
 
   return *this;
 }

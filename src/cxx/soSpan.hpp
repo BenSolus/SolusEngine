@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2017-2018 by Bennet Carstensen
  *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
@@ -21,9 +21,9 @@
  */
 
 /**
- *  @file      vk/soVkPhysicalDevice.hpp
+ *  @file      cxx/soSpan.hpp
  *  @author    Bennet Carstensen
- *  @date      2017
+ *  @date      2018
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
@@ -50,54 +50,81 @@
 
 #pragma once
 
-#include "soVkInstance.hpp"
-#include "soVkSurface.hpp"
+#if (__cplusplus > 201103L)
 
-extern const std::vector<const char*> DEVICE_EXTENSIONS;
+#include "gsl/soGSLSpan.hpp"
+
+#else // __cplusplus > 201103L 
 
 namespace so {
-namespace vk {
-    
-class
-PhysicalDevice
+
+template<class T, std::ptrdiff_t Extent>
+class Span;
+
+} // namespace so
+
+template<class T, std::ptrdiff_t Extent>
+std::ostream&
+operator<<(std::ostream& stream, so::Span<T, Extent> const& span);
+
+namespace std {
+
+template<std::ptrdiff_t Extent>
+int
+strcmp(char const* lhs, so::Span<char const, Extent>& rhs);
+
+} // namespace std
+
+namespace so {
+
+constexpr std::ptrdiff_t dynamicExtent{ -1 };
+
+template<class T, std::ptrdiff_t Extent = dynamicExtent>
+class Span
 {
+  using element_type = T;
+  using index_type   = std::ptrdiff_t;
+  using pointer      = T*;
+
   public:
-    PhysicalDevice();
 
-    explicit PhysicalDevice
-      (VkPhysicalDevice device,
-       SharedPtrInstance const& instance
-         = Instance::getSharedPtrNullInstance());
+    Span() noexcept : mData(nullptr) {}
 
-    PhysicalDevice(SharedPtrInstance const& instance, Surface const& surface);
+    explicit Span(element_type(&arr)[Extent]) noexcept
+      : mData(std::addressof(arr[0]))
+    {
+    }
 
-    PhysicalDevice(PhysicalDevice const& other) = delete;
+    friend std::ostream&
+    operator<<<T, Extent>(std::ostream&          stream,
+                          Span<T, Extent> const& span);
 
-    PhysicalDevice(PhysicalDevice&& other) = delete;
-
-    virtual ~PhysicalDevice() noexcept = default;
-
-    PhysicalDevice& operator=(PhysicalDevice const& other) = delete;
-
-    PhysicalDevice& operator=(PhysicalDevice&& other) noexcept;
-    
-    inline VkPhysicalDevice getVkPhysicalDevice() { return mPhysicalDevice; }
-
-    inline SharedPtrInstance
-    getInstance() { return mInstance->shared_from_this(); }
+    pointer data() const noexcept { return mData; }
 
   protected:
-    VkPhysicalDevice  mPhysicalDevice;
-    SharedPtrInstance mInstance;
+    static constexpr std::ptrdiff_t extent{ Extent };
+    
+    pointer    mData{ nullptr };
 
-    bool
-    checkDeviceExtensionSupport(VkPhysicalDevice device);
+}; // class Span
 
-    bool
-    isDeviceSuitable(VkPhysicalDevice device, Surface const& surface);
-
-}; // class PhysicalDevice
-
-} // namespace vk
 } // namespace so
+
+template<std::ptrdiff_t Extent>
+std::ostream&
+operator<<(std::ostream& stream, so::Span<char const, Extent> const& span)
+{
+  stream << span.data();
+  
+  return stream;
+}
+
+template<std::ptrdiff_t Extent>
+int
+std::strcmp(char const* lhs, so::Span<char const, Extent>& rhs)
+{
+  return std::strcmp(lhs, rhs.data());
+}
+
+#endif // else __cplusplus > 201103L 
 
