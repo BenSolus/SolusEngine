@@ -21,7 +21,7 @@
  */
 
 /**
- *  @file      soVkDebugReportCallbackEXT.hpp
+ *  @file      cxx/soConstExpr.hpp
  *  @author    Bennet Carstensen
  *  @date      2017
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
@@ -50,48 +50,98 @@
 
 #pragma once
 
-#include "soVkInstance.hpp"
-
-#include "cxx/soReturnT.hpp"
+#if __cplusplus < 201703L
 
 namespace so {
-namespace vk {
 
-class
-DebugReportCallbackEXT
-{
-  public:
-    DebugReportCallbackEXT();
+template<typename IF, typename THEN>
+constexpr typename std::enable_if<IF::value>::type
+constExprIf(THEN&& trueStatement);
 
-    DebugReportCallbackEXT(DebugReportCallbackEXT const& other) = delete;
+template<typename IF, typename THEN>
+constexpr typename std::enable_if<not IF::value>::type
+constExprIf(THEN&& trueStatement);
 
-    DebugReportCallbackEXT(DebugReportCallbackEXT&& other) noexcept = delete;
+template<typename IF, typename THEN, typename ELSE>
+constexpr typename std::enable_if<IF::value>::type
+constExprIf(THEN&& trueStatement, ELSE&& falseStatement);
 
-    ~DebugReportCallbackEXT() noexcept;
+template<typename IF, typename THEN, typename ELSE>
+constexpr typename std::enable_if<not IF::value>::type
+constExprIf(THEN&& trueStatement, ELSE&& falseStatement);
 
-    DebugReportCallbackEXT&
-    operator=(DebugReportCallbackEXT const& other) = delete;
-
-    DebugReportCallbackEXT&
-    operator=(DebugReportCallbackEXT&& other) noexcept = delete;
-    
-    return_t
-    initialize(SharedPtrInstance const& instance);
-
-    VkDebugReportCallbackEXT&
-    getVkDebugReportCallbackEXT() { return mCallback; }
-
-  private:
-    VkDebugReportCallbackEXT mCallback{ nullptr };
-
-    SharedPtrInstance        mInstance{ Instance::getSharedPtrNullInstance() };
-
-    void
-    deleteMembers();
-};
-
-bool
-checkValidationLayerSupport();
-
-} // namespace vk
 } // namespace so
+
+template<typename IF, typename THEN>
+constexpr typename std::enable_if<IF::value>::type
+so::constExprIf(THEN&& trueStatement)
+{
+  trueStatement();
+}
+
+template<typename IF, typename THEN>
+constexpr typename std::enable_if<not IF::value>::type
+so::constExprIf(THEN&& trueStatement)
+{
+  (void) trueStatement();
+}
+
+template<typename IF, typename THEN, typename ELSE>
+constexpr typename std::enable_if<IF::value>::type
+so::constExprIf(THEN&& trueStatement, ELSE&& falseStatement)
+{
+  (void) falseStatement;
+
+  trueStatement();
+}
+
+template<typename IF, typename THEN, typename ELSE>
+constexpr typename std::enable_if<not IF::value>::type
+constExprIf(THEN&& trueStatement, ELSE&& falseStatement)
+{
+  (void) trueStatement;
+
+  falseStatement();
+}
+
+#else // __cplusplus < 201703L
+ 
+namespace so {
+
+template<typename IF, typename THEN>
+constexpr void
+constExprIf(THEN&& trueStatement);
+
+template<typename IF, typename THEN, typename ELSE>
+constexpr void
+constExprIf(THEN&& trueStatement, ELSE&& falseStatement);
+
+} // namespace so
+
+template<typename IF, typename THEN>
+constexpr void
+so::constExprIf(THEN&& trueStatement)
+{
+  if constexpr (IF::value)
+  {
+    trueStatement();
+  }
+}
+
+template<typename IF, typename THEN, typename ELSE>
+constexpr void
+so::constExprIf(THEN&& trueStatement, ELSE&& falseStatement)
+{
+  if constexpr (IF::value)
+  {
+    trueStatement();
+  }
+  else
+  {
+    falseStatement();
+  }
+}
+
+#endif // else __cplusplus < 201703L
+ 
+

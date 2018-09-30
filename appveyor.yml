@@ -35,7 +35,7 @@ init:
       git clone https://github.com/KhronosGroup/glslang.git
       mkdir .\glslang\build
       cd glslang\build
-      cmake .. G "%generator%"
+      cmake .. -G "%generator%"
       cmake --build . --config %config% --target install
       set "PATH=C:\Program Files\glslang\bin;%PATH%"
 
@@ -44,7 +44,7 @@ init:
       git clone https://github.com/KhronosGroup/Vulkan-Headers.git
       mkdir .\Vulkan-Headers\build
       cd Vulkan-Headers\build
-      cmake .. G "%generator%"
+      cmake .. -G "%generator%"
       cmake --build . --config %config% --target install
 
   - cmd: |-

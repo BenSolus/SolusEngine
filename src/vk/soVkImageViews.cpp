@@ -43,7 +43,7 @@ so::vk::ImageViews::ImageViews(SharedPtrLogicalDevice const& device,
 
   mImageViews.resize(size);
 
-  for(uindex i(0); i < size; increment(i))
+  for(uindex i(0); i < size; ++i)
   {
     VkImageViewCreateInfo createInfo = {};
 
@@ -107,7 +107,7 @@ so::vk::ImageViews::addImageViews(std::vector<VkImage> const& images,
 
   mImageViews.resize(newSize);
 
-  for(uindex i(oldSize); i < newSize; increment(i))
+  for(uindex i(oldSize); i < newSize; ++i)
   {
     VkImageViewCreateInfo createInfo({});
 
@@ -145,7 +145,7 @@ so::vk::ImageViews::destroyMembers()
 
   if(device not_eq VK_NULL_HANDLE)
   {  
-    for(uindex i(0); i < mImageViews.size(); increment(i))
+    for(uindex i(0); i < mImageViews.size(); ++i)
     {
       vkDestroyImageView(device, mImageViews[i], nullptr);
     }

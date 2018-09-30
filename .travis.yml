@@ -5,24 +5,9 @@ dist: trusty
 sudo: required
 language: cpp
 
-addons:
-  apt:
-    packages:
-      - build-essential
-      - git
-      - libgnome-keyring-dev
-      - fakeroot
-      - xorg-dev
-      - libwayland-dev
-      - libassimp-dev
-      - libgtest-dev
-      - ninja-build
-
 matrix:
   include:
     - os: linux
-      compiler:
-        - gcc
       addons:
         apt:
           sources:
@@ -30,14 +15,38 @@ matrix:
           packages:
             - gcc-4.9
             - g++-4.9
+            - build-essential
+            - git
+            - libgnome-keyring-dev
+            - fakeroot
+            - xorg-dev
+            - libwayland-dev
+            - libassimp-dev
+            - libgtest-dev
+            - ninja-build
             - libboost-all-dev
       env:
         - SET_COMPILERS="CC=gcc-4.9 && CXX=g++-4.9"
     - os: linux
-      compiler:
-        - clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-3.3
+          packages:
+            - clang-3.3
+            - build-essential
+            - git
+            - libgnome-keyring-dev
+            - fakeroot
+            - xorg-dev
+            - libwayland-dev
+            - libassimp-dev
+            - libgtest-dev
+            - ninja-build
+            - libboost-all-dev
       env:
-        - SET_COMPILERS="CC=clang && CXX=clang++"
+        - SET_COMPILERS="CC=clang-3.3 && CXX=clang++-3.3"
 
 before_install:
   ### Set compilers

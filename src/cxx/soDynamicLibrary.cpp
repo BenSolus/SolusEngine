@@ -24,6 +24,9 @@
 
 #include <soException.hpp>
 
+#include "cxx/soConstExpr.hpp"
+#include "cxx/soOS.hpp"
+
 so::base::Symbol::Symbol() : mSymbol(nullptr) {}
 
 so::base::Symbol::Symbol(Symbol&& other) noexcept
@@ -52,7 +55,7 @@ so::base::Symbol::operator=(Symbol&& other) noexcept
 bool
 so::base::Symbol::isValid()
 {
-  return mSymbol != nullptr;
+  return mSymbol not_eq nullptr;
 }
 
 so::DynamicLibrary::DynamicLibrary() : mIsComplete(false), mHandle(nullptr) {}
@@ -60,45 +63,42 @@ so::DynamicLibrary::DynamicLibrary() : mIsComplete(false), mHandle(nullptr) {}
 so::DynamicLibrary::DynamicLibrary(Path& file)
   : DynamicLibrary()
 {
-#if defined(_MSC_VER) || defined(__MINGW32__)
+  constExprIf<isUNIXBased<OS>> // if
+  ([&]() // then
+   {
+     mHandle = dlopen(file.c_str(), RTLD_NOW);
 
-#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
-
-  mHandle = dlopen(file.c_str(), RTLD_NOW);
-
-  mIsComplete = mHandle not_eq nullptr;
+     mIsComplete = mHandle not_eq nullptr;
     
-  (void) dlerror();
-
-#else
-
-#endif 
-
+     (void) dlerror();      
+   },
+   [&](){} // else
+  );
 }
 
 so::DynamicLibrary::DynamicLibrary(char const*                  file,
                                    std::vector<nameSymbolPair>& symbols)
   : DynamicLibrary()
 {
-#if defined(_MSC_VER) || defined(__MINGW32__)
+  constExprIf<isUNIXBased<OS>> // if
+  ([&]() // then
+   {
+     mHandle = dlopen(file, RTLD_NOW);
 
-#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+     (void) dlerror();
 
-  mHandle = dlopen(file, RTLD_NOW);
+     if(mHandle not_eq nullptr)
+     { 
+       mIsComplete = true;
 
-  (void) dlerror();
-
-  if(mHandle not_eq nullptr)
-  { 
-    mIsComplete = true;
-
-    for(auto& symbol : symbols)
-      loadSymbol(symbol);
-  }
-
-#else
-
-#endif 
+       for(auto& symbol : symbols)
+       {
+         loadSymbol(symbol);
+       }
+     }
+   },
+   [&](){} // else
+  );
 }
 
 so::DynamicLibrary::DynamicLibrary(DynamicLibrary&& other) noexcept

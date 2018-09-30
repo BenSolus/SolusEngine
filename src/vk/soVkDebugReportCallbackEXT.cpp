@@ -20,9 +20,9 @@
  * THE SOFTWARE.
  */
 
-#include <soVkDebugReportCallbackEXT.hpp>
+#include "soVkDebugReportCallbackEXT.hpp"
 
-#include <soException.hpp>
+#include <iostream>
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL
 debugCallback(VkDebugReportFlagsEXT      flags,
@@ -38,14 +38,42 @@ so::vk::DebugReportCallbackEXT::DebugReportCallbackEXT()
   : mCallback(nullptr), mInstance(Instance::getSharedPtrNullInstance())
 {}
 
-so::vk::DebugReportCallbackEXT::DebugReportCallbackEXT
-  (SharedPtrInstance const& instance)
-  : mCallback(nullptr), mInstance(instance)
+so::vk::DebugReportCallbackEXT::~DebugReportCallbackEXT() noexcept
 {
-  if(!ENABLE_VALIDATION_LAYERS)
-    return;
+  deleteMembers();
+}
 
-  VkDebugReportCallbackCreateInfoEXT createInfo({});
+// so::vk::DebugReportCallbackEXT&
+// so::vk::DebugReportCallbackEXT::operator=
+//   (DebugReportCallbackEXT&& other) noexcept
+// {
+//   if(this is_eq &other)
+//   {
+//     return *this;
+//   }
+
+//  deleteMembers();
+
+//   mCallback = other.mCallback;
+//   mInstance = other.mInstance;
+
+//   other.mCallback = nullptr;
+//   other.mInstance = Instance::getSharedPtrNullInstance();
+
+//   return *this;
+// }
+
+so::return_t
+so::vk::DebugReportCallbackEXT::initialize(SharedPtrInstance const& instance)
+{
+  mInstance = instance;
+
+  if(not ENABLE_VALIDATION_LAYERS)
+  {
+    return success;
+  }
+
+  VkDebugReportCallbackCreateInfoEXT createInfo{ };
 
   createInfo.sType       =
     VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
@@ -55,7 +83,7 @@ so::vk::DebugReportCallbackEXT::DebugReportCallbackEXT
 
   auto func(reinterpret_cast<PFN_vkCreateDebugReportCallbackEXT>
     (vkGetInstanceProcAddr(instance->getVkInstance(),
-                         "vkCreateDebugReportCallbackEXT")));
+                           "vkCreateDebugReportCallbackEXT")));
 
   if(func not_eq nullptr)
   {
@@ -64,32 +92,13 @@ so::vk::DebugReportCallbackEXT::DebugReportCallbackEXT
                                nullptr,
                                &mCallback));
 
-    if (result not_eq VK_SUCCESS)
-      THROW_EXCEPTION("failed to set up debug callback!");
+    if(result not_eq VK_SUCCESS)
+    {
+      return failure;
+    }
   }
-}
 
-so::vk::DebugReportCallbackEXT::~DebugReportCallbackEXT() noexcept
-{
-  deleteMembers();
-}
-
-so::vk::DebugReportCallbackEXT&
-so::vk::DebugReportCallbackEXT::operator=
-  (DebugReportCallbackEXT&& other) noexcept
-{
-  if(this is_eq &other)
-    return *this;
-
-  deleteMembers();
-
-  mCallback = other.mCallback;
-  mInstance = other.mInstance;
-
-  other.mCallback = nullptr;
-  other.mInstance = Instance::getSharedPtrNullInstance();
-
-  return *this;
+  return success;
 }
 
 void
@@ -127,7 +136,7 @@ debugCallback(VkDebugReportFlagsEXT      flags,
   (void) layerPrefix;
   (void) userData;
 
-  std::cerr << "validation layer: " << msg << std::endl;
+  std::cerr << "<ERROR> validation layer: " << msg << std::endl;
 
   return VK_FALSE;
 }

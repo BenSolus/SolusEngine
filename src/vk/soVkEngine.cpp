@@ -47,8 +47,11 @@ so::Engine::initialize(std::string const& applicationName,
     return failure;
   }
 
-  mDebugCallback = vk::DebugReportCallbackEXT(instance);
-
+  if(mDebugCallback.initialize(instance) is_eq failure)
+  {
+    return failure;
+  }
+  
   mSurface.setSharedPtrInstance(instance);
 
   if(mSurface.createWindow(applicationName) is_eq failure)
