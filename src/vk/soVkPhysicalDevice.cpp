@@ -20,17 +20,16 @@
  * IN THE SOFTWARE.
  */
 
-#include <soVkPhysicalDevice.hpp>
+#include "soVkPhysicalDevice.hpp"
 
-#include <soVkQueueFamilyIndices.hpp>
-#include <soVkSwapChainSupportDetails.hpp>
+#include "soVkQueueFamilyIndices.hpp"
+#include "soVkSwapChainSupportDetails.hpp"
 
-#include <soDefinitions.hpp>
-#include <soException.hpp>
+#include "cxx/soDefinitions.hpp"
 
 #include <set>
 
-std::vector<char const*> const DEVICE_EXTENSIONS
+std::array<char const*, 1> const DEVICE_EXTENSIONS
   ({ VK_KHR_SWAPCHAIN_EXTENSION_NAME });
 
 so::vk::PhysicalDevice::PhysicalDevice()
@@ -38,18 +37,37 @@ so::vk::PhysicalDevice::PhysicalDevice()
     mInstance(Instance::getSharedPtrNullInstance())
 {}
 
-so::vk::PhysicalDevice::PhysicalDevice(SharedPtrInstance const& instance,
-                                       Surface           const& surface)
-  : mPhysicalDevice(VK_NULL_HANDLE), mInstance(instance)
+so::vk::PhysicalDevice&
+so::vk::PhysicalDevice::operator=(PhysicalDevice&& other) noexcept
 {
-  VkInstance vkInstance(instance->getVkInstance());
+  if(this is_eq &other)
+  {
+    return *this;
+  }
 
-  uint32_t   deviceCount(0);
+  mPhysicalDevice = other.mPhysicalDevice;
+  mInstance       = other.mInstance;
+
+  other.mPhysicalDevice = VK_NULL_HANDLE;
+  other.mInstance       = Instance::getSharedPtrNullInstance();
+
+  return *this;
+}
+
+so::return_t
+so::vk::PhysicalDevice::initialize(SharedPtrInstance const& instance,
+                                   Surface           const& surface)
+{
+  VkInstance vkInstance{ instance->getVkInstance() };
+
+  uint32_t   deviceCount{ 0 };
 
   vkEnumeratePhysicalDevices(vkInstance, &deviceCount, nullptr);
 
   if(deviceCount is_eq 0)
-    THROW_EXCEPTION("failed to find GPUs with Vulkan ""support!");
+  {
+    return failure;
+  }
 
   std::vector<VkPhysicalDevice> devices(deviceCount);
 
@@ -64,28 +82,7 @@ so::vk::PhysicalDevice::PhysicalDevice(SharedPtrInstance const& instance,
     }
   }
 
-  if(mPhysicalDevice is_eq VK_NULL_HANDLE)
-    THROW_EXCEPTION("failed to find a suitable GPU!");
-}
-
-so::vk::PhysicalDevice::PhysicalDevice(VkPhysicalDevice         device,
-                                       SharedPtrInstance const& instance)
-  : mPhysicalDevice(device), mInstance(instance)
-{}
-
-so::vk::PhysicalDevice&
-so::vk::PhysicalDevice::operator=(PhysicalDevice&& other) noexcept
-{
-  if(this is_eq &other)
-    return *this;
-
-  mPhysicalDevice = other.mPhysicalDevice;
-  mInstance       = other.mInstance;
-
-  other.mPhysicalDevice = VK_NULL_HANDLE;
-  other.mInstance       = Instance::getSharedPtrNullInstance();
-
-  return *this;
+  return mPhysicalDevice not_eq VK_NULL_HANDLE ? success : failure;
 }
 
 bool
@@ -120,9 +117,9 @@ bool
 so::vk::PhysicalDevice::isDeviceSuitable(VkPhysicalDevice        device,
                                          Surface          const& surface)
 {
-  QueueFamilyIndices indices(device, surface);
+  QueueFamilyIndices indices{ device, surface };
 
-  bool extensionsSupported(checkDeviceExtensionSupport(device));
+  bool extensionsSupported{ checkDeviceExtensionSupport(device) };
 
 //  bool swapChainAdequate = false;
 //

@@ -53,7 +53,7 @@
 #include "soVkInstance.hpp"
 #include "soVkSurface.hpp"
 
-extern const std::vector<const char*> DEVICE_EXTENSIONS;
+extern const std::array<const char*, 1> DEVICE_EXTENSIONS;
 
 namespace so {
 namespace vk {
@@ -63,11 +63,6 @@ PhysicalDevice
 {
   public:
     PhysicalDevice();
-
-    explicit PhysicalDevice
-      (VkPhysicalDevice device,
-       SharedPtrInstance const& instance
-         = Instance::getSharedPtrNullInstance());
 
     PhysicalDevice(SharedPtrInstance const& instance, Surface const& surface);
 
@@ -80,7 +75,11 @@ PhysicalDevice
     PhysicalDevice& operator=(PhysicalDevice const& other) = delete;
 
     PhysicalDevice& operator=(PhysicalDevice&& other) noexcept;
-    
+
+    return_t
+    initialize(SharedPtrInstance const& instance,
+               Surface           const& surface);
+
     inline VkPhysicalDevice getVkPhysicalDevice() { return mPhysicalDevice; }
 
     inline SharedPtrInstance

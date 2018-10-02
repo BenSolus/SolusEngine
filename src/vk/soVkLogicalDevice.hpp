@@ -69,8 +69,6 @@ LogicalDevice : public PhysicalDevice,
 
     LogicalDevice();
 
-    LogicalDevice(SharedPtrInstance const& device, Surface const& surface);
-
     LogicalDevice(LogicalDevice const& other) = delete;
 
     LogicalDevice(LogicalDevice&& other) = delete;
@@ -81,6 +79,9 @@ LogicalDevice : public PhysicalDevice,
 
     LogicalDevice&
     operator=(LogicalDevice&& other) noexcept;
+
+    return_t
+    initialize(SharedPtrInstance const& device, Surface const& surface);
 
     inline VkDevice getVkDevice() { return mDevice; }
 

@@ -76,9 +76,14 @@ so::Engine::initialize(std::string const& applicationName,
         //mSurface.initialize();
         //mSurface       = vk::Surface(applicationName, instance);
 
-  vk::SharedPtrLogicalDevice device
-    (std::make_shared<vk::LogicalDevice>
-       (instance, mSurface));
+  vk::SharedPtrLogicalDevice device(std::make_shared<vk::LogicalDevice>());
+
+  result = device->initialize(instance, mSurface);
+
+  if(result is_eq failure)
+  {
+    return failure;
+  }
 
   mSwapChain     = vk::SwapChain(device, mSurface);
 

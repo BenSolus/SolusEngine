@@ -130,11 +130,9 @@ so::vk::Instance::checkValidationLayerSupport()
 
   std::cout << "<INFO> Available Vulkan layers:\n";
  
-  constexpr std::ptrdiff_t arraySize{ VK_MAX_EXTENSION_NAME_SIZE };
-
   for(auto const& layerProperties : availableLayers)
   {
-    Span<char const, arraySize> layerName{ layerProperties.layerName };
+    Span<char const> layerName{ layerProperties.layerName };
 
     std::cout << "<INFO>   " << layerName << '\n';
   }
@@ -145,7 +143,7 @@ so::vk::Instance::checkValidationLayerSupport()
 
     for(auto const& layerProperties : availableLayers)
     {
-      Span<char const, arraySize> otherLayerName{ layerProperties.layerName };
+      Span<char const> otherLayerName{ layerProperties.layerName };
 
       if(std::strcmp(layerName, otherLayerName) is_eq 0)
       {

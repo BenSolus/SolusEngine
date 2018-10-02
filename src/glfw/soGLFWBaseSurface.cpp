@@ -29,6 +29,7 @@ void error_callback(int error, char const* description);
 void error_callback(int error, char const* description)
 { 
   (void) error;
+
   puts(description);
 }
 

@@ -52,7 +52,7 @@
 
 namespace so {
 
-template<class ElemenetType, std::ptrdiff_t Extent>
+template<class ElemenetType, std::ptrdiff_t Extent = gsl::dynamic_extent>
 class Span;
 
 } // namespace so

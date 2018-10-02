@@ -30,7 +30,7 @@ so::vk::QueueFamilyIndices::QueueFamilyIndices(VkPhysicalDevice        device,
 {
   QueueFamilyIndices indices;
 
-  uint32_t queueFamilyCount(0);
+  uint32_t queueFamilyCount{ 0 };
 
   vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
 
@@ -41,24 +41,32 @@ so::vk::QueueFamilyIndices::QueueFamilyIndices(VkPhysicalDevice        device,
                                            queueFamilies.data());
 
 
-  int i(0);
+  int i{ 0 };
 
   for(auto const& queueFamily : queueFamilies)
   {
-    uint32_t const queueCount(queueFamily.queueCount);
+    uint32_t const queueCount{ queueFamily.queueCount };
     
     if(queueCount > 0)
-      if(queueFamily.queueFlags bitand VK_QUEUE_GRAPHICS_BIT)
-        mGraphicsFamily = i;
+    {
+      bool const supportsGraphicsOperations
+                   { static_cast<bool>(queueFamily.queueFlags bitand
+                                       VK_QUEUE_GRAPHICS_BIT) };
 
-    VkBool32 presentSupport = false;
+      if(supportsGraphicsOperations)
+      { 
+        mGraphicsFamily = i;
+      }
+    }
+
+    auto presentSupport = static_cast<VkBool32>(false);
 
     vkGetPhysicalDeviceSurfaceSupportKHR(device,
                                          static_cast<uint32_t>(i),
                                          surface.getVkSurfaceKHR(),
                                          &presentSupport);
 
-    if((queueCount > 0) and presentSupport)
+    if((queueCount > 0) and static_cast<bool>(presentSupport))
     {
       mPresentFamily = i;
     }
