@@ -34,13 +34,23 @@ so::Engine::initialize(std::string const& applicationName,
 {
   so::return_t result;
 
-  mSurface.initialize();
+  if(mSurface.initialize() is_eq failure)
+  {
+    return failure;
+  }
  
   vk::SharedPtrInstance instance(std::make_shared<vk::Instance>());
 
+  std::vector<char const*> instanceExtensions;
+
+  if(mSurface.getInstanceExtensions(instanceExtensions) is_eq failure)
+  {
+    return failure;
+  }
+
   result = instance->initialize(applicationName,
                                 applicationVersion,
-                                mSurface.getInstanceExtensions());
+                                instanceExtensions);
  
   if(result is_eq failure)
   {

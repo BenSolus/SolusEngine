@@ -147,9 +147,11 @@ Module
     base::Symbol const&
     getSymbol(index const idx);
 
-    std::string const&
+    std::string const
     getName();
 
+    std::string const
+    getName() const;
     bool
     isAvailable();
 

@@ -55,9 +55,6 @@
 #include "soModule.hpp"
 #include "soReturnT.hpp"
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-
 namespace so {
 namespace vk {
 
@@ -81,11 +78,11 @@ Surface
     Surface&
     operator=(Surface&& other) noexcept = delete;
 
-    void
+    so::return_t
     initialize();
 
-    std::vector<char const*>
-    getInstanceExtensions();
+    so::return_t
+    getInstanceExtensions(std::vector<char const*>& instanceExtensions);
 
     return_t
     createWindow(std::string const& title,
@@ -107,14 +104,8 @@ Surface
     void
     getWindowSize(size_type& width, size_type& height) const;
 
-    GLFWwindow*
-    getGLFWwindow()
-    {
-      return nullptr;
-    }
-
     void
-    setSharedPtrInstance(SharedPtrInstance instance);
+    setSharedPtrInstance(SharedPtrInstance const& instance);
 
     SharedPtrInstance
 		getSharedPtrInstance();

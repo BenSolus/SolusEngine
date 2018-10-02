@@ -20,17 +20,13 @@
  * IN THE SOFTWARE.
  */
 
-#include <soVkGLFWSurface.hpp>
+#include "soVkGLFWSurface.hpp"
 
 so::vk::GLFWSurface::GLFWSurface()
   : base::Surface(), mSurface(VK_NULL_HANDLE), mInstance(VK_NULL_HANDLE) {}
 
 so::vk::GLFWSurface::GLFWSurface(VkInstance const instance) 
   : base::Surface(), mSurface(VK_NULL_HANDLE), mInstance(instance) {}
-
-so::vk::GLFWSurface::GLFWSurface(std::string const& title)
-  : base::Surface(title), mSurface(VK_NULL_HANDLE), mInstance(VK_NULL_HANDLE)
-{}
 
 so::vk::GLFWSurface::~GLFWSurface() noexcept { deleteMembers(); }
 
@@ -55,20 +51,24 @@ so::vk::GLFWSurface::operator=(GLFWSurface&& other) noexcept
   return *this;
 }
 
-char const**
-so::vk::GLFWSurface::getInstanceExtensions(size_type* count) const
+so::return_t
+so::vk::GLFWSurface::getInstanceExtensions(char const*** extensions,
+                                           size_type* count) const
 {
   std::uint32_t ucount(0);
 
-  char const** extensions(glfwGetRequiredInstanceExtensions(&ucount));
+  *extensions = (glfwGetRequiredInstanceExtensions(&ucount));
 
-  if(extensions is_eq nullptr)
-    THROW_EXCEPTION("Couldn't retrieve Vulkan instance extension required by "
-                    "GLFW.");
+  if(*extensions is_eq nullptr)
+  {
+    *count = 0;
+
+    return failure;
+  }
 
   *count = static_cast<size_type>(ucount);
 
-  return extensions;
+  return success;
 }
 
 so::return_t
@@ -94,8 +94,6 @@ so::vk::GLFWSurface::createSurface(VkInstance instance)
                                                  mWindow,
                                                  nullptr,
                                                  &mSurface) };
-
-  if(result not_eq VK_SUCCESS) std::cout << std::to_string(result) << '\n';
 
   return result is_eq VK_SUCCESS ? success : failure;
 }

@@ -52,7 +52,6 @@
 
 #include "soVulkanSurface.hpp"
 
-#include "soDefinitions.hpp"
 #include "soReturnT.hpp"
 
 #ifdef __cplusplus
@@ -62,10 +61,10 @@ extern "C"
 
 #endif // __cplusplus
 
-char const*
+so::return_t
 soVkGLFWSurfaceInitialize(void** surface);
 
-char const*
+so::return_t
 soVkGLFWGetInstanceExtensions(void const*    surface,
                               char const***  extensions,
                               so::size_type* count);

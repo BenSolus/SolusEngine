@@ -50,8 +50,8 @@
 
 #pragma once
 
-#include <soDefinitions.hpp>
-#include <soException.hpp>
+#include "soDefinitions.hpp"
+#include "soReturnT.hpp"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -64,8 +64,6 @@ Surface
 {
   public:
     Surface();    
-    
-    explicit Surface(std::string const& title);
 
     Surface(Surface const& other) = delete;
 
@@ -78,6 +76,9 @@ Surface
 
     Surface&
     operator=(Surface&& other) noexcept; 
+
+    return_t
+    initialize();
 
     inline bool windowIsClosed() { return glfwWindowShouldClose(mWindow); }
 

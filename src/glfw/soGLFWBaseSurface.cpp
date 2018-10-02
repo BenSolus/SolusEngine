@@ -20,9 +20,9 @@
  * IN THE SOFTWARE.
  */
 
-#include <soGLFWBaseSurface.hpp>
+#include "soGLFWBaseSurface.hpp"
 
-#include <soDefinitions.hpp>
+#include <cstdio>
 
 void error_callback(int error, char const* description);
 
@@ -35,27 +35,6 @@ void error_callback(int error, char const* description)
 
 so::base::Surface::Surface() : mIsInitialized(false), mWindow(nullptr)
 {
-  glfwSetErrorCallback(error_callback);
-
-  if(glfwInit() is_eq GLFW_FALSE)
-    THROW_EXCEPTION("Failed to initialize the GLFW library.");
-
-  mIsInitialized = true;
-}
-    
-so::base::Surface::Surface(std::string const& title) : Surface()
-{
-  glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-  mWindow = glfwCreateWindow(800,
-                             600,
-                             title.c_str(),
-                             nullptr,
-                             nullptr);
-
-  if(mWindow is_eq nullptr)
-    THROW_EXCEPTION("Failed to create GLFWwindow.");
 }
 
 so::base::Surface::~Surface() noexcept
@@ -63,14 +42,18 @@ so::base::Surface::~Surface() noexcept
   deleteMembers();
 
   if(mIsInitialized)
+  {
     glfwTerminate();
+  }
 }
 
 so::base::Surface&
 so::base::Surface::operator=(Surface&& other) noexcept
 {
   if(this is_eq &other)
+  {
     return *this;
+  }
 
   deleteMembers();
 
@@ -81,6 +64,21 @@ so::base::Surface::operator=(Surface&& other) noexcept
   other.mWindow        = nullptr;
 
   return *this;
+}
+
+so::return_t
+so::base::Surface::initialize()
+{
+  glfwSetErrorCallback(error_callback);
+
+  if(glfwInit() is_eq GLFW_FALSE)
+  {
+    return failure;
+  }
+
+  mIsInitialized = true;
+
+  return success;
 }
 
 void

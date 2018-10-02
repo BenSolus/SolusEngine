@@ -20,25 +20,27 @@
  * IN THE SOFTWARE.
  */
 
-#include <soGLFWSurface.h>
+#include "soGLFWSurface.h"
 
-#include <soVkGLFWSurface.hpp>
+#include "soVkGLFWSurface.hpp"
 
-char const*
+so::return_t
 soVkGLFWSurfaceInitialize(void** surface)
 {
-  try
+  auto tmpSurfacePtr{ new so::vk::GLFWSurface() };
+
+  if(tmpSurfacePtr->initialize() is_eq failure)
   {
-    *surface = static_cast<void*>(new so::vk::GLFWSurface());
-  }
-  catch(so::Exception<std::runtime_error> const& e)
-  {
+    delete tmpSurfacePtr;
+
     *surface = nullptr;
 
-    return e.what();
+    return failure;
   }
 
-  return nullptr;
+  *surface = tmpSurfacePtr;
+
+  return success;
 }
 
 void
@@ -47,24 +49,13 @@ soVkGLFWSurfaceTerminate(void* surface)
   delete static_cast<so::vk::GLFWSurface*>(surface);
 }
 
-char const*
+so::return_t
 soVkGLFWGetInstanceExtensions(void const*    surface,
                               char const***  extensions,
                               so::size_type* count)
 {
-  try
-  {
-    *extensions = static_cast<so::vk::GLFWSurface const*>
-                    (surface)->getInstanceExtensions(count);
-  }
-  catch(so::Exception<std::runtime_error> const& e)
-  {
-    *extensions = nullptr;
-
-    return e.what();
-  }
-
-  return nullptr;
+  return static_cast<so::vk::GLFWSurface const*>
+           (surface)->getInstanceExtensions(extensions, count);
 }
 
 so::return_t

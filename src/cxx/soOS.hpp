@@ -67,11 +67,11 @@ enum class OperatingSystem
 
 constexpr so::OperatingSystem OS = so::OperatingSystem::Linux;
 
-#elif __APPLE__
+#elif defined __APPLE__
 
 constexpr so::OperatingSystem OS = so::OperatingSystem::OSX;
 
-#elif __WIN32
+#elif defined __WIN32
 
 constexpr so::OperatingSystem OS = so::OperatingSystem::Windows;
 

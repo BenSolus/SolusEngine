@@ -52,8 +52,6 @@
 
 #include "soVulkanSurface.hpp"
 
-#include "soReturnT.hpp"
-
 namespace so {
 namespace vk {
 
@@ -64,8 +62,6 @@ GLFWSurface : public base::Surface
     GLFWSurface();
 
     explicit GLFWSurface(VkInstance const instance);
-
-    explicit GLFWSurface(std::string const& title);
 
     GLFWSurface(GLFWSurface const& other) = delete;
 
@@ -79,8 +75,8 @@ GLFWSurface : public base::Surface
     GLFWSurface&
     operator=(GLFWSurface&& other) noexcept;
 
-    char const**
-    getInstanceExtensions(size_type* count) const;
+    return_t
+    getInstanceExtensions(char const*** extensions, size_type* count) const;
 
     return_t
     createWindow(std::string const& title,

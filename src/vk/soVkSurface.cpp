@@ -22,7 +22,6 @@
 
 #include <soVkSurface.hpp>
 
-#include <soException.hpp>
 #include "cxx/soMemory.hpp"
 
 #include <regex>
@@ -61,8 +60,12 @@ so::vk::Surface::Impl
     ~Impl() noexcept
     {
       for(auto& provider: mProviders)
+      {
         if(provider.first.isAvailable())
+        {
           provider.first(1, VoidReturn::getVoidReturn(), provider.second);
+        }
+      }
     }
 
     Impl&
@@ -71,7 +74,7 @@ so::vk::Surface::Impl
     Impl&
     operator=(Impl&& other) noexcept = delete;
 
-    void
+    so::return_t
     initialize()
     {
       bool   atLeastOneValidBackend(false);
@@ -82,8 +85,6 @@ so::vk::Surface::Impl
       {
         if(provider.first.isAvailable())
         {
-          try
-          {
           std::string verbose("<VERBOSE> Starting initialization of surface "
                               "provider '");
 
@@ -92,13 +93,19 @@ so::vk::Surface::Impl
 
           std::cout << verbose;
 
-          char const* error;
+          so::return_t result;
  
-          provider.first(0, error, &provider.second);
+          provider.first(0, result, &provider.second);
 
-          if(error not_eq nullptr)
-            THROW_EXCEPTION(error);
+          if(result is_eq failure)
+          {
+            verbose += "<ERROR>   Failed to initialize surface provider '";
+            verbose += provider.first.getName();
+            verbose += "' for engine backend 'Vulkan'.";
 
+            continue;
+          }
+          
           verbose  = "<VERBOSE> Initialized surface provider '";
 
           verbose += provider.first.getName();
@@ -119,17 +126,6 @@ so::vk::Surface::Impl
 
             std::cout << verbose;
           }
-          }
-          catch(...)
-          {
-          std::string warning("<WARNING> Failed initialization of surface "
-                              " backend '");
-
-          warning += provider.first.getName();
-          warning += "' for engine backend 'Vulkan'.\n";
-
-          std::cerr << warning;
-          }
         }
 
         ++idx;
@@ -137,39 +133,52 @@ so::vk::Surface::Impl
 
       if(not atLeastOneValidBackend)
       {
-        THROW_EXCEPTION("Couldn't initialize any surface provider.");
+        return failure;
       }
 
+      return success;
     }
 
-    std::vector<char const*>
-    getInstanceExtensions() const
+    return_t
+    getInstanceExtensions(std::vector<char const*>& instanceExtensions) const
     {
-      std::vector<char const*> allProviderInstanceExtensions;
+      instanceExtensions = std::vector<char const*>();
 
       for(auto const& provider : mProviders)
       {
-        char const*  error{ nullptr };
-        char const** extensions{ nullptr };
+        return_t     result;
+        char const** providerExtensions{ nullptr };
         size_type    count;
 
-        provider.first(2, error, provider.second, &extensions, &count);
+        provider.first(2,
+                       result,
+                       provider.second,
+                       &providerExtensions,
+                       &count);
 
-        if(error not_eq nullptr)
+        if(result is_eq failure)
         {
-          THROW_EXCEPTION(error);
+          std::string error{ "<ERROR>   Failed to get instance extensions " };
+
+          error += "for surface provider '";
+          error += provider.first.getName();
+          error += "'.";
+
+          std::cout << error << '\n';
+
+          continue;
         }
 
         std::vector<char const*> providerInstanceExtensions
-                                   { extensions, extensions + count };
+                                   { providerExtensions,
+                                     providerExtensions + count };
                 
-        allProviderInstanceExtensions.insert
-                                        (allProviderInstanceExtensions.end(),
-                                         providerInstanceExtensions.begin(),
-                                         providerInstanceExtensions.end());
+        instanceExtensions.insert(instanceExtensions.end(),
+                                  providerInstanceExtensions.begin(),
+                                  providerInstanceExtensions.end());
       }
 
-      return allProviderInstanceExtensions;
+      return success;
     }
 
     return_t
@@ -252,7 +261,7 @@ so::vk::Surface::Impl
       module(8, VoidReturn::getVoidReturn(), handle, &width, &height);
     }
 
-    std::string const&
+    std::string const
     getName()
     {
       return getModule().getName();
@@ -293,16 +302,17 @@ so::vk::Surface::Surface()
 
 so::vk::Surface::~Surface() noexcept = default;
 
-void
+so::return_t
 so::vk::Surface::initialize()
 {
-  mPImpl->initialize();
+  return mPImpl->initialize();
 }
 
-std::vector<char const*>
-so::vk::Surface::getInstanceExtensions()
+so::return_t
+so::vk::Surface::getInstanceExtensions
+  (std::vector<char const*>& instanceExtensions)
 {
-  return mPImpl->getInstanceExtensions();
+  return mPImpl->getInstanceExtensions(instanceExtensions);
 }
 
 so::return_t
@@ -344,7 +354,7 @@ so::vk::Surface::getWindowSize(size_type& width, size_type& height) const
 }
 
 void
-so::vk::Surface::setSharedPtrInstance(SharedPtrInstance instance)
+so::vk::Surface::setSharedPtrInstance(SharedPtrInstance const& instance)
 {
   mInstance = instance;
 }

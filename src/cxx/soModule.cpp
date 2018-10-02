@@ -126,8 +126,14 @@ so::Module::getSymbol(index const idx)
   return mSymbols[pos];
 }
 
-std::string const&
+std::string const
 so::Module::getName()
+{
+  return mName;
+}
+
+std::string const
+so::Module::getName() const
 {
   return mName;
 }

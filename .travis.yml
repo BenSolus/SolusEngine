@@ -13,8 +13,8 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - gcc-4.9
-            - g++-4.9
+            - gcc-5
+            - g++-5
             - build-essential
             - git
             - libgnome-keyring-dev
@@ -26,13 +26,13 @@ matrix:
             - ninja-build
             - libboost-all-dev
       env:
-        - SET_COMPILERS="CC=gcc-4.9 && CXX=g++-4.9"
+        - SET_COMPILERS="CC=gcc-5 && CXX=g++-5"
     - os: linux
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-3.3
+            - llvm-toolchain-trusty-4.0
           packages:
             - clang-3.3
             - build-essential
@@ -46,7 +46,7 @@ matrix:
             - ninja-build
             - libboost-all-dev
       env:
-        - SET_COMPILERS="CC=clang-3.3 && CXX=clang++-3.3"
+        - SET_COMPILERS="CC=clang-4.0 && CXX=clang++-4.0"
 
 before_install:
   ### Set compilers
