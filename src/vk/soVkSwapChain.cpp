@@ -25,8 +25,6 @@
 #include "soVkQueueFamilyIndices.hpp"
 #include "soVkSwapChainSupportDetails.hpp"
 
-#include "soException.hpp"
-
 so::vk::SwapChain::SwapChain()
   : mSwapChain(VK_NULL_HANDLE),
     mSwapChainExtent({ 0, 0 }),
@@ -37,39 +35,41 @@ so::vk::SwapChain::SwapChain()
     mPipeline()
 {}
 
-so::vk::SwapChain::SwapChain(SharedPtrLogicalDevice const& device,
-                             Surface                const& surface, 
-                             VkSwapchainKHR                oldSwapChain)
-  : SwapChain()
+so::return_t
+so::vk::SwapChain::initialize(SharedPtrLogicalDevice const& device,
+                              Surface const&                surface, 
+                              VkSwapchainKHR                oldSwapChain)
 {
   mDevice = device;
 
-  VkDevice         vkDevice(device->getVkDevice());
-  VkPhysicalDevice physicalDevice(device->getVkPhysicalDevice());
+  VkDevice         vkDevice{ device->getVkDevice() };
+  VkPhysicalDevice physicalDevice{ device->getVkPhysicalDevice() };
 
-  SwapChainSupportDetails swapChainSupport(physicalDevice,
-                                           surface.getVkSurfaceKHR());
+  SwapChainSupportDetails swapChainSupport{ physicalDevice,
+                                            surface.getVkSurfaceKHR()};
 
   VkSurfaceFormatKHR surfaceFormat
-    (chooseSwapSurfaceFormat(swapChainSupport.getFormats()));
+    { chooseSwapSurfaceFormat(swapChainSupport.getFormats()) };
   VkPresentModeKHR presentMode
-    (chooseSwapPresentMode(swapChainSupport.getPresentModes()));
-  VkExtent2D extent(chooseSwapExtent(swapChainSupport.getCapabilities(),
-                                     surface));
+    { chooseSwapPresentMode(swapChainSupport.getPresentModes()) };
+  VkExtent2D extent{ chooseSwapExtent(swapChainSupport.getCapabilities(),
+                                      surface) };
 
-  uint32_t imageCount =
-    swapChainSupport.getCapabilities().minImageCount + 1;
+  uint32_t imageCount
+    { swapChainSupport.getCapabilities().minImageCount + 1 };
 
   uint32_t const maxImageCount
-    (swapChainSupport.getCapabilities().maxImageCount);
+    { swapChainSupport.getCapabilities().maxImageCount };
   
-  bool const imageLimitDefined(maxImageCount > 0);
-  bool const maxSmallerMin(imageCount > maxImageCount);
+  bool const imageLimitDefined{ maxImageCount > 0 };
+  bool const maxSmallerMin{ imageCount > maxImageCount };
 
   if(imageLimitDefined and maxSmallerMin)
+  {
     imageCount = maxImageCount;
+  }
 
-  VkSwapchainCreateInfoKHR createInfo = {};
+  VkSwapchainCreateInfoKHR createInfo{};
 
   createInfo.sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
   createInfo.surface          = surface.getVkSurfaceKHR();
@@ -80,9 +80,9 @@ so::vk::SwapChain::SwapChain(SharedPtrLogicalDevice const& device,
   createInfo.imageArrayLayers = 1;
   createInfo.imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-  QueueFamilyIndices indices(physicalDevice, surface);
+  QueueFamilyIndices indices{ physicalDevice, surface };
 
-  uint32_t queueFamilyIndices[] =
+  uint32_t queueFamilyIndices[]
     { static_cast<uint32_t>(indices.getGraphicsFamily()),
       static_cast<uint32_t>(indices.getPresentFamily()) };
 
@@ -93,8 +93,9 @@ so::vk::SwapChain::SwapChain(SharedPtrLogicalDevice const& device,
     createInfo.pQueueFamilyIndices   = queueFamilyIndices;
   }
   else
+  {   
     createInfo.imageSharingMode      = VK_SHARING_MODE_EXCLUSIVE;
-
+  }
 
   createInfo.preTransform   =
     swapChainSupport.getCapabilities().currentTransform;
@@ -103,39 +104,34 @@ so::vk::SwapChain::SwapChain(SharedPtrLogicalDevice const& device,
   createInfo.clipped        = VK_TRUE;
   createInfo.oldSwapchain   = oldSwapChain;
 
-  VkResult const result(vkCreateSwapchainKHR(vkDevice,
-                                             &createInfo,
-                                             nullptr,
-                                             &mSwapChain));
+  VkResult const swapChainResult(vkCreateSwapchainKHR(vkDevice,
+                                                      &createInfo,
+                                                      nullptr,
+                                                      &mSwapChain));
 
-  if(result not_eq VK_SUCCESS)
-    THROW_EXCEPTION("failed to create swap chain (" +
-                    std::to_string(result) +
-                    ").");
+  if(swapChainResult not_eq VK_SUCCESS)
+  {
+    return failure;  
+  }
 
   vkGetSwapchainImagesKHR(vkDevice, mSwapChain, &imageCount, nullptr);
   
   mSwapChainImages.resize(imageCount);
 
   vkGetSwapchainImagesKHR(vkDevice,
-                        mSwapChain,
-                        &imageCount,
-                        mSwapChainImages.data());
+                          mSwapChain,
+                          &imageCount,
+                          mSwapChainImages.data());
 
   mSwapChainImageFormat = surfaceFormat.format;
   mSwapChainExtent      = extent;
 
-  try
-  {
-    mImageViews = ImageViews(mDevice,
-                             mSwapChainImages,
-                             mSwapChainImageFormat,
-                             VK_IMAGE_ASPECT_COLOR_BIT);
-  }
-  catch(...)
-  {
-    THROW_NESTED_EXCEPTION("failed to create swap chain.");
-  }
+  return_t result{ mImageViews.initialize(mDevice,
+                                          mSwapChainImages,
+                                          mSwapChainImageFormat,
+                                          VK_IMAGE_ASPECT_COLOR_BIT) };
+
+  return result;
 }
 
 so::vk::SwapChain::~SwapChain() noexcept
@@ -147,7 +143,9 @@ so::vk::SwapChain&
 so::vk::SwapChain::operator=(so::vk::SwapChain&& other) noexcept
 {
   if(this is_eq &other)
+  {
     return *this;
+  }
 
   destroyMembers();
 
@@ -170,22 +168,26 @@ VkSurfaceFormatKHR
 so::vk::SwapChain::chooseSwapSurfaceFormat
 (std::vector<VkSurfaceFormatKHR> const& availableFormats)
 {
-  bool const onlyOneFormat(availableFormats.size() is_eq 1);
-  bool const formatIsUndefined(availableFormats[0].format is_eq
-                               VK_FORMAT_UNDEFINED);
+  bool const onlyOneFormat{ availableFormats.size() is_eq 1 };
+  bool const formatIsUndefined{ availableFormats[0].format is_eq
+                                VK_FORMAT_UNDEFINED };
 
   if(onlyOneFormat and formatIsUndefined)
+  {
     return {VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
+  }
 
   for(auto const& availableFormat : availableFormats)
   {
-    bool const hasBGR8BitFormat(availableFormat.format is_eq
-                                VK_FORMAT_B8G8R8A8_UNORM);
-    bool const supportsSRGB(availableFormat.colorSpace is_eq
-                            VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
+    bool const hasBGR8BitFormat{ availableFormat.format is_eq
+                                 VK_FORMAT_B8G8R8A8_UNORM };
+    bool const supportsSRGB{ availableFormat.colorSpace is_eq
+                             VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
 
     if(hasBGR8BitFormat and supportsSRGB)
+    {
       return availableFormat;
+    }
   }
 
   return availableFormats[0];
@@ -195,13 +197,19 @@ VkPresentModeKHR
 so::vk::SwapChain::chooseSwapPresentMode
   (std::vector<VkPresentModeKHR> const& availablePresentModes)
 {
-  VkPresentModeKHR bestMode = VK_PRESENT_MODE_FIFO_KHR;
+  VkPresentModeKHR bestMode{ VK_PRESENT_MODE_FIFO_KHR};
 
   for(auto const& availablePresentMode : availablePresentModes)
+  {
     if(availablePresentMode is_eq VK_PRESENT_MODE_MAILBOX_KHR)
-      return availablePresentMode;
-    else if(availablePresentMode is_eq VK_PRESENT_MODE_IMMEDIATE_KHR)
+    {
       bestMode = availablePresentMode;
+    }
+    else if(availablePresentMode is_eq VK_PRESENT_MODE_IMMEDIATE_KHR)
+    {
+      bestMode = availablePresentMode;
+    }
+  }
 
   return bestMode;
 }
@@ -212,9 +220,11 @@ so::vk::SwapChain::chooseSwapExtent
 {
   uint32_t const widthCapabilities{ capabilities.currentExtent.width };
 
+  VkExtent2D swapExtent;
+
   if(widthCapabilities not_eq std::numeric_limits<uint32_t>::max())
   {
-    return capabilities.currentExtent;
+    swapExtent = capabilities.currentExtent;
   }
   else
   {
@@ -240,14 +250,16 @@ so::vk::SwapChain::chooseSwapExtent
       std::min(capabilities.maxImageExtent.height, actualExtent.height)
     );
 
-    return actualExtent;
+    swapExtent = actualExtent;
   }
+
+  return swapExtent;
 }
 
 void
 so::vk::SwapChain::destroyMembers()
 {
-  VkDevice device(mDevice->getVkDevice());
+  VkDevice device{ mDevice->getVkDevice() };
 
   if((mSwapChain not_eq VK_NULL_HANDLE) and (device not_eq VK_NULL_HANDLE))
   {

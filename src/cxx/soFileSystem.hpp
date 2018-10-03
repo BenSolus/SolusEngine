@@ -50,16 +50,18 @@
 
 #pragma once
 
+#include "soReturnT.hpp"
+
 #include <vector>
 #include <string>
 
-#if __cplusplus >= 201703L
+#if (defined USE_BOOST_FILESYSTEM) || (__cplusplus < 201703L)
 
-#include <std/soStdFilesystem.hpp>
+#include "boost/soBoostFilesystem.hpp"
 
 #else
 
-#include <boost/soBoostFilesystem.hpp>
+#include "std/soStdFilesystem.hpp"
 
 #endif
 
@@ -68,8 +70,8 @@ namespace so {
 Path const&
 getBinaryDir();
 
-std::vector<char>
-readBinaryFile(std::string const& filename);
+return_t
+readBinaryFile(std::string const& filename, std::vector<char>& content);
 
 } // namespace so
 

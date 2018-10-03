@@ -48,11 +48,9 @@
  *             OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
-
 #pragma once
 
-#include <soVkLogicalDevice.hpp>
+#include "soVkLogicalDevice.hpp"
 
 #include <string>
 #include <vector>

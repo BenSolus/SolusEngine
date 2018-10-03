@@ -50,7 +50,7 @@
 
 #pragma once
 
-#include <soVkLogicalDevice.hpp>
+#include "soVkLogicalDevice.hpp"
 
 namespace so {
 namespace vk {
@@ -60,13 +60,6 @@ ImageViews
 {
   public:
     ImageViews();
-
-    ImageViews(SharedPtrLogicalDevice const& device);
-
-    ImageViews(SharedPtrLogicalDevice const& device,
-               std::vector<VkImage>   const& images,
-               VkFormat                      format,
-               VkImageAspectFlags            aspectFlags);
 
     ImageViews(ImageViews const& other) = delete;
 
@@ -80,10 +73,16 @@ ImageViews
     ImageViews&
     operator=(ImageViews&& other) noexcept;
 
+    return_t
+    initialize(SharedPtrLogicalDevice const& device,
+               std::vector<VkImage>   const& images,
+               VkFormat                      format,
+               VkImageAspectFlags            aspectFlags);
+
     inline std::vector<VkImageView>&
     getVkImageViewsRef() { return mImageViews; }
 
-    void
+    return_t
     addImageViews(std::vector<VkImage> const&   images,
                   VkFormat                      format,
                   VkImageAspectFlags            aspectFlags);

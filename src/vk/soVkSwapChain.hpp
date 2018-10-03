@@ -55,7 +55,6 @@
 #include "soVkPipeline.hpp"
 #include "soVkSurface.hpp"
 
-
 #include <vector>
 
 namespace so {
@@ -66,10 +65,6 @@ SwapChain
 {
   public:
     SwapChain();
-
-    SwapChain(SharedPtrLogicalDevice const& device,
-              Surface const&                surface, 
-              VkSwapchainKHR                oldSwapChain = VK_NULL_HANDLE);
 
     SwapChain(SwapChain const& other) = delete;
 
@@ -83,6 +78,11 @@ SwapChain
     SwapChain&
     operator=(SwapChain&& other) noexcept;
 
+    return_t
+    initialize(SharedPtrLogicalDevice const& device,
+               Surface const&                surface, 
+               VkSwapchainKHR                oldSwapChain = VK_NULL_HANDLE);
+ 
     inline VkSwapchainKHR getVkSwapchainKHR() { return mSwapChain; }
 
     inline VkExtent2D getVkExtent() { return mSwapChainExtent; }

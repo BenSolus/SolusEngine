@@ -50,8 +50,8 @@
 
 #pragma once
 
-#include <soDefinitions.hpp>
-#include <soFileSystem.hpp>
+#include "soDefinitions.hpp"
+#include "soFileSystem.hpp"
 
 #if defined(_MSC_VER) || defined(__MINGW32__)
 
@@ -88,13 +88,13 @@ Symbol
   public:
     Symbol();
     
-    Symbol(void* symbol);
+    explicit Symbol(void* symbol);
 
     Symbol(Symbol const& other) = delete;
     
     Symbol(Symbol&& other) noexcept;
  
-    virtual ~Symbol() noexcept;
+    virtual ~Symbol() noexcept = default;
 
     Symbol& operator=(Symbol const& other) = delete;
 
@@ -104,9 +104,12 @@ Symbol
     bool
     isValid();
 
+    inline void setAddress(void* address) { mSymbol = address; }
+
   protected:
     void* mSymbol;
-};
+
+}; // class Symbol
 
 } // namespace base
 
@@ -123,9 +126,9 @@ Symbol : public base::Symbol
       : base::Symbol(static_cast<base::Symbol&&>(other))
     {}
  
-    Symbol(void* symbol) : base::Symbol(symbol) {}
+    explicit Symbol(void* symbol) : base::Symbol(symbol) {}
 
-    ~Symbol() noexcept = default;
+    virtual ~Symbol() noexcept = default;
 
     Symbol& operator=(Symbol const& other) = delete;
 
@@ -133,7 +136,9 @@ Symbol : public base::Symbol
     operator=(Symbol&& other) noexcept
     {
       if(this is_eq &other)
+      {
         return *this;
+      }
 
       base::Symbol::operator=(static_cast<base::Symbol&&>(other));
     
@@ -170,7 +175,7 @@ DynamicLibrary
   public:
     DynamicLibrary();
 
-    DynamicLibrary(Path& file);
+    explicit DynamicLibrary(Path& file);
 
     template<typename Ret, typename... IN, typename... NEXT>
     DynamicLibrary(char const*                                 filename,
@@ -186,7 +191,9 @@ DynamicLibrary
       (void) dlerror();
 
       if(mHandle not_eq nullptr)
+      {
         loadSymbols(symbol, next...);
+      }
 #endif
     } 
 

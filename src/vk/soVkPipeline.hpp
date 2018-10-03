@@ -50,7 +50,7 @@
 
 #pragma once
 
-#include <soVkLogicalDevice.hpp>
+#include "soVkLogicalDevice.hpp"
 
 namespace so {
 namespace vk {
@@ -60,11 +60,6 @@ Pipeline
 {
   public:
     Pipeline();
-
-    Pipeline(SharedPtrLogicalDevice const& device,
-             VkExtent2D                    swapChainExtent,
-             VkRenderPass                  renderPass,
-             VkDescriptorSetLayout&        descriptorSetLayout);
 
     Pipeline(Pipeline const& other) = delete;
 
@@ -76,23 +71,13 @@ Pipeline
     operator=(Pipeline const& other) = delete;
 
     Pipeline&
-    operator=(Pipeline&& other) noexcept
-    {
-      if(this == &other)
-        return *this;
-
-      destroyMembers();
-
-      mPipeline       = other.mPipeline;
-      mPipelineLayout = other.mPipelineLayout;
-      mDevice         = other.mDevice;
-
-      other.mPipeline       = VK_NULL_HANDLE;
-      other.mPipelineLayout = VK_NULL_HANDLE;
-      other.mDevice         = LogicalDevice::SHARED_PTR_NULL_LOGICAL_DEVICE;
-
-      return *this;
-    }
+    operator=(Pipeline&& other) noexcept;
+   
+    return_t
+    initialize(SharedPtrLogicalDevice const& device,
+               VkExtent2D                    swapChainExtent,
+               VkRenderPass                  renderPass,
+               VkDescriptorSetLayout&        descriptorSetLayout);
 
     inline VkPipeline getVkPipeline() { return mPipeline; }
  

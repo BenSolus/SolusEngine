@@ -135,7 +135,7 @@ ENDIF()
 # Set default compiler flags                                                  #
 ###############################################################################
 
-SET(DEFAULT_CXX_FLAGS "-Wall -Wextra -pedantic ")
+SET(DEFAULT_CXX_FLAGS "-Wall -Wextra -pedantic")
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${DEFAULT_CXX_FLAGS}")
 

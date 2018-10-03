@@ -20,10 +20,9 @@
  * IN THE SOFTWARE.
  */
 
-#include <soVkShaderModule.hpp>
+#include "soVkShaderModule.hpp"
 
-#include <soException.hpp>
-#include <soFileSystem.hpp>
+#include "soFileSystem.hpp"
 
 so::vk::ShaderModule::ShaderModule()
   : mShaderModule(VK_NULL_HANDLE),
@@ -36,16 +35,12 @@ so::vk::ShaderModule::ShaderModule(SharedPtrLogicalDevice const& device,
 {
   std::vector<char> shaderCode;
 
-  try
+  if(readBinaryFile(file, shaderCode) is_eq failure)
   {
-    shaderCode = readBinaryFile(file);
-  }
-  catch(...)
-  {
-    THROW_NESTED_EXCEPTION("Caught exception:");
+    return;
   }
 
-  VkShaderModuleCreateInfo createInfo = {};
+  VkShaderModuleCreateInfo createInfo{};
 
   createInfo.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
   createInfo.codeSize = shaderCode.size();
@@ -57,9 +52,9 @@ so::vk::ShaderModule::ShaderModule(SharedPtrLogicalDevice const& device,
                                              &mShaderModule));
 
   if(result not_eq VK_SUCCESS)
-    THROW_EXCEPTION("failed to create shader module (" +
-										std::to_string(result) +
- 										").");
+  {
+    mShaderModule = VK_NULL_HANDLE;
+  }
 }
 
 so::vk::ShaderModule::~ShaderModule() noexcept
@@ -71,7 +66,9 @@ so::vk::ShaderModule&
 so::vk::ShaderModule::operator=(ShaderModule&& other) noexcept
 {
 	if(this is_eq &other)
-		return *this;
+  {
+    return *this;
+  }
 
   destroy_members();
 
@@ -88,7 +85,7 @@ so::vk::ShaderModule::operator=(ShaderModule&& other) noexcept
 void
 so::vk::ShaderModule::destroy_members()
 {
-  VkDevice device(mDevice->getVkDevice());
+  VkDevice device{ mDevice->getVkDevice() };
 
   if((mShaderModule not_eq VK_NULL_HANDLE) and (device not_eq VK_NULL_HANDLE))
   {

@@ -20,25 +20,46 @@
  * IN THE SOFTWARE.
  */
 
-#include <soVkImageViews.hpp>
+#include "soVkImageViews.hpp"
 
-#include <soDefinitions.hpp>
-#include <soException.hpp>
+#include "soDefinitions.hpp"
 
 so::vk::ImageViews::ImageViews()
   : mImageViews(), mDevice(LogicalDevice::SHARED_PTR_NULL_LOGICAL_DEVICE)
 {}
 
-so::vk::ImageViews::ImageViews(SharedPtrLogicalDevice const& device)
-  : mImageViews(), mDevice(device)
-{}
+so::vk::ImageViews::~ImageViews() noexcept
+{
+  destroyMembers();
+}
 
-so::vk::ImageViews::ImageViews(SharedPtrLogicalDevice const& device,
+so::vk::ImageViews&
+so::vk::ImageViews::operator=(ImageViews&& other) noexcept
+{
+  if(this is_eq &other)
+  {
+    return *this;
+  }
+
+  destroyMembers();
+          
+  mImageViews = other.mImageViews;
+  mDevice     = other.mDevice;
+
+  other.mImageViews = std::vector<VkImageView>();
+  other.mDevice     = LogicalDevice::SHARED_PTR_NULL_LOGICAL_DEVICE;
+
+  return *this;
+}
+
+so::return_t
+so::vk::ImageViews::initialize(SharedPtrLogicalDevice const& device,
                                std::vector<VkImage>   const& images,
                                VkFormat                      format,
                                VkImageAspectFlags            aspectFlags)
-  : mImageViews(), mDevice(device)
 {
+  mDevice = device;
+
   std::size_t const size(images.size());
 
   mImageViews.resize(size);
@@ -68,36 +89,15 @@ so::vk::ImageViews::ImageViews(SharedPtrLogicalDevice const& device,
                                             &mImageViews[i]));
 
     if(result not_eq VK_SUCCESS)
-      THROW_EXCEPTION("failed to create image views (" +
-                      std::to_string(result) +
-                      ").");
+    {
+      return failure;
+    }
   }
+
+  return success;
 }
 
-so::vk::ImageViews::~ImageViews() noexcept
-{
-  destroyMembers();
-}
-
-so::vk::ImageViews&
-so::vk::ImageViews::operator=(ImageViews&& other) noexcept
-{
-  if(this is_eq &other)
-    return *this;
-
-  destroyMembers();
-          
-  mImageViews = other.mImageViews;
-  mDevice     = other.mDevice;
-
-  other.mImageViews = std::vector<VkImageView>();
-  other.mDevice     = LogicalDevice::SHARED_PTR_NULL_LOGICAL_DEVICE;
-
-  return *this;
-}
-
-
-void
+so::return_t
 so::vk::ImageViews::addImageViews(std::vector<VkImage> const& images,
                                   VkFormat                    format,
                                   VkImageAspectFlags          aspectFlags)
@@ -132,10 +132,12 @@ so::vk::ImageViews::addImageViews(std::vector<VkImage> const& images,
                                             &mImageViews[i]));
 
     if(result not_eq VK_SUCCESS)
-      THROW_EXCEPTION("failed to create image view (" +
-                      std::to_string(result) +
-                      ").");
+    {
+      return failure;
+    }
   }
+
+  return success;
 }
 
 void
@@ -144,11 +146,11 @@ so::vk::ImageViews::destroyMembers()
   VkDevice device(mDevice->getVkDevice());
 
   if(device not_eq VK_NULL_HANDLE)
-  {  
-    for(uindex i(0); i < mImageViews.size(); ++i)
+  { 
+    for(auto imageView : mImageViews)
     {
-      vkDestroyImageView(device, mImageViews[i], nullptr);
-    }
+      vkDestroyImageView(device, imageView, nullptr);
+    }  
   }
 }
 

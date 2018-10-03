@@ -20,37 +20,40 @@
  * IN THE SOFTWARE.
  */
 
-#include <soFileSystem.hpp>
+#include "soFileSystem.hpp"
 
-#include <soDefinitions.hpp>
-#include <soException.hpp>
+#include "soConstExpr.hpp"
+#include "soDefinitions.hpp"
+#include "soOS.hpp"
 
 #ifdef __linux__
+
 #include <unistd.h>
+
 #endif
 
 #include <fstream>
 
-std::vector<char>
-so::readBinaryFile(const std::string& filename)
+so::return_t
+so::readBinaryFile(const std::string& filename, std::vector<char>& content)
 {
   std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
   if(not file.is_open())
-    throw Exception<std::runtime_error>("failed to open file!",
-                                        PRETTY_FUNCTION_SIG);
+  {
+    return failure;
+  }
 
   std::streamsize const fileSize(file.tellg());
 
-  std::vector<char> buffer(static_cast<std::vector<char>::size_type>
-                      (fileSize));
+  content.resize(static_cast<std::vector<char>::size_type>(fileSize)); 
 
   file.seekg(0);
-  file.read(buffer.data(), fileSize);
+  file.read(content.data(), fileSize);
 
   file.close();
 
-  return buffer;
+  return success;
 }
 
 static std::string
@@ -59,33 +62,34 @@ getBinDir()
   /* Trying to find the root directory of the binarys. */
   std::string root;
 
-#ifdef __linux__ // Using readlink on Linux.
+  so::constExprIf<isUNIXBased<OS>> // if
+  ([&]() // then
+   {
+     char exe[FILENAME_MAX] = {};
 
-  char exe[FILENAME_MAX] = {};
+     // Find path to executable
+     if(readlink("/proc/self/exe", exe, FILENAME_MAX) is_eq -1)
+     {
+       // TODO(BenSolus): Implementing some error handling.   
+     }
+     else
+     {
+       exe[sizeof(exe) - 1] = '\0';
+     }
 
-  // Find path to executable
-  if(readlink("/proc/self/exe", exe, FILENAME_MAX) is_eq -1)
-  {
-    throw so::Exception<std::runtime_error>("failed to get path of this "
-                                            "executable!",
-                                            PRETTY_FUNCTION_SIG);
-  }
-  else
-    exe[sizeof(exe) - 1] = '\0';
+     root = std::string(exe);
 
-  root = std::string(exe);
+     /* Remove executable name and the bin folder which will result in the
+      * root directory. (Kinda hardcoded, but easily changeable.) */
 
-  /* Remove executable name and the bin folder which will result in the
-   * root directory. (Kinda hardcoded, but easily changeable.) */
+     std::size_t const pos(root.find
+                             ("bin/" +
+                              std::string(program_invocation_short_name)));
 
-  std::size_t const pos(root.find("bin/" +
-                                  std::string(program_invocation_short_name)));
-
-  root = root.erase(pos, root.length() - pos);
-#else
-  throw Exception<std::runtime_error>("failed to get path of binary "
-                                      "directory: unsupported OS!");
-#endif
+     root = root.erase(pos, root.length() - pos);
+   },
+   [&](){} // else
+  );
 
   return root;
 }

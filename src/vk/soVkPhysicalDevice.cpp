@@ -58,6 +58,8 @@ so::return_t
 so::vk::PhysicalDevice::initialize(SharedPtrInstance const& instance,
                                    Surface           const& surface)
 {
+  mInstance = instance;
+
   VkInstance vkInstance{ instance->getVkInstance() };
 
   uint32_t   deviceCount{ 0 };

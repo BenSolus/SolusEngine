@@ -85,7 +85,10 @@ so::Engine::initialize(std::string const& applicationName,
     return failure;
   }
 
-  mSwapChain     = vk::SwapChain(device, mSurface);
+  if(mSwapChain.initialize(device, mSurface) is_eq failure)
+  {
+    return failure;
+  }
 
   return success;
 }

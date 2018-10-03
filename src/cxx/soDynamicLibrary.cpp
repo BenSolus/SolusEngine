@@ -20,12 +20,10 @@
  * IN THE SOFTWARE.
  */
 
-#include <soDynamicLibrary.hpp>
+#include "soDynamicLibrary.hpp"
 
-#include <soException.hpp>
-
-#include "cxx/soConstExpr.hpp"
-#include "cxx/soOS.hpp"
+#include "soConstExpr.hpp"
+#include "soOS.hpp"
 
 so::base::Symbol::Symbol() : mSymbol(nullptr) {}
 
@@ -37,13 +35,13 @@ so::base::Symbol::Symbol(Symbol&& other) noexcept
 
 so::base::Symbol::Symbol(void* symbol) : mSymbol(symbol) {}
 
-so::base::Symbol::~Symbol() noexcept { mSymbol = nullptr; }
-
 so::base::Symbol&
 so::base::Symbol::operator=(Symbol&& other) noexcept
 {
   if(this is_eq &other)
+  {
     return *this;
+  }
 
   mSymbol = other.mSymbol;
 
@@ -117,7 +115,9 @@ so::DynamicLibrary&
 so::DynamicLibrary::operator=(DynamicLibrary&& other) noexcept
 {
   if(this is_eq &other)
+  {
     return *this;
+  }
 
   deleteMembers();
 
@@ -133,70 +133,73 @@ so::DynamicLibrary::operator=(DynamicLibrary&& other) noexcept
 so::base::Symbol
 so::DynamicLibrary::loadSymbol(std::string const& symbol)
 {
-#if defined(_MSC_VER) || defined(__MINGW32__)
+  base::Symbol result;
 
-#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
-  
-  void* symbolAddress(dlsym(mHandle, symbol.c_str()));
+  constExprIf<isUNIXBased<OS>> // if
+  ([&]() // then
+   {  
+     void* symbolAddress(dlsym(mHandle, symbol.c_str()));
 
-  char const* lastError(dlerror());
+     char const* lastError(dlerror());
 
-  if(lastError is_eq nullptr)
-    return base::Symbol(symbolAddress);
-  else
-  {
-    std::string warning("<WARNING> Couldn't load symbol '");
+     if(lastError is_eq nullptr)
+     {
+        result.setAddress(symbolAddress);
+     }
+     else
+     {
+       std::string warning("<ERROR>   Couldn't load symbol '");
 
-    warning += symbol;
-    warning += "': ";
-    warning += lastError;
-    warning += ".\n";
+       warning += symbol;
+       warning += "': ";
+       warning += lastError;
+       warning += ".\n";
 
-    std::cerr << warning;
+       std::cerr << warning;
 
-    mIsComplete = false;
+       mIsComplete = false;
+     }
+   },
+   [&](){} // else
+  );
 
-    return base::Symbol();
-  }
-
-#else
-
-#endif  
+  return result;
 }
 
 
 void
 so::DynamicLibrary::loadSymbol(nameSymbolPair& symbol)
 {
-#if defined(_MSC_VER) || defined(__MINGW32__)
+  constExprIf<isUNIXBased<OS>> // if
+  ([&]() // then
+   {
+     void* symbolAddress(dlsym(mHandle, std::get<0>(symbol)));
 
-#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
-
-  void* symbolAddress(dlsym(mHandle, std::get<0>(symbol)));
-
-  if(dlerror() is_eq nullptr)
-    std::get<1>(symbol) = base::Symbol(symbolAddress);
-  else
-    mIsComplete = false;
-
-#else
-
-#endif
- 
+     if(dlerror() is_eq nullptr)
+     {
+       std::get<1>(symbol) = base::Symbol(symbolAddress);
+     }
+     else
+     {
+       mIsComplete = false;
+     }
+   },
+   [&](){} // else 
+  );
 }
 
 void
 so::DynamicLibrary::deleteMembers()
 {
-#if defined(_MSC_VER) || defined(__MINGW32__)
-
-#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
-
-  if(mHandle not_eq nullptr)
-    dlclose(mHandle);
-
-#else 
-
-#endif
+  constExprIf<isUNIXBased<OS>> // if
+  ([&]() // then
+   {
+     if(mHandle not_eq nullptr)
+     {
+       dlclose(mHandle);
+     }
+   },
+   [&](){} // else
+  );
 }
 

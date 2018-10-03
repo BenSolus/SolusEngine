@@ -24,7 +24,6 @@
 
 #include "soVkShaderModule.hpp"
 
-#include "soException.hpp"
 #include "soFileSystem.hpp"
 
 so::vk::Pipeline::Pipeline()
@@ -33,30 +32,56 @@ so::vk::Pipeline::Pipeline()
     mDevice(LogicalDevice::SHARED_PTR_NULL_LOGICAL_DEVICE)
 {}
 
-so::vk::Pipeline::Pipeline(SharedPtrLogicalDevice const& device,
-                            VkExtent2D                    swapChainExtent,
-                            VkRenderPass                  renderPass,
-                            VkDescriptorSetLayout&        descriptorSetLayout)
-: mPipeline(VK_NULL_HANDLE),
-  mPipelineLayout(VK_NULL_HANDLE),
-  mDevice(device)
+so::vk::Pipeline::~Pipeline() noexcept
 {
-  ShaderModule vertShader, fragShader;
+  destroyMembers();
+}
 
-  try
+so::vk::Pipeline&
+so::vk::Pipeline::operator=(Pipeline&& other) noexcept
+{
+  if(this == &other)
   {
-    vertShader = ShaderModule(device,
-                              BIN_DIR + "/data/shaders/triangle/vert.spv");
-
-    fragShader = ShaderModule(device,
-                              BIN_DIR + "/data/shaders/triangle/frag.spv");
-  }
-  catch(...)
-  {
-    THROW_NESTED_EXCEPTION("Caught exception:");
+    return *this;
   }
 
-  VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
+  destroyMembers();
+
+  mPipeline       = other.mPipeline;
+  mPipelineLayout = other.mPipelineLayout;
+  mDevice         = other.mDevice;
+
+  other.mPipeline       = VK_NULL_HANDLE;
+  other.mPipelineLayout = VK_NULL_HANDLE;
+  other.mDevice         = LogicalDevice::SHARED_PTR_NULL_LOGICAL_DEVICE;
+
+  return *this;
+}
+
+so::return_t
+so::vk::Pipeline::initialize(SharedPtrLogicalDevice const& device,
+                             VkExtent2D                    swapChainExtent,
+                             VkRenderPass                  renderPass,
+                             VkDescriptorSetLayout&        descriptorSetLayout)
+{
+  mDevice = device;
+
+  ShaderModule vertShader{ device,
+                           BIN_DIR + "/data/shaders/triangle/vert.spv" };
+
+  ShaderModule fragShader{ device,
+                           BIN_DIR + "/data/shaders/triangle/frag.spv" };
+
+  bool const gotValidShaders
+               { (vertShader.getVkShaderModule() not_eq VK_NULL_HANDLE) and
+                 (fragShader.getVkShaderModule() not_eq VK_NULL_HANDLE) };
+ 
+  if(not gotValidShaders)
+  {
+    return failure;
+  }
+
+  VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
 
   vertShaderStageInfo.sType  =
     VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -80,11 +105,8 @@ so::vk::Pipeline::Pipeline(SharedPtrLogicalDevice const& device,
   (void) swapChainExtent;
   (void) renderPass;
   (void) descriptorSetLayout;
-} 
 
-so::vk::Pipeline::~Pipeline() noexcept
-{
-  destroyMembers();
+  return success;
 }
 
 void
@@ -105,3 +127,4 @@ so::vk::Pipeline::destroyMembers()
     }
   }
 }
+

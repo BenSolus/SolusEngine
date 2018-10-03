@@ -50,6 +50,7 @@
 
 #pragma once
 
+#include <string>
 #include <type_traits>
 
 namespace so {
@@ -62,6 +63,12 @@ enum class OperatingSystem
 }; // enum class OperatingSystem
 
 } // namespace so
+
+namespace std {
+  
+std::string to_string(so::OperatingSystem);
+
+} // namespace std
 
 #ifdef __linux__
 
@@ -85,5 +92,4 @@ struct isUNIXBased<so::OperatingSystem::Linux> : std::true_type {};
 
 template<>
 struct isUNIXBased<so::OperatingSystem::macOS> : std::true_type {};
-
 
