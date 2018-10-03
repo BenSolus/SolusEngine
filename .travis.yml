@@ -13,8 +13,8 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - gcc-5.1
-            - g++-5.1
+            - gcc-5
+            - g++-5
             - build-essential
             - git
             - libgnome-keyring-dev
@@ -26,7 +26,7 @@ matrix:
             - ninja-build
             - libboost-all-dev
       env:
-        - SET_COMPILERS="CC=gcc-5.1 && CXX=g++-5.1"
+        - SET_COMPILERS="CC=gcc-5 && CXX=g++-5"
     - os: linux
       addons:
         apt:
