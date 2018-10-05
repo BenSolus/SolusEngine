@@ -22,6 +22,7 @@
 
 #include "soVkShaderModule.hpp"
 
+#include "soDebugCallback.hpp"
 #include "soFileSystem.hpp"
 
 so::vk::ShaderModule::ShaderModule()
@@ -37,6 +38,16 @@ so::vk::ShaderModule::ShaderModule(SharedPtrLogicalDevice const& device,
 
   if(readBinaryFile(file, shaderCode) is_eq failure)
   {
+    std::string message{ ": Failed to load shader code from binary "
+                         "file'" };
+    
+    message += file;
+    message += "'";
+
+    PREPEND_FUNCTION_SIG_TO_STRING(message);
+
+    executeDebugCallback(error, message);
+
     return;
   }
 
@@ -53,6 +64,12 @@ so::vk::ShaderModule::ShaderModule(SharedPtrLogicalDevice const& device,
 
   if(result not_eq VK_SUCCESS)
   {
+    std::string message{ ": Failed to create shader module." };
+
+    PREPEND_FUNCTION_SIG_TO_STRING(message);
+
+    executeDebugCallback(error, message);
+
     mShaderModule = VK_NULL_HANDLE;
   }
 }

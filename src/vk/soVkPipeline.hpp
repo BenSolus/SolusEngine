@@ -52,6 +52,8 @@
 
 #include "soVkLogicalDevice.hpp"
 
+#include "soVkSwapChain.hpp"
+
 namespace so {
 namespace vk {
     
@@ -75,9 +77,7 @@ Pipeline
    
     return_t
     initialize(SharedPtrLogicalDevice const& device,
-               VkExtent2D                    swapChainExtent,
-               VkRenderPass                  renderPass,
-               VkDescriptorSetLayout&        descriptorSetLayout);
+               SwapChain              const& swapChain);
 
     inline VkPipeline getVkPipeline() { return mPipeline; }
  

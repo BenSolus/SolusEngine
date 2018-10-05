@@ -21,10 +21,10 @@
  */
 
 /**
- *  @file      soEngine.hpp
+ *  @file      shader.frag
  *  @author    Bennet Carstensen
  *  @date      2017
- *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
+ *  @copyright Copyright (c) 2017 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
  *             obtaining a copy of this software and associated documentation
@@ -48,38 +48,14 @@
  *             OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#pragma once
 
-#include "soVkDebugReportCallbackEXT.hpp"
-#include "soVkInstance.hpp"
-#include "soVkLogicalDevice.hpp"
-#include "soVkPipeline.hpp"
-#include "soVkSurface.hpp"
+#version 450
+#extension GL_ARB_separate_shader_objects : enable
 
-namespace so {
+layout(location = 0) out vec4 outColor;
 
-class
-Engine
+void main()
 {
-  public:
-    Engine();
+    outColor = vec4(1.0, 0.0, 0.0, 1.0);
+}
 
-    ~Engine() noexcept = default;
-
-    so::return_t
-    initialize(std::string const& applicationName,
-               uint32_t    const  applicationVersion);
-
-    inline bool windowIsClosed() { return mSurface.windowIsClosed(); } 
-
-    inline void surfacePollEvents() { mSurface.pollEvents(); } 
-
-  private:
-    vk::DebugReportCallbackEXT mDebugCallback;
-    vk::Surface                mSurface;
-    vk::SwapChain              mSwapChain;
-    vk::Pipeline               mPipeline;
-
-};
-
-} // namespace so

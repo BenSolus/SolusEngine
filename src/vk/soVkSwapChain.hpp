@@ -52,7 +52,6 @@
 
 #include "soVkImageViews.hpp"
 #include "soVkLogicalDevice.hpp"
-#include "soVkPipeline.hpp"
 #include "soVkSurface.hpp"
 
 #include <vector>
@@ -105,8 +104,7 @@ SwapChain
     SharedPtrLogicalDevice mDevice;
 
     ImageViews             mImageViews;
-    Pipeline               mPipeline;
-
+   
     VkSurfaceFormatKHR
     chooseSwapSurfaceFormat
       (std::vector<VkSurfaceFormatKHR> const& availableFormats);

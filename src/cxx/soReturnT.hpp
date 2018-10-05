@@ -50,6 +50,8 @@
 
 #pragma once
 
+#include <string>
+
 namespace so {
 
 enum class return_t
@@ -63,4 +65,11 @@ enum class return_t
 constexpr so::return_t success = so::return_t::success;
 
 constexpr so::return_t failure = so::return_t::failure;
+
+namespace std {
+
+std::string
+to_string(so::return_t val);
+
+} // namespace std
 

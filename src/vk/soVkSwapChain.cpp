@@ -31,8 +31,7 @@ so::vk::SwapChain::SwapChain()
     mSwapChainImageFormat(VK_FORMAT_UNDEFINED),
     mSwapChainImages(),
     mDevice(LogicalDevice::SHARED_PTR_NULL_LOGICAL_DEVICE),
-    mImageViews(),
-    mPipeline()
+    mImageViews()
 {}
 
 so::return_t

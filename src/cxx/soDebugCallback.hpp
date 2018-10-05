@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2017 by Bennet Carstensen
+ * Copyright (C) 2017-2018 by Bennet Carstensen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in
@@ -15,23 +15,23 @@
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
  */
 
 /**
- *  @file      soEngine.hpp
+ *  @file      soDebugCallback.hpp
  *  @author    Bennet Carstensen
- *  @date      2017
+ *  @date      2018
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
  *             obtaining a copy of this software and associated documentation
  *             files (the "Software"), to deal in the Software without
  *             restriction, including without limitation the rights to use,
- *             copy, modify, merge, publish, distribute, sublicense, and/or sell
- *             copies of the Software, and to permit persons to whom the
+ *             copy, modify, merge, publish, distribute, sublicense, and/or
+ *             sell copies of the Software, and to permit persons to whom the
  *             Software is furnished to do so, subject to the following
  *             conditions:
  *
@@ -50,36 +50,36 @@
 
 #pragma once
 
-#include "soVkDebugReportCallbackEXT.hpp"
-#include "soVkInstance.hpp"
-#include "soVkLogicalDevice.hpp"
-#include "soVkPipeline.hpp"
-#include "soVkSurface.hpp"
+#include "soReturnT.hpp"
+
+#include <string>
 
 namespace so {
 
-class
-Engine
+enum class
+DebugCode
 {
-  public:
-    Engine();
-
-    ~Engine() noexcept = default;
-
-    so::return_t
-    initialize(std::string const& applicationName,
-               uint32_t    const  applicationVersion);
-
-    inline bool windowIsClosed() { return mSurface.windowIsClosed(); } 
-
-    inline void surfacePollEvents() { mSurface.pollEvents(); } 
-
-  private:
-    vk::DebugReportCallbackEXT mDebugCallback;
-    vk::Surface                mSurface;
-    vk::SwapChain              mSwapChain;
-    vk::Pipeline               mPipeline;
-
+  info,
+  infoItem,
+  verbose,
+  error
 };
 
+typedef void (*DebugCallback) (DebugCode const, std::string const&);
+
+void
+setDebugCallback(DebugCallback callback);
+
+void
+executeDebugCallback(DebugCode const code, std::string const& message);
+
 } // namespace so
+
+constexpr so::DebugCode info     = so::DebugCode::info;
+
+constexpr so::DebugCode infoItem = so::DebugCode::infoItem;
+
+constexpr so::DebugCode verbose  = so::DebugCode::verbose;
+
+constexpr so::DebugCode error    = so::DebugCode::error;
+

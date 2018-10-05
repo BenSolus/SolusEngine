@@ -23,6 +23,7 @@
 #include "soFileSystem.hpp"
 
 #include "soConstExpr.hpp"
+#include "soDebugCallback.hpp"
 #include "soDefinitions.hpp"
 #include "soOS.hpp"
 
@@ -41,6 +42,15 @@ so::readBinaryFile(const std::string& filename, std::vector<char>& content)
 
   if(not file.is_open())
   {
+    std::string message{ ": Cannot open binary file '" };
+
+    message += filename;
+    message += "'";
+
+    PREPEND_FUNCTION_SIG_TO_STRING(message);
+
+    executeDebugCallback(error, message);
+
     return failure;
   }
 

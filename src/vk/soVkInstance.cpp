@@ -22,6 +22,7 @@
 
 #include "soVkInstance.hpp"
 
+#include "cxx/soDebugCallback.hpp"
 #include "cxx/soDefinitions.hpp"
 #include "cxx/soMemory.hpp"
 #include "cxx/soSpan.hpp"
@@ -58,14 +59,17 @@ so::vk::Instance::initialize(std::string const& applicationName,
 {
   if(ENABLE_VALIDATION_LAYERS and not checkValidationLayerSupport())
   {
+    std::string message{ ": Validation layers requested, but not available"  };
+
+    PREPEND_FUNCTION_SIG_TO_STRING(message);
+
+    executeDebugCallback(error, message);
+
     return failure;
-    // THROW_EXCEPTION("Validation layers requested, but not vailable!");
   }
 
   std::unique_ptr<VkApplicationInfo> 
     appInfo{ make_unique<VkApplicationInfo>() };
-
-  // VkApplicationInfo* appInfo{ new VkApplicationInfo({}) };
 
   appInfo->sType               = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   appInfo->pApplicationName    = applicationName.c_str();
@@ -85,11 +89,12 @@ so::vk::Instance::initialize(std::string const& applicationName,
                     additionalExtensions.begin(),
                     additionalExtensions.end());
 
-  std::cout << "<INFO> Requested extensions:\n";
+
+  executeDebugCallback(info, "Requested extensions:");
 
   for(auto extension : extensions)
   {
-    std::cout << "<INFO>   " << extension << '\n';
+    executeDebugCallback(infoItem, extension);
   }
 
   createInfo.enabledExtensionCount   =
@@ -108,8 +113,13 @@ so::vk::Instance::initialize(std::string const& applicationName,
 
   if(vkCreateInstance(&createInfo, nullptr, &mInstance) not_eq VK_SUCCESS)
   { 
+    std::string message{ ": Failed to create instance" };
+
+    PREPEND_FUNCTION_SIG_TO_STRING(message);
+
+    executeDebugCallback(error, message);
+
     return failure;
-    // THROW_EXCEPTION("failed to create instance!");
   }
 
   return success;
@@ -128,13 +138,11 @@ so::vk::Instance::checkValidationLayerSupport()
 
   vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 
-  std::cout << "<INFO> Available Vulkan layers:\n";
+  executeDebugCallback(info, "Available Vulkan layers:");
  
   for(auto const& layerProperties : availableLayers)
   {
-    Span<char const> layerName{ layerProperties.layerName };
-
-    std::cout << "<INFO>   " << layerName << '\n';
+    executeDebugCallback(infoItem, layerProperties.layerName);
   }
 
   for(char const* layerName : VALIDATION_LAYERS)

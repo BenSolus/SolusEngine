@@ -79,6 +79,65 @@ namespace so {
 
 constexpr std::ptrdiff_t dynamicExtent{ -1 };
 
+namespace internal {
+
+template<std::ptrdiff_t Ext>
+class
+ExtentType
+{
+  public:
+    using index_type = std::ptrdiff_t;
+
+    static_assert(Ext >= 0, "A fixed-size span must be >= 0 in size.");
+
+    constexpr ExtentType() noexcept = default;
+
+    template<index_type Other>
+    explicit constexpr ExtentType(ExtentType<Other> other)
+    {
+      static_assert((Other is_eq Ext) or (Other is_eq dynamicExtent),
+                    "Mismatch between fixed-size extent and size of "
+                    "initializing data.");
+
+      static_assert(other.size() is_eq Ext, "Error");
+    }
+
+    explicit constexpr ExtentType(index_type size)
+    {
+      static_assert(size is_eq Ext, "Error");
+    }
+
+    constexpr index_type size() const noexcept { return Ext; }
+
+}; // class ExtentType
+
+template<>
+class
+ExtentType<dynamicExtent>
+{
+  public:
+    using index_type = std::ptrdiff_t;
+    
+    template<index_type Other>
+    explicit constexpr ExtentType(ExtentType<Other> other)
+      : mSize(other.size())
+    {
+    }
+
+    explicit constexpr ExtentType(index_type size) : mSize(size)
+    {
+      //static_assert(size >= 0, "Error");
+    }
+
+    constexpr index_type size() const noexcept { return mSize; }
+  
+  private:
+    index_type mSize;
+};
+
+} // internal
+
+
 template<class T, std::ptrdiff_t Extent = dynamicExtent>
 class Span
 {
@@ -86,25 +145,46 @@ class Span
   using index_type   = std::ptrdiff_t;
   using pointer      = T*;
 
+  struct NotNullptr
+  {
+    pointer ptr;
+  };
+
+  template<class ExtentType>
+  class
+  StorageType : public ExtentType
+  {
+    public:
+      template<class OtherExtentType>
+      constexpr StorageType(NotNullptr data, OtherExtentType ext)
+        : ExtentType(ext), mData(data.ptr)
+      {}
+
+      constexpr pointer data() const noexcept { return mData; }
+
+    private:
+      pointer mData;
+  };
+
   public:
 
-    Span() noexcept : mData(nullptr) {}
+    constexpr Span() noexcept : mStorage(nullptr, internal::ExtentType<0>()){}
 
-    explicit Span(element_type(&arr)[Extent]) noexcept
-      : mData(std::addressof(arr[0]))
+    template <std::size_t N>
+    explicit constexpr Span(element_type(&arr)[N]) noexcept
+      : mStorage(NotNullptr{ std::addressof(arr[0]) },
+                 internal::ExtentType<N> ())
     {
     }
+
+    pointer data() const { return mStorage.data(); }
 
     friend std::ostream&
     operator<<<T, Extent>(std::ostream&          stream,
                           Span<T, Extent> const& span);
 
-    pointer data() const noexcept { return mData; }
-
   protected:
-    static constexpr std::ptrdiff_t extent{ Extent };
-    
-    pointer    mData{ nullptr };
+    StorageType<internal::ExtentType<Extent>> mStorage;
 
 }; // class Span
 

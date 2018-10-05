@@ -60,9 +60,7 @@ so::vk::Pipeline::operator=(Pipeline&& other) noexcept
 
 so::return_t
 so::vk::Pipeline::initialize(SharedPtrLogicalDevice const& device,
-                             VkExtent2D                    swapChainExtent,
-                             VkRenderPass                  renderPass,
-                             VkDescriptorSetLayout&        descriptorSetLayout)
+                             SwapChain              const& swapChain)
 {
   mDevice = device;
 
@@ -89,7 +87,7 @@ so::vk::Pipeline::initialize(SharedPtrLogicalDevice const& device,
   vertShaderStageInfo.module = vertShader.getVkShaderModule();
   vertShaderStageInfo.pName  = "triangle";
 
-  VkPipelineShaderStageCreateInfo fragShaderStageInfo = {};
+  VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
 
   fragShaderStageInfo.sType  =
     VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -97,14 +95,30 @@ so::vk::Pipeline::initialize(SharedPtrLogicalDevice const& device,
   fragShaderStageInfo.module = fragShader.getVkShaderModule();
   fragShaderStageInfo.pName  = "triangle";
 
-  VkPipelineShaderStageCreateInfo shaderStages[] =
-    { vertShaderStageInfo, fragShaderStageInfo };
+  VkPipelineShaderStageCreateInfo shaderStages[]{ vertShaderStageInfo,
+                                                  fragShaderStageInfo };
+
+  VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
+  
+  vertexInputInfo.sType =
+    VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+  vertexInputInfo.vertexBindingDescriptionCount = 0;
+  vertexInputInfo.pVertexBindingDescriptions = nullptr;
+  vertexInputInfo.vertexAttributeDescriptionCount = 0;
+  vertexInputInfo.pVertexAttributeDescriptions = nullptr;
+
+  VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
+  
+  inputAssembly.sType =
+    VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+  inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+  inputAssembly.primitiveRestartEnable = VK_FALSE;
+  
+  (void) swapChain;
 
   (void) shaderStages;
-
-  (void) swapChainExtent;
-  (void) renderPass;
-  (void) descriptorSetLayout;
+  (void) vertexInputInfo;
+  (void) inputAssembly;
 
   return success;
 }

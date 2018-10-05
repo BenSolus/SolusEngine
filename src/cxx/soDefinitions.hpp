@@ -73,6 +73,9 @@
 
 #endif
 
+#define PREPEND_FUNCTION_SIG_TO_STRING(target) \
+  target.insert(0, PRETTY_FUNCTION_SIG);
+
 namespace so {
 
   using size_type = std::size_t;

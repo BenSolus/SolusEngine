@@ -24,8 +24,9 @@
 
 so::Engine::Engine()
   : mDebugCallback(),
-    mSurface(),
-    mSwapChain()
+    mSurface(), 
+    mSwapChain(),
+    mPipeline()
 {}
 
 so::return_t
@@ -86,6 +87,11 @@ so::Engine::initialize(std::string const& applicationName,
   }
 
   if(mSwapChain.initialize(device, mSurface) is_eq failure)
+  {
+    return failure;
+  }
+
+  if(mPipeline.initialize(device, mSwapChain) is_eq failure)
   {
     return failure;
   }

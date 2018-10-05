@@ -35,6 +35,8 @@ matrix:
             - llvm-toolchain-trusty-4.0
           packages:
             - clang-4.0
+            - gcc-6
+            - g++-6
             - build-essential
             - git
             - libgnome-keyring-dev
