@@ -28,6 +28,14 @@
 
 #include <set>
 
+so::vk::SharedPtrLogicalDevice const&
+so::vk::LogicalDevice::getSharedPtrNullDevice()
+{
+  static SharedPtrLogicalDevice device{ std::make_shared<LogicalDevice>() };
+
+  return device;
+}
+
 so::vk::LogicalDevice::LogicalDevice()
   : PhysicalDevice(),
     mDevice(VK_NULL_HANDLE),
@@ -153,6 +161,3 @@ so::vk::LogicalDevice::destroyMembers()
   }
 }
 
-so::vk::SharedPtrLogicalDevice const
-so::vk::LogicalDevice::SHARED_PTR_NULL_LOGICAL_DEVICE
-  (std::make_shared<so::vk::LogicalDevice>());

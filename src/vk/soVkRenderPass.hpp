@@ -21,10 +21,10 @@
  */
 
 /**
- *  @file      soVkLogicalDevice.hpp
+ *  @file      vk/soVkRenderPass.hpp
  *  @author    Bennet Carstensen
  *  @date      2017
- *  @copyright Copyright (c) 2017 Bennet Carstensen
+ *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
  *             obtaining a copy of this software and associated documentation
@@ -50,64 +50,44 @@
 
 #pragma once
 
-#include <soVkPhysicalDevice.hpp>
-#include <soVkSurface.hpp>
+#include "soVkSwapChain.hpp"
 
-#if defined(__GNUC__) || defined(__clang__)
-#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
-#endif
+#include "cxx/soReturnT.hpp"
 
 namespace so {
 namespace vk {
 
 class
-LogicalDevice;
-
-using SharedPtrLogicalDevice = std::shared_ptr<LogicalDevice>;
-
-class
-LogicalDevice : public PhysicalDevice,
-                public std::enable_shared_from_this<LogicalDevice>
+RenderPass
 {
   public:
-    static SharedPtrLogicalDevice const&
-    getSharedPtrNullDevice();
+    RenderPass();
 
-    LogicalDevice();
+    RenderPass(RenderPass const &other) = delete;
 
-    LogicalDevice(LogicalDevice const& other) = delete;
+    RenderPass(RenderPass &&other) = delete;
 
-    LogicalDevice(LogicalDevice&& other) = delete;
+    ~RenderPass() noexcept;
 
-    ~LogicalDevice() noexcept override;
+    RenderPass& operator=(RenderPass const &other) = delete;
 
-    LogicalDevice& operator=(LogicalDevice const& other) = delete;
-
-    LogicalDevice&
-    operator=(LogicalDevice&& other) noexcept;
-
+    RenderPass& operator=(RenderPass &&other) noexcept;
+    
     return_t
-    initialize(SharedPtrInstance const& device, Surface const& surface);
+    initialize(SharedPtrLogicalDevice const& device,
+               SwapChain              const& swapChain);
 
-    inline VkDevice getVkDevice() { return mDevice; }
-
-    inline VkQueue getGraphicsVkQueue() { return mGraphicsQueue; }
-
-    inline VkQueue getPresentVkQueue() { return mPresentQueue; }
+    inline VkRenderPass getVkRenderPass() const { return mRenderPass; }
 
   private:
-    VkDevice mDevice;
-    VkQueue  mGraphicsQueue;
-    VkQueue  mPresentQueue;
+    VkRenderPass mRenderPass;
 
-    void
-    destroyMembers();
-};
+    SharedPtrLogicalDevice mDevice;
+
+    void destroyMembers();
+
+}; // class RenderPass
 
 } // namespace vk
-} //namespace so
-
-#if defined(__GNUC__) || defined(__clang__)
-#pragma GCC diagnostic pop // ignored "-Wnon-virtual-dtor"
-#endif
+} // namespace so
 

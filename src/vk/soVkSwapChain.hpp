@@ -84,9 +84,9 @@ SwapChain
  
     inline VkSwapchainKHR getVkSwapchainKHR() { return mSwapChain; }
 
-    inline VkExtent2D getVkExtent() { return mSwapChainExtent; }
+    inline VkExtent2D getVkExtent() const { return mSwapChainExtent; }
 
-    inline VkFormat getVkFormat() { return mSwapChainImageFormat; }
+    inline VkFormat getVkFormat() const { return mSwapChainImageFormat; }
 
     inline std::vector<VkImage>& getVkImages() { return mSwapChainImages; }
 

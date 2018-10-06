@@ -52,6 +52,7 @@
 
 #include "soVkLogicalDevice.hpp"
 
+#include "soVkRenderPass.hpp"
 #include "soVkSwapChain.hpp"
 
 namespace so {
@@ -77,7 +78,8 @@ Pipeline
    
     return_t
     initialize(SharedPtrLogicalDevice const& device,
-               SwapChain              const& swapChain);
+               SwapChain              const& swapChain,
+							 RenderPass             const& renderPass);
 
     inline VkPipeline getVkPipeline() { return mPipeline; }
  

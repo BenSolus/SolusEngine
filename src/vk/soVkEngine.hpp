@@ -78,8 +78,9 @@ Engine
     vk::DebugReportCallbackEXT mDebugCallback;
     vk::Surface                mSurface;
     vk::SwapChain              mSwapChain;
-    vk::Pipeline               mPipeline;
-
+		vk::RenderPass             mRenderPass;
+	  vk::Pipeline               mPipeline;
+ 
 };
 
 } // namespace so

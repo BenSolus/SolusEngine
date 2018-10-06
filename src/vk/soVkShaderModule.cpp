@@ -27,7 +27,7 @@
 
 so::vk::ShaderModule::ShaderModule()
   : mShaderModule(VK_NULL_HANDLE),
-    mDevice(LogicalDevice::SHARED_PTR_NULL_LOGICAL_DEVICE)
+    mDevice(LogicalDevice::getSharedPtrNullDevice())
 {}
 
 so::vk::ShaderModule::ShaderModule(SharedPtrLogicalDevice const& device,
@@ -93,7 +93,7 @@ so::vk::ShaderModule::operator=(ShaderModule&& other) noexcept
   mDevice       = other.mDevice;
 
   other.mShaderModule = VK_NULL_HANDLE;
-  other.mDevice       = LogicalDevice::SHARED_PTR_NULL_LOGICAL_DEVICE;
+  other.mDevice       = LogicalDevice::getSharedPtrNullDevice();
 
   return *this;
 }

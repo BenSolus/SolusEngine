@@ -50,11 +50,13 @@
 
 #pragma once
 
+#include "soDefinitions.hpp"
+
 #if (__cplusplus > 201103L)
 
 #include "gsl/soGSLSpan.hpp"
 
-#else // __cplusplus > 201103L 
+#else
 
 namespace so {
 

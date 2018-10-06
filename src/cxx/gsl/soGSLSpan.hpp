@@ -48,7 +48,7 @@
  *             OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <span>
+#include <gsl/span>
 
 namespace so {
 
@@ -71,13 +71,20 @@ strcmp(char const* lhs, so::Span<char const, Extent>& rhs);
 
 namespace so {
 
-template<class ElemenetType, std::ptrdiff_t Extent>
-class Span : public gsl::span<ElemenetType, Extent>
+template<class T, std::ptrdiff_t Extent>
+class Span : public gsl::span<T, Extent>
 {
+  using element_type = T;
+
   public:
+    template<std::size_t N>
+    explicit constexpr Span(element_type (&arr)[N]) noexcept
+      : gsl::span<T, Extent>(arr)
+    {}
+
     friend std::ostream&
-    operator<<<ElemenetType, Extent>(std::ostream& stream,
-                                     Span<ElemenetType, Extent> const& span);
+    operator<<<T, Extent>(std::ostream& stream,
+                          Span<T, Extent> const& span);
 
 }; // class Span
 

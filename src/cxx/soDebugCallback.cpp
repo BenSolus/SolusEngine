@@ -55,3 +55,9 @@ so::executeDebugCallback(DebugCode const code, std::string const& message)
   (*getDebugCallbackInstance())(code, message);
 }
 
+void
+so::executeDebugCallback(DebugCode const code, Span<char const> message)
+{
+  (*getDebugCallbackInstance())(code, message.data());
+}
+

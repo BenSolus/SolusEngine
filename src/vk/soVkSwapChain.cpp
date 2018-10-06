@@ -30,7 +30,7 @@ so::vk::SwapChain::SwapChain()
     mSwapChainExtent({ 0, 0 }),
     mSwapChainImageFormat(VK_FORMAT_UNDEFINED),
     mSwapChainImages(),
-    mDevice(LogicalDevice::SHARED_PTR_NULL_LOGICAL_DEVICE),
+    mDevice(LogicalDevice::getSharedPtrNullDevice()),
     mImageViews()
 {}
 
@@ -158,7 +158,7 @@ so::vk::SwapChain::operator=(so::vk::SwapChain&& other) noexcept
   other.mSwapChainExtent      = { 0, 0 };
   other.mSwapChainImageFormat = VK_FORMAT_UNDEFINED;
   other.mSwapChainImages      = std::vector<VkImage>();
-  other.mDevice               = LogicalDevice::SHARED_PTR_NULL_LOGICAL_DEVICE;
+  other.mDevice               = LogicalDevice::getSharedPtrNullDevice();
 
   return *this;
 }

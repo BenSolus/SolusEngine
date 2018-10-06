@@ -25,7 +25,7 @@
 #include "soDefinitions.hpp"
 
 so::vk::ImageViews::ImageViews()
-  : mImageViews(), mDevice(LogicalDevice::SHARED_PTR_NULL_LOGICAL_DEVICE)
+  : mImageViews(), mDevice(LogicalDevice::getSharedPtrNullDevice())
 {}
 
 so::vk::ImageViews::~ImageViews() noexcept
@@ -47,7 +47,7 @@ so::vk::ImageViews::operator=(ImageViews&& other) noexcept
   mDevice     = other.mDevice;
 
   other.mImageViews = std::vector<VkImageView>();
-  other.mDevice     = LogicalDevice::SHARED_PTR_NULL_LOGICAL_DEVICE;
+  other.mDevice     = LogicalDevice::getSharedPtrNullDevice();
 
   return *this;
 }

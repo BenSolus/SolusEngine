@@ -142,7 +142,9 @@ so::vk::Instance::checkValidationLayerSupport()
  
   for(auto const& layerProperties : availableLayers)
   {
-    executeDebugCallback(infoItem, layerProperties.layerName);
+    Span<char const> layerName{ layerProperties.layerName };
+
+    executeDebugCallback(infoItem, layerName);
   }
 
   for(char const* layerName : VALIDATION_LAYERS)

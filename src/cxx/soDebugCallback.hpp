@@ -51,6 +51,7 @@
 #pragma once
 
 #include "soReturnT.hpp"
+#include "soSpan.hpp"
 
 #include <string>
 
@@ -72,6 +73,9 @@ setDebugCallback(DebugCallback callback);
 
 void
 executeDebugCallback(DebugCode const code, std::string const& message);
+
+void
+executeDebugCallback(DebugCode const code, Span<char const> message);
 
 } // namespace so
 

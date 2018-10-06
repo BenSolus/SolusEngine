@@ -22,10 +22,14 @@
 
 #include "soVkEngine.hpp"
 
+#include "cxx/soDebugCallback.hpp"
+#include "cxx/soDefinitions.hpp"
+
 so::Engine::Engine()
   : mDebugCallback(),
     mSurface(), 
     mSwapChain(),
+    mRenderPass(),
     mPipeline()
 {}
 
@@ -91,10 +95,20 @@ so::Engine::initialize(std::string const& applicationName,
     return failure;
   }
 
-  if(mPipeline.initialize(device, mSwapChain) is_eq failure)
+  if(mRenderPass.initialize(device, mSwapChain) is_eq failure)
+  {
+    std::string message{ "Failed to create a render pass." };
+ 
+    PREPEND_FUNCTION_SIG_TO_STRING(message);
+
+    executeDebugCallback(error, message);
+  }
+
+  if(mPipeline.initialize(device, mSwapChain, mRenderPass) is_eq failure)
   {
     return failure;
   }
+
 
   return success;
 }
