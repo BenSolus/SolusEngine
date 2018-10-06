@@ -25,13 +25,16 @@
 #include "soVkQueueFamilyIndices.hpp"
 #include "soVkSwapChainSupportDetails.hpp"
 
+#include "cxx/soDebugCallback.hpp"
+#include "cxx/soDefinitions.hpp"
+
 so::vk::SwapChain::SwapChain()
   : mSwapChain(VK_NULL_HANDLE),
     mSwapChainExtent({ 0, 0 }),
     mSwapChainImageFormat(VK_FORMAT_UNDEFINED),
     mSwapChainImages(),
-    mDevice(LogicalDevice::getSharedPtrNullDevice()),
-    mImageViews()
+    mSwapChainImageViews(),
+    mDevice(LogicalDevice::getSharedPtrNullDevice())
 {}
 
 so::return_t
@@ -110,6 +113,12 @@ so::vk::SwapChain::initialize(SharedPtrLogicalDevice const& device,
 
   if(swapChainResult not_eq VK_SUCCESS)
   {
+    std::string message{ ": Failed to create swap chain." };
+
+    PREPEND_FUNCTION_SIG_TO_STRING(message);
+
+    executeDebugCallback(error, message);
+
     return failure;  
   }
 
@@ -125,12 +134,25 @@ so::vk::SwapChain::initialize(SharedPtrLogicalDevice const& device,
   mSwapChainImageFormat = surfaceFormat.format;
   mSwapChainExtent      = extent;
 
-  return_t result{ mImageViews.initialize(mDevice,
-                                          mSwapChainImages,
-                                          mSwapChainImageFormat,
-                                          VK_IMAGE_ASPECT_COLOR_BIT) };
+  return_t result{ mSwapChainImageViews.initialize
+                     (mDevice,
+                      mSwapChainImages,
+                      mSwapChainImageFormat,
+                      VK_IMAGE_ASPECT_COLOR_BIT) };
 
-  return result;
+  if(result is_eq failure)
+  {
+    std::string message{ ": Failed to create image views for the swap "
+                         "chain." };
+
+    PREPEND_FUNCTION_SIG_TO_STRING(message);
+
+    executeDebugCallback(error, message);
+
+    return failure;
+  }
+
+  return success;
 }
 
 so::vk::SwapChain::~SwapChain() noexcept
@@ -152,6 +174,7 @@ so::vk::SwapChain::operator=(so::vk::SwapChain&& other) noexcept
   mSwapChainExtent      = other.mSwapChainExtent;
   mSwapChainImageFormat = other.mSwapChainImageFormat;
   mSwapChainImages      = other.mSwapChainImages;
+  mSwapChainImageViews  = std::move(other.mSwapChainImageViews);
   mDevice               = other.mDevice;
 
   other.mSwapChain            = VK_NULL_HANDLE;
@@ -159,6 +182,7 @@ so::vk::SwapChain::operator=(so::vk::SwapChain&& other) noexcept
   other.mSwapChainImageFormat = VK_FORMAT_UNDEFINED;
   other.mSwapChainImages      = std::vector<VkImage>();
   other.mDevice               = LogicalDevice::getSharedPtrNullDevice();
+  other.mSwapChainImageViews  = ImageViews();
 
   return *this;
 }

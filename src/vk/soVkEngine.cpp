@@ -30,7 +30,8 @@ so::Engine::Engine()
     mSurface(), 
     mSwapChain(),
     mRenderPass(),
-    mPipeline()
+    mPipeline(),
+    mFramebuffers()
 {}
 
 so::return_t
@@ -97,18 +98,34 @@ so::Engine::initialize(std::string const& applicationName,
 
   if(mRenderPass.initialize(device, mSwapChain) is_eq failure)
   {
-    std::string message{ "Failed to create a render pass." };
+    std::string message{ ": Failed to create a render pass." };
  
     PREPEND_FUNCTION_SIG_TO_STRING(message);
 
     executeDebugCallback(error, message);
+  
+    return failure;
   }
 
   if(mPipeline.initialize(device, mSwapChain, mRenderPass) is_eq failure)
   {
+    std::string message{ ": Failed to create a graphics pipeline." };
+
+    PREPEND_FUNCTION_SIG_TO_STRING(message);
+
+    executeDebugCallback(error, message);
+
     return failure;
   }
 
+  if(mFramebuffers.initialize(device, mSwapChain, mRenderPass) is_eq failure)
+  {
+    std::string message{ ": Failed to create framebuffers." };
+
+    PREPEND_FUNCTION_SIG_TO_STRING(message);
+
+    return failure;
+  }
 
   return success;
 }

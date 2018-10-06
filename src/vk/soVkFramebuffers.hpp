@@ -1,5 +1,4 @@
-/*
- * Copyright (C) 2017 by Bennet Carstensen
+/* Copyright (C) 2017-2018 by Bennet Carstensen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,8 +20,8 @@
  */
 
 /**
- *  @file      soEngine.hpp
- *  @author    Bennet Carstensen
+ *  @file      soVkFramebuffers.hpp
+ *  @author    bennet carstensen
  *  @date      2017
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
@@ -50,38 +49,46 @@
 
 #pragma once
 
-#include "soVkDebugReportCallbackEXT.hpp"
-#include "soVkFramebuffers.hpp"
-#include "soVkInstance.hpp"
-#include "soVkLogicalDevice.hpp"
-#include "soVkPipeline.hpp"
-#include "soVkSurface.hpp"
+#include "soVkRenderPass.hpp"
 
 namespace so {
+namespace vk {
 
 class
-Engine
+Framebuffers
 {
   public:
-    Engine();
+    Framebuffers() noexcept;
+ 
+    Framebuffers(Framebuffers const &other) = delete;
 
-    ~Engine() noexcept = default;
+    Framebuffers(Framebuffers &&other) = delete;
 
-    so::return_t
-    initialize(std::string const& applicationName,
-               uint32_t    const  applicationVersion);
+    ~Framebuffers() noexcept;
 
-    inline bool windowIsClosed() { return mSurface.windowIsClosed(); } 
+    Framebuffers& operator=(Framebuffers const &other) = delete;
 
-    inline void surfacePollEvents() { mSurface.pollEvents(); } 
+    Framebuffers& operator=(Framebuffers &&other) noexcept;
+
+    return_t
+    initialize(SharedPtrLogicalDevice const& device,
+               SwapChain              const& swapChain,
+               RenderPass             const& renderPass);
+
+    inline std::vector<VkFramebuffer>& getVkFramebuffers()
+    {
+      return mFramebuffers;
+    }
 
   private:
-    vk::DebugReportCallbackEXT mDebugCallback;
-    vk::Surface                mSurface;
-    vk::SwapChain              mSwapChain;
-		vk::RenderPass             mRenderPass;
-	  vk::Pipeline               mPipeline;
-    vk::Framebuffers           mFramebuffers;
-};
+    std::vector<VkFramebuffer> mFramebuffers;
 
+    SharedPtrLogicalDevice     mDevice;
+
+    void destroyMembers();
+
+}; // class Framebuffers
+
+} // namespace vk
 } // namespace so
+

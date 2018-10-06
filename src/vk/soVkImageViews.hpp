@@ -79,8 +79,8 @@ ImageViews
                VkFormat                      format,
                VkImageAspectFlags            aspectFlags);
 
-    inline std::vector<VkImageView>&
-    getVkImageViewsRef() { return mImageViews; }
+    inline std::vector<VkImageView> const&
+    getVkImageViewsRef() const { return mImageViews; }
 
     return_t
     addImageViews(std::vector<VkImage> const&   images,

@@ -88,7 +88,11 @@ SwapChain
 
     inline VkFormat getVkFormat() const { return mSwapChainImageFormat; }
 
-    inline std::vector<VkImage>& getVkImages() { return mSwapChainImages; }
+    inline std::vector<VkImage> const&
+    getVkImages() const { return mSwapChainImages; }
+
+    inline ImageViews const&
+    getImageViews() const { return mSwapChainImageViews; }
 
     inline SharedPtrLogicalDevice
     getDevice() { return mDevice->shared_from_this(); }
@@ -100,11 +104,11 @@ SwapChain
     VkFormat               mSwapChainImageFormat;
 
     std::vector<VkImage>   mSwapChainImages;
+    ImageViews             mSwapChainImageViews;
+   
 
     SharedPtrLogicalDevice mDevice;
 
-    ImageViews             mImageViews;
-   
     VkSurfaceFormatKHR
     chooseSwapSurfaceFormat
       (std::vector<VkSurfaceFormatKHR> const& availableFormats);

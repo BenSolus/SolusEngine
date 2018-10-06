@@ -68,7 +68,7 @@ init:
       cd Vulkan-Loader
       mkdir build
       cd build
-      cmake -DVULKAN_HEADERS_INSTALL_DIR ..
+      cmake -DVULKAN_HEADERS_INSTALL_DIR="C:/projects/deps/Vulkan-Headers/build/install/include/vulkan" ..
       cmake --build . --config %config% --target install
 
   - cmd: |-
@@ -78,7 +78,7 @@ init:
       sed  -i -e '/#include/i#include <cmath>\n' layers/parameter_validation_utils.cpp
       mkdir build
       cd build
-      cmake -DVULKAN_HEADERS_INSTALL_DIR -DGLSLANG_INSTALL_DIR="C:\Program Files\glslang" ..
+      cmake -DVULKAN_HEADERS_INSTALL_DIR="C:/projects/deps/Vulkan-Headers/build/install/include/vulkan" -DGLSLANG_INSTALL_DIR="C:\Program Files\glslang" ..
       cmake --build . --config %config% --target install
   
   - cmd: |-

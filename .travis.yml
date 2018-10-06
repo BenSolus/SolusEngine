@@ -24,7 +24,6 @@ matrix:
             - libassimp-dev
             - libgtest-dev
             - ninja-build
-            - libboost-all-dev
       env:
         - SET_COMPILERS="CC=gcc-5 && CXX=g++-5"
     - os: linux
@@ -70,14 +69,21 @@ before_install:
 
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd $TRAVIS_BUILD_DIR; fi
 
+  ### Install boost
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone  hhttps://github.com/boostorg/boost.git; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd boost; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then git checkout tags/boost-1.62.0
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then ./bootstrap.sh; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then ./b2 install; fi
+
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ..; fi
+
   ### Install OpenGL Mathematics
   - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/g-truc/glm.git; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd glm; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo cmake -DGLM_TEST_ENABLE_CXX_11=ON CMakeLists.txt; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo make; fi
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo make install; fi
-
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ..; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo make install; fi 
 
   ### Install glslang
   - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/KhronosGroup/glslang.git; fi
