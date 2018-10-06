@@ -22,6 +22,8 @@
 
 #include "soVkEngine.hpp"
 
+#include "soVkCommandPool.hpp"
+
 #include "cxx/soDebugCallback.hpp"
 #include "cxx/soDefinitions.hpp"
 
@@ -45,7 +47,7 @@ so::Engine::initialize(std::string const& applicationName,
     return failure;
   }
  
-  vk::SharedPtrInstance instance(std::make_shared<vk::Instance>());
+  vk::SharedPtrInstance instance{ std::make_shared<vk::Instance>() };
 
   std::vector<char const*> instanceExtensions;
 
@@ -79,20 +81,29 @@ so::Engine::initialize(std::string const& applicationName,
   {
     return failure;
   }
-        //mSurface.initialize();
-        //mSurface       = vk::Surface(applicationName, instance);
 
-  vk::SharedPtrLogicalDevice device(std::make_shared<vk::LogicalDevice>());
+  vk::SharedPtrLogicalDevice device{ std::make_shared<vk::LogicalDevice>() };
 
-  result = device->initialize(instance, mSurface);
-
-  if(result is_eq failure)
+  if(device->initialize(instance, mSurface) is_eq failure)
   {
     return failure;
   }
 
   if(mSwapChain.initialize(device, mSurface) is_eq failure)
   {
+    return failure;
+  }
+
+  vk::SharedPtrCommandPool commandPool{ std::make_shared<vk::CommandPool>() };
+
+  if(commandPool->initialize(device, mSurface) is_eq failure)
+  {
+    std::string message{ ": Failed to create a command pool." };
+
+    PREPEND_FUNCTION_SIG_TO_STRING(message);
+
+    executeDebugCallback(error, message);
+
     return failure;
   }
 

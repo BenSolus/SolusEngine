@@ -11,8 +11,9 @@ platform:
 environment:
   DOXYGEN_ROOT: C:\projects\doxygeni
   DOXYGEN_EXE: C:\projects\doxygen\Doxygen.1.8.13\tools\doxygen.exe
+  PYTHON: "C:\\Python33-x64"
 
-  matrix:
+ matrix: 
     - generator: "Visual Studio 14 2015 Win64"
       config: Debug
     - generator: "Visual Studio 14 2015 Win64"

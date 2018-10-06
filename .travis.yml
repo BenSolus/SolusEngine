@@ -44,8 +44,7 @@ matrix:
             - libwayland-dev
             - libassimp-dev
             - libgtest-dev
-            - ninja-build
-            - libboost-all-dev
+            - ninja-build       
       env:
         - SET_COMPILERS="CC=clang-4.0 && CXX=clang++-4.0"
 
@@ -70,7 +69,7 @@ before_install:
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd $TRAVIS_BUILD_DIR; fi
 
   ### Install boost
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone  hhttps://github.com/boostorg/boost.git; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/boostorg/boost.git; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd boost; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then git checkout tags/boost-1.62.0
   - if [ $TRAVIS_OS_NAME = "linux" ]; then ./bootstrap.sh; fi
