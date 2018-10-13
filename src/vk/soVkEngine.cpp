@@ -22,8 +22,6 @@
 
 #include "soVkEngine.hpp"
 
-#include "soVkCommandPool.hpp"
-
 #include "cxx/soDebugCallback.hpp"
 #include "cxx/soDefinitions.hpp"
 
@@ -33,7 +31,8 @@ so::Engine::Engine()
     mSwapChain(),
     mRenderPass(),
     mPipeline(),
-    mFramebuffers()
+    mFramebuffers(),
+    mCommandBuffers()
 {}
 
 so::return_t
@@ -98,42 +97,45 @@ so::Engine::initialize(std::string const& applicationName,
 
   if(commandPool->initialize(device, mSurface) is_eq failure)
   {
-    std::string message{ ": Failed to create a command pool." };
+    std::string message{ "Failed to create a command pool." };
 
-    PREPEND_FUNCTION_SIG_TO_STRING(message);
-
-    executeDebugCallback(error, message);
+    DEBUG_CALLBACK(error, message, vk::CommandPool::initialize);
 
     return failure;
   }
 
   if(mRenderPass.initialize(device, mSwapChain) is_eq failure)
   {
-    std::string message{ ": Failed to create a render pass." };
+    std::string message{ "Failed to create a render pass." };
  
-    PREPEND_FUNCTION_SIG_TO_STRING(message);
+    DEBUG_CALLBACK(error, message, vk::RenderPass::initialize);
 
-    executeDebugCallback(error, message);
-  
     return failure;
   }
 
   if(mPipeline.initialize(device, mSwapChain, mRenderPass) is_eq failure)
   {
-    std::string message{ ": Failed to create a graphics pipeline." };
+    std::string message{ "Failed to create a graphics pipeline." };
 
-    PREPEND_FUNCTION_SIG_TO_STRING(message);
-
-    executeDebugCallback(error, message);
+    DEBUG_CALLBACK(error, message, vk::Pipeline::initialize);
 
     return failure;
   }
 
   if(mFramebuffers.initialize(device, mSwapChain, mRenderPass) is_eq failure)
   {
-    std::string message{ ": Failed to create framebuffers." };
+    std::string message{ "Failed to create framebuffers." };
 
-    PREPEND_FUNCTION_SIG_TO_STRING(message);
+    DEBUG_CALLBACK(error, message, vk::Framebuffers::initialize);
+
+    return failure;
+  }
+
+  if(mCommandBuffers.initialize(device, commandPool) is_eq failure)
+  {
+    std::string message{ "Failed to create command buffers. " };
+
+    DEBUG_CALLBACK(error, message, vk::CommandBuffers::initialize);
 
     return failure;
   }

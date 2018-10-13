@@ -50,10 +50,10 @@
 
 #pragma once
 
+#include "soDefinitions.hpp"
+#include "soMacroDispatcher.hpp"
+#include "soPrettyFunctionSig.hpp"
 #include "soReturnT.hpp"
-#include "soSpan.hpp"
-
-#include <string>
 
 namespace so {
 
@@ -66,18 +66,47 @@ DebugCode
   error
 };
 
-typedef void (*DebugCallback) (DebugCode const, std::string const&);
+typedef void (*DebugCallback) (DebugCode   const,
+                               std::string const&,
+                               std::string const&,
+                               index       const,
+                               std::string const&);
 
 void
 setDebugCallback(DebugCallback callback);
 
 void
-executeDebugCallback(DebugCode const code, std::string const& message);
-
-void
-executeDebugCallback(DebugCode const code, Span<char const> message);
+executeDebugCallback(DebugCode   const  code,
+                     std::string const& message,
+                     std::string const& funcSig,
+                     index       const  line,
+                     std::string const& file);
 
 } // namespace so
+
+#define DEBUG_CALLBACK(...) MACRO_DISPATCHER(DEBUG_CALLBACK, __VA_ARGS__)
+
+#define DEBUG_CALLBACK2(code, message)          \
+  so::executeDebugCallback(code,                \
+                           message,             \
+                           PRETTY_FUNCTION_SIG, \
+                           __LINE__,            \
+                           __FILE__)
+
+#define DEBUG_CALLBACK3(code, message, function)                        \
+  so::executeDebugCallback(code,                                        \
+                           message,                                     \
+                           getPrettyFunctionSig<decltype(&function)>(), \
+                           __LINE__,                                    \
+                           __FILE__)
+
+#define DEBUG_CALLBACK4(code, message, trgClass, function)  \
+  so::executeDebugCallback                               \
+    (code,                                               \
+     message,                                            \
+     getPrettyFunctionSig<decltype(trgClass::*function)>(), \
+     __LINE__,                                           \
+     __FILE__)
 
 constexpr so::DebugCode info     = so::DebugCode::info;
 

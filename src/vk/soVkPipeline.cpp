@@ -78,11 +78,7 @@ so::vk::Pipeline::initialize(SharedPtrLogicalDevice const& device,
  
   if(not gotValidShaders)
   {
-		std::string message{ "Failed to load shader code." };
-
-		PREPEND_FUNCTION_SIG_TO_STRING(message);
-
-		executeDebugCallback(error, message);
+    DEBUG_CALLBACK(error, "Failed to load shader code.");
 
     return failure;
   }
@@ -215,7 +211,7 @@ so::vk::Pipeline::initialize(SharedPtrLogicalDevice const& device,
   
   if(result not_eq VK_SUCCESS)
   {
-    executeDebugCallback(error, "Failed to create pipeline layout.");
+    DEBUG_CALLBACK(error, "Failed to create pipeline layout.");
 
     return failure;
   }
@@ -248,11 +244,9 @@ so::vk::Pipeline::initialize(SharedPtrLogicalDevice const& device,
 
   if(result not_eq VK_SUCCESS)
   {
-    std::string message{ "Failed to create graphics pipeline." };
-
-    PREPEND_FUNCTION_SIG_TO_STRING(message);
-
-    executeDebugCallback(error, message);
+    DEBUG_CALLBACK(error,
+                   "Failed to create graphics pipeline.",
+                   vkCreateGraphicsPipelines);
 
     return failure;
   }

@@ -27,6 +27,14 @@
 #include "cxx/soDebugCallback.hpp"
 #include "cxx/soDefinitions.hpp"
 
+so::vk::SharedPtrCommandPool const&
+so::vk::CommandPool::getSharedPtrNullCommandPool()
+{
+  static SharedPtrCommandPool commandPool{ std::make_shared<CommandPool>() };
+
+  return commandPool;
+}
+
 so::vk::CommandPool::CommandPool()
   : mCommandPool(VK_NULL_HANDLE),
     mDevice(LogicalDevice::getSharedPtrNullDevice())
@@ -86,9 +94,7 @@ so::vk::CommandPool::initialize(SharedPtrLogicalDevice const& device,
   {
     std::string message{ "Failed to create a command pool." };
 
-    PREPEND_FUNCTION_SIG_TO_STRING(message);
-
-    executeDebugCallback(error, message);
+    DEBUG_CALLBACK(error, message, vkCreateCommandPool);
 
     return failure;
   }

@@ -29,10 +29,17 @@ getDebugCallbackInstance()
 {
   static DebugCallback debugCallback
     {
-      [](DebugCode const code, std::string const& message)     
+      [](DebugCode   const  code,
+         std::string const& message,
+         std::string const& funcSig,
+         index       const  line,
+         std::string const& file)     
       {
         (void) code;
         (void) message;
+        (void) funcSig;
+        (void) line;
+        (void) file;
       }
     };
 
@@ -50,14 +57,12 @@ so::setDebugCallback(DebugCallback callback)
 }
 
 void
-so::executeDebugCallback(DebugCode const code, std::string const& message)
+so::executeDebugCallback(DebugCode   const  code,
+                         std::string const& message,
+                         std::string const& funcSig,
+                         index       const  line,
+                         std::string const& file)
 {
-  (*getDebugCallbackInstance())(code, message);
-}
-
-void
-so::executeDebugCallback(DebugCode const code, Span<char const> message)
-{
-  (*getDebugCallbackInstance())(code, message.data());
+  (*getDebugCallbackInstance())(code, message, funcSig, line, file);
 }
 

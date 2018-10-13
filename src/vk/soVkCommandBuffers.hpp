@@ -1,5 +1,4 @@
-/*
- * Copyright (C) 2017 by Bennet Carstensen
+/* Copyright (C) 2017-2018 by Bennet Carstensen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +20,7 @@
  */
 
 /**
- *  @file      soEngine.hpp
+ *  @file      soVkCommandBuffer.hpp
  *  @author    Bennet Carstensen
  *  @date      2017
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
@@ -50,41 +49,45 @@
 
 #pragma once
 
-#include "soVkCommandBuffers.hpp"
-#include "soVkDebugReportCallbackEXT.hpp"
-#include "soVkFramebuffers.hpp"
-#include "soVkInstance.hpp"
-#include "soVkLogicalDevice.hpp"
-#include "soVkPipeline.hpp"
-#include "soVkSurface.hpp"
+#include "vk/soVkCommandPool.hpp"
 
 namespace so {
-
+namespace vk {
+   
 class
-Engine
+CommandBuffers
 {
   public:
-    Engine();
+    CommandBuffers();
 
-    ~Engine() noexcept = default;
+    CommandBuffers(CommandBuffers const& other) = delete;
 
-    so::return_t
-    initialize(std::string const& applicationName,
-               uint32_t    const  applicationVersion);
+    CommandBuffers(CommandBuffers&& other) = delete;
 
-    inline bool windowIsClosed() { return mSurface.windowIsClosed(); } 
+    ~CommandBuffers() noexcept;
 
-    inline void surfacePollEvents() { mSurface.pollEvents(); } 
+    CommandBuffers&
+    operator=(CommandBuffers const& other) = delete;
+
+    CommandBuffers&
+    operator=(CommandBuffers&& other) noexcept;
+
+    return_t
+    initialize(SharedPtrLogicalDevice const& device,
+               SharedPtrCommandPool   const& commandPool);
+ 
+    inline auto& getVkCommandBuffersRef() { return mCommandBuffers; }
 
   private:
-    vk::DebugReportCallbackEXT mDebugCallback;
-    vk::Surface                mSurface;
-    vk::SwapChain              mSwapChain;
-		vk::RenderPass             mRenderPass;
-	  vk::Pipeline               mPipeline;
-    vk::Framebuffers           mFramebuffers;
-    vk::CommandBuffers         mCommandBuffers;
+    std::vector<VkCommandBuffer> mCommandBuffers;
 
-};
+    SharedPtrLogicalDevice       mDevice;
+    SharedPtrCommandPool         mCommandPool;
 
+    void
+    destroyMembers();
+
+}; // class CommandBuffers
+
+} // namespace vk
 } // namespace so

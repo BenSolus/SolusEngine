@@ -99,11 +99,11 @@ so::vk::RenderPass::initialize(SharedPtrLogicalDevice const& device,
 
   if(result not_eq VK_SUCCESS)
   {
-		std::string message{ "Failed to create render pass." };
+		DEBUG_CALLBACK(error,
+		               "Failed to create render pass.",
+		               vkCreateRenderPass);
 
-		PREPEND_FUNCTION_SIG_TO_STRING(message);
-
-		executeDebugCallback(error, message);
+    return failure; 
   }
 
 	return success;

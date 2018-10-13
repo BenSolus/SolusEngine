@@ -64,6 +64,9 @@ class
 CommandPool : public std::enable_shared_from_this<CommandPool>
 {
   public:
+    static SharedPtrCommandPool const&
+    getSharedPtrNullCommandPool();
+
     CommandPool();
 
     CommandPool(SharedPtrLogicalDevice const& device, VkCommandPool commandPool);

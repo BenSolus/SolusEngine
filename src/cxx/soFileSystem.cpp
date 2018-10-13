@@ -1,5 +1,4 @@
-/*
- * Copyright (C) 2017-2018 by Bennet Carstensen
+/* Copyright (C) 2017-2018 by Bennet Carstensen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -47,9 +46,7 @@ so::readBinaryFile(const std::string& filename, std::vector<char>& content)
     message += filename;
     message += "'";
 
-    PREPEND_FUNCTION_SIG_TO_STRING(message);
-
-    executeDebugCallback(error, message);
+    DEBUG_CALLBACK(error, message);
 
     return failure;
   }

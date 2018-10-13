@@ -113,11 +113,9 @@ so::vk::SwapChain::initialize(SharedPtrLogicalDevice const& device,
 
   if(swapChainResult not_eq VK_SUCCESS)
   {
-    std::string message{ ": Failed to create swap chain." };
-
-    PREPEND_FUNCTION_SIG_TO_STRING(message);
-
-    executeDebugCallback(error, message);
+    DEBUG_CALLBACK(error,
+                   "Failed to create swap chain.",
+                   vkCreateSwapchainKHR);
 
     return failure;  
   }
@@ -142,12 +140,9 @@ so::vk::SwapChain::initialize(SharedPtrLogicalDevice const& device,
 
   if(result is_eq failure)
   {
-    std::string message{ ": Failed to create image views for the swap "
-                         "chain." };
-
-    PREPEND_FUNCTION_SIG_TO_STRING(message);
-
-    executeDebugCallback(error, message);
+    DEBUG_CALLBACK(error,
+                   "Failed to create image views for the swap chain.",
+                   ImageViews::initialize);
 
     return failure;
   }

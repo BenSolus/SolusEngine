@@ -55,27 +55,6 @@
 
 #define is_eq ==
 
-#if defined(__GNUC__) || defined(__clang__)
-
-#define PRETTY_FUNCTION_SIG __PRETTY_FUNCTION__
-
-#elif defined(_MSC_VER)
-
-#define PRETTY_FUNCTION_SIG __FUNCSIG__
-
-#elif defined(__func__)
-
-#define PRETTY_FUNCTION_SIG __func__
-
-#else
-
-#define PRETTY_FUNCTION_SIG __FUNCTION__
-
-#endif
-
-#define PREPEND_FUNCTION_SIG_TO_STRING(target) \
-  target.insert(0, PRETTY_FUNCTION_SIG);
-
 namespace so {
 
   using size_type = std::size_t;

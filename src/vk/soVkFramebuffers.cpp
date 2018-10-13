@@ -93,11 +93,9 @@ so::vk::Framebuffers::initialize(SharedPtrLogicalDevice const& device,
 
     if(result not_eq VK_SUCCESS)
     {
-      std::string message{ ": Failed to create a framebuffer." };
-
-      PREPEND_FUNCTION_SIG_TO_STRING(message);
-
-      executeDebugCallback(error, message);
+      DEBUG_CALLBACK(error,
+                     "Failed to create a framebuffer.",
+                     vkCreateFramebuffer);
 
       return failure;
     }

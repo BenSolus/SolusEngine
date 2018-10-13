@@ -6,10 +6,17 @@
 int
 main() 
 { 
-  so::setDebugCallback([](so::DebugCode const code, std::string const& message)
+  so::setDebugCallback([](so::DebugCode const  code,
+                          std::string   const& message,
+                          std::string   const& funcSig,
+                          so::index         const  line,
+                          std::string   const& file)
                        {
                          std::string debugMessage{ message };
                          
+                         debugMessage.insert(0, ": ");
+                         debugMessage.insert(0, funcSig);
+
                          switch(code)
                          {
                            case so::DebugCode::info:
@@ -27,6 +34,12 @@ main()
                            default:
                              break;
                          }
+
+                         debugMessage.append("(");
+                         debugMessage.append(file);
+                         debugMessage.append(", line ");
+                         debugMessage.append(std::to_string(line));
+                         debugMessage.append(")");
 
                          puts(debugMessage.c_str());
                        });

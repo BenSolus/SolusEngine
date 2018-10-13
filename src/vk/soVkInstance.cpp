@@ -61,9 +61,7 @@ so::vk::Instance::initialize(std::string const& applicationName,
   {
     std::string message{ ": Validation layers requested, but not available"  };
 
-    PREPEND_FUNCTION_SIG_TO_STRING(message);
-
-    executeDebugCallback(error, message);
+    DEBUG_CALLBACK(error, message);
 
     return failure;
   }
@@ -89,12 +87,13 @@ so::vk::Instance::initialize(std::string const& applicationName,
                     additionalExtensions.begin(),
                     additionalExtensions.end());
 
-
-  executeDebugCallback(info, "Requested extensions:");
+  DEBUG_CALLBACK(info, "Requested extensions:");
 
   for(auto extension : extensions)
   {
-    executeDebugCallback(infoItem, extension);
+    std::string message{ extension };
+
+    DEBUG_CALLBACK(infoItem, message);
   }
 
   createInfo.enabledExtensionCount   =
@@ -115,9 +114,7 @@ so::vk::Instance::initialize(std::string const& applicationName,
   { 
     std::string message{ ": Failed to create instance" };
 
-    PREPEND_FUNCTION_SIG_TO_STRING(message);
-
-    executeDebugCallback(error, message);
+    DEBUG_CALLBACK(error, message, vkCreateInstance);
 
     return failure;
   }
@@ -138,13 +135,13 @@ so::vk::Instance::checkValidationLayerSupport()
 
   vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 
-  executeDebugCallback(info, "Available Vulkan layers:");
+  DEBUG_CALLBACK(info, "Available Vulkan layers:"); 
  
   for(auto const& layerProperties : availableLayers)
   {
-    Span<char const> layerName{ layerProperties.layerName };
+    std::string message{ layerProperties.layerName };
 
-    executeDebugCallback(infoItem, layerName);
+    DEBUG_CALLBACK(infoItem, message);
   }
 
   for(char const* layerName : VALIDATION_LAYERS)

@@ -71,7 +71,7 @@ before_install:
   ### Install boost
   - if [ $TRAVIS_OS_NAME = "linux" ]; then git clone https://github.com/boostorg/boost.git; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd boost; fi
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then git checkout tags/boost-1.62.0
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then git checkout tags/boost-1.62.0; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then ./bootstrap.sh; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then ./b2 install; fi
 

@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2017 by Bennet Carstensen
+ * Copyright (C) 2017-2018 by Bennet Carstensen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in
@@ -15,23 +15,23 @@
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
  */
 
 /**
- *  @file      soEngine.hpp
+ *  @file      cxx/soPrettyFunctionSig.hpp
  *  @author    Bennet Carstensen
- *  @date      2017
+ *  @date      2018
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
  *             obtaining a copy of this software and associated documentation
  *             files (the "Software"), to deal in the Software without
  *             restriction, including without limitation the rights to use,
- *             copy, modify, merge, publish, distribute, sublicense, and/or sell
- *             copies of the Software, and to permit persons to whom the
+ *             copy, modify, merge, publish, distribute, sublicense, and/or
+ *             sell copies of the Software, and to permit persons to whom the
  *             Software is furnished to do so, subject to the following
  *             conditions:
  *
@@ -50,41 +50,66 @@
 
 #pragma once
 
-#include "soVkCommandBuffers.hpp"
-#include "soVkDebugReportCallbackEXT.hpp"
-#include "soVkFramebuffers.hpp"
-#include "soVkInstance.hpp"
-#include "soVkLogicalDevice.hpp"
-#include "soVkPipeline.hpp"
-#include "soVkSurface.hpp"
+#include "soCompiler.hpp"
+#include "soConstExpr.hpp"
+
+#include <regex>
+#include <string>
+
+#if defined(__GNUC__) || defined(__clang__)
+
+#define PRETTY_FUNCTION_SIG __PRETTY_FUNCTION__
+
+#elif defined(_MSC_VER)
+
+#define PRETTY_FUNCTION_SIG __FUNCSIG__
+
+#elif defined(__func__)
+
+#define PRETTY_FUNCTION_SIG __func__
+
+#else
+
+#define PRETTY_FUNCTION_SIG __FUNCTION__
+
+#endif
+
+#define PREPEND_FUNCTION_SIG_TO_STRING(target) \
+  target.insert(0, PRETTY_FUNCTION_SIG);
 
 namespace so {
 
-class
-Engine
+template <class T>
+std::string
+getPrettyFunctionSig()
 {
-  public:
-    Engine();
+  std::string prettyFunctionSig{ PRETTY_FUNCTION_SIG };
 
-    ~Engine() noexcept = default;
+  constExprIf<isGCCCompatible<Comp>> // if
+  ([&]() // then
+   {
+     const std::regex rgx{ ".*T = (.*);.*" };
 
-    so::return_t
-    initialize(std::string const& applicationName,
-               uint32_t    const  applicationVersion);
+     std::smatch match;
 
-    inline bool windowIsClosed() { return mSurface.windowIsClosed(); } 
+     bool const foundMatch{ std::regex_search(prettyFunctionSig,
+                                              match,
+                                              rgx) };
 
-    inline void surfacePollEvents() { mSurface.pollEvents(); } 
+     if(foundMatch)
+     {
+       prettyFunctionSig = match[1];
+     }
+     else
+     {
+       prettyFunctionSig = "";
+     }
+   },
+   [&](){} // else
+  );
 
-  private:
-    vk::DebugReportCallbackEXT mDebugCallback;
-    vk::Surface                mSurface;
-    vk::SwapChain              mSwapChain;
-		vk::RenderPass             mRenderPass;
-	  vk::Pipeline               mPipeline;
-    vk::Framebuffers           mFramebuffers;
-    vk::CommandBuffers         mCommandBuffers;
-
-};
+  return prettyFunctionSig;
+}
 
 } // namespace so
+
