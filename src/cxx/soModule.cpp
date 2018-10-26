@@ -113,13 +113,13 @@ so::Module::Module(Module&& other) noexcept
 }
 
 so::base::Symbol const&
-so::Module::operator[](index const idx)
+so::Module::operator[](index_t const idx)
 {
   return getSymbol(idx);
 }
 
 so::base::Symbol const&
-so::Module::getSymbol(index const idx)
+so::Module::getSymbol(index_t const idx)
 {
   auto const pos(static_cast<Symbols::size_type>(idx));
 

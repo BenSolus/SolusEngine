@@ -1,5 +1,4 @@
-/*
- * Copyright (C) 2017 by Bennet Carstensen
+/* Copyright (C) 2017-2018 by Bennet Carstensen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,9 +20,9 @@
  */
 
 /**
- *  @file      soEngine.hpp
+ *  @file      soVkFences.hpp
  *  @author    Bennet Carstensen
- *  @date      2017
+ *  @date      2018
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
  *
  *             Permission is hereby granted, free of charge, to any person
@@ -50,56 +49,113 @@
 
 #pragma once
 
-#include "soVkCommandBuffers.hpp"
-#include "soVkDebugReportCallbackEXT.hpp"
-#include "soVkFences.hpp"
-#include "soVkFramebuffers.hpp"
-#include "soVkInstance.hpp"
 #include "soVkLogicalDevice.hpp"
-#include "soVkPipeline.hpp"
-#include "soVkSemaphores.hpp"
-#include "soVkSurface.hpp"
 
-#include "cxx/soDefinitions.hpp"
+#include "cxx/soDebugCallback.hpp"
+
+#include <vector>
 
 namespace so {
+namespace vk {
 
+template<typename FC = std::vector<VkFence>>
 class
-Engine
+Fences
 {
+    using fence_container = FC;
+    using size_type       = typename fence_container::size_type;
+
+//    static_assert
+//      (std::is_same<std::result_of<decltype(decltype(&FC::at)(FC, std::size_t))>::type,
+//                    VkFence>::value,
+//       "Template parameter is not a container of VkFences.");
   public:
-    Engine();
+    Fences();
 
-    ~Engine() noexcept;
+    Fences(const Fences& other) = delete;
 
-    so::return_t
-    initialize(std::string const& applicationName,
-               uint32_t    const  applicationVersion,
-               size_type   const  maxFramesInFlight = 2);
+    Fences(Fences&& other) = delete;
 
-    inline bool windowIsClosed() { return mSurface.windowIsClosed(); } 
+    ~Fences() noexcept;
 
-    inline void surfacePollEvents() { mSurface.pollEvents(); } 
+    Fences&
+    operator=(const Fences& other) = delete;
 
-    inline VkDevice getVkDevice()
-    { return mSwapChain.getDevice()->getVkDevice(); }
-    
+    Fences&
+    operator=(Fences&& other) = delete;
+
     return_t
-    drawFrame();
+    initialize(      SharedPtrLogicalDevice device,
+               const size_type              numFences);
+
+    VkFence&
+    operator[](const index_t idx);
 
   private:
-    vk::DebugReportCallbackEXT mDebugCallback;
-    vk::Surface                mSurface;
-    vk::SwapChain              mSwapChain;
-		vk::RenderPass             mRenderPass;
-	  vk::Pipeline               mPipeline;
-    vk::Framebuffers           mFramebuffers;
-    vk::CommandBuffers         mCommandBuffers;
-    vk::Semaphores             mImageAvailableSemaphores;
-    vk::Semaphores             mRenderFinishedSemaphores;
-    vk::Fences<>               mInFlightFences;
+    fence_container        mFences;
 
-    index_t                    mCurrentFrame;
-};
+    SharedPtrLogicalDevice mDevice;
+}; // class Fences
 
+} // namespace vk
 } // namespace so
+
+template<typename FC>
+so::vk::Fences<FC>::Fences()
+  : mFences(0),
+    mDevice(LogicalDevice::getSharedPtrNullDevice())
+{}
+
+template<typename FC>
+so::vk::Fences<FC>::~Fences() noexcept
+{
+  VkDevice device{ mDevice->getVkDevice() };
+
+  for(auto& fence : mFences)
+  {
+    if(fence not_eq VK_NULL_HANDLE)
+    {
+      vkDestroyFence(device, fence, nullptr);
+    }
+  }
+}
+
+template<typename FC>
+so::return_t
+so::vk::Fences<FC>::initialize(      SharedPtrLogicalDevice device,
+                               const size_type              numFences)
+{
+  mDevice = device;
+
+  VkDevice vkDevice{ mDevice->getVkDevice() };
+
+  mFences.resize(numFences);
+
+  VkFenceCreateInfo fenceInfo{};
+
+  fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+  fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+  for(auto& fence : mFences)
+  {
+    VkResult result{ vkCreateFence(vkDevice, &fenceInfo, nullptr, &fence) };
+
+    if(result not_eq VK_SUCCESS)
+    {
+      DEBUG_CALLBACK(error,
+                     "Failed to create a fence.",
+                     vkCreateFence);
+
+      return failure;
+    }
+  }
+
+  return success;
+}
+
+template<typename FC>
+VkFence&
+so::vk::Fences<FC>::operator[](const index_t idx)
+{
+  return mFences[static_cast<Fences<FC>::size_type>(idx)];
+}

@@ -1,5 +1,4 @@
-/*
- * Copyright (C) 2017 by Bennet Carstensen
+/* Copyright (C) 2017-2018 by Bennet Carstensen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +20,7 @@
  */
 
 /**
- *  @file      soEngine.hpp
+ *  @file      soVkSemaphore.hpp
  *  @author    Bennet Carstensen
  *  @date      2017
  *  @copyright Copyright (c) 2017-2018 Bennet Carstensen
@@ -50,56 +49,46 @@
 
 #pragma once
 
-#include "soVkCommandBuffers.hpp"
-#include "soVkDebugReportCallbackEXT.hpp"
-#include "soVkFences.hpp"
-#include "soVkFramebuffers.hpp"
-#include "soVkInstance.hpp"
 #include "soVkLogicalDevice.hpp"
-#include "soVkPipeline.hpp"
-#include "soVkSemaphores.hpp"
-#include "soVkSurface.hpp"
 
 #include "cxx/soDefinitions.hpp"
 
 namespace so {
-
+namespace vk {
+    
 class
-Engine
+Semaphores
 {
   public:
-    Engine();
+    Semaphores();
 
-    ~Engine() noexcept;
+    Semaphores(Semaphores const& other) = delete;
 
-    so::return_t
-    initialize(std::string const& applicationName,
-               uint32_t    const  applicationVersion,
-               size_type   const  maxFramesInFlight = 2);
+    Semaphores(Semaphores&& other) = delete;
 
-    inline bool windowIsClosed() { return mSurface.windowIsClosed(); } 
+    ~Semaphores() noexcept;
 
-    inline void surfacePollEvents() { mSurface.pollEvents(); } 
+    Semaphores&
+    operator=(Semaphores const& other) = delete;
 
-    inline VkDevice getVkDevice()
-    { return mSwapChain.getDevice()->getVkDevice(); }
-    
+    Semaphores&
+    operator=(Semaphores&& other) noexcept;
+  
     return_t
-    drawFrame();
+    initialize(SharedPtrLogicalDevice const& device,
+               size_type              const  numSemaphores);
 
+    inline auto& getVkSemaphoresRef() { return mSemaphores; }
+        
   private:
-    vk::DebugReportCallbackEXT mDebugCallback;
-    vk::Surface                mSurface;
-    vk::SwapChain              mSwapChain;
-		vk::RenderPass             mRenderPass;
-	  vk::Pipeline               mPipeline;
-    vk::Framebuffers           mFramebuffers;
-    vk::CommandBuffers         mCommandBuffers;
-    vk::Semaphores             mImageAvailableSemaphores;
-    vk::Semaphores             mRenderFinishedSemaphores;
-    vk::Fences<>               mInFlightFences;
+    std::vector<VkSemaphore> mSemaphores;
 
-    index_t                    mCurrentFrame;
-};
+    SharedPtrLogicalDevice   mDevice;
 
+    void
+    destroyMembers();
+
+}; // class Semaphores
+
+} // namespace vk
 } // namespace so

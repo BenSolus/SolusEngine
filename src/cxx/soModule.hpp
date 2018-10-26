@@ -113,7 +113,7 @@ Module
 
     template<typename... Args>
     void
-    operator()(index const idx, VoidReturn const& voidReturn, Args... args)
+    operator()(index_t const idx, VoidReturn const& voidReturn, Args... args)
     {
       (void) voidReturn;
 
@@ -124,7 +124,7 @@ Module
 
     template<typename Ret, typename... Args>
     void
-    operator()(index const idx, Ret& ret, Args... args)
+    operator()(index_t const idx, Ret& ret, Args... args)
     {
       auto const pos(static_cast<Symbols::size_type>(idx));
 
@@ -133,7 +133,7 @@ Module
 
     template<typename Ret, typename... Args>
     void
-    operator()(index const idx, Ret& ret, Args... args) const
+    operator()(index_t const idx, Ret& ret, Args... args) const
     {
       auto const pos(static_cast<Symbols::size_type>(idx));
 
@@ -142,10 +142,10 @@ Module
 
 
     base::Symbol const&
-    operator[](index const idx);
+    operator[](index_t const idx);
 
     base::Symbol const&
-    getSymbol(index const idx);
+    getSymbol(index_t const idx);
 
     std::string const
     getName();

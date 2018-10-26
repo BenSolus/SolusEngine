@@ -81,7 +81,7 @@ Pipeline
                SwapChain              const& swapChain,
 							 RenderPass             const& renderPass);
 
-    inline VkPipeline getVkPipeline() { return mPipeline; }
+    inline VkPipeline getVkPipeline() const { return mPipeline; }
  
     inline VkPipelineLayout getVkPipelineLayout() { return mPipelineLayout; }
 

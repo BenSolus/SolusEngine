@@ -69,7 +69,7 @@ DebugCode
 typedef void (*DebugCallback) (DebugCode   const,
                                std::string const&,
                                std::string const&,
-                               index       const,
+                               index_t     const,
                                std::string const&);
 
 void
@@ -79,7 +79,7 @@ void
 executeDebugCallback(DebugCode   const  code,
                      std::string const& message,
                      std::string const& funcSig,
-                     index       const  line,
+                     index_t     const  line,
                      std::string const& file);
 
 } // namespace so

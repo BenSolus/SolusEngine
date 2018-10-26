@@ -59,9 +59,9 @@ namespace so {
 
   using size_type = std::size_t;
 
-  using index  = std::ptrdiff_t;
+  using index_t   = std::ptrdiff_t;
   
-  using uindex = std::size_t;
+  using uindex_t  = std::size_t;
 
 } // namespace so
 

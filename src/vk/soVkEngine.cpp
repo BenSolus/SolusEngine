@@ -23,7 +23,7 @@
 #include "soVkEngine.hpp"
 
 #include "cxx/soDebugCallback.hpp"
-#include "cxx/soDefinitions.hpp"
+
 
 so::Engine::Engine()
   : mDebugCallback(),
@@ -32,12 +32,28 @@ so::Engine::Engine()
     mRenderPass(),
     mPipeline(),
     mFramebuffers(),
-    mCommandBuffers()
+    mCommandBuffers(),
+    mImageAvailableSemaphores(),
+    mRenderFinishedSemaphores(),
+    mInFlightFences(),
+    mCurrentFrame(0)
 {}
+
+so::Engine::~Engine() noexcept
+{
+  VkDevice device{ getVkDevice() };
+
+  if(device not_eq VK_NULL_HANDLE)
+  {
+    vkDeviceWaitIdle(device);
+  }
+}
+
 
 so::return_t
 so::Engine::initialize(std::string const& applicationName,
-                       uint32_t    const  applicationVersion)
+                       uint32_t    const  applicationVersion,
+                       size_type   const  maxFramesInFlight)
 {
   so::return_t result;
 
@@ -131,7 +147,14 @@ so::Engine::initialize(std::string const& applicationName,
     return failure;
   }
 
-  if(mCommandBuffers.initialize(device, commandPool) is_eq failure)
+  result = mCommandBuffers.initialize(device,
+                                      commandPool,
+                                      mFramebuffers,
+                                      mRenderPass,
+                                      mSwapChain,
+                                      mPipeline);
+  
+  if(result is_eq failure)
   {
     std::string message{ "Failed to create command buffers. " };
 
@@ -139,6 +162,118 @@ so::Engine::initialize(std::string const& applicationName,
 
     return failure;
   }
+
+  result = mImageAvailableSemaphores.initialize(device, maxFramesInFlight);
+  result = result is_eq failure
+             ? failure
+             : mRenderFinishedSemaphores.initialize(device, maxFramesInFlight);
+
+  if(result is_eq failure)
+  {
+    DEBUG_CALLBACK(error,
+                   "Failed to create a semaphore.",
+                   vk::Semaphores::initialize);
+
+    return failure;
+  }
+
+  if(mInFlightFences.initialize(device, maxFramesInFlight) is_eq failure)
+  {
+    DEBUG_CALLBACK(error,
+                   "Failed to create a fence for in-flight frames.",
+                   vk::Fences<>::initialize);
+
+    return failure;
+  }
+
+  return success;
+}
+
+so::return_t
+so::Engine::drawFrame()
+{
+  VkDevice device{ mSwapChain.getDevice()->getVkDevice() };
+
+  vkWaitForFences(device,
+                  1,
+                  &mInFlightFences[mCurrentFrame],
+                  VK_TRUE,
+                  std::numeric_limits<uint64_t>::max());
+
+  vkResetFences(device, 1, &mInFlightFences[mCurrentFrame]);
+
+  uint32_t imageIndex;
+
+  VkSemaphore imageAvailableSemaphore
+    { mImageAvailableSemaphores.getVkSemaphoresRef()[mCurrentFrame] };
+
+  VkSemaphore renderFinishedSemaphore
+    { mRenderFinishedSemaphores.getVkSemaphoresRef()[mCurrentFrame] };
+
+  vkAcquireNextImageKHR(getVkDevice(),
+                        mSwapChain.getVkSwapchainKHR(),
+                        std::numeric_limits<uint64_t>::max(),
+                        imageAvailableSemaphore,
+                        VK_NULL_HANDLE,
+                        &imageIndex);
+
+  VkSubmitInfo submitInfo{};
+
+  submitInfo.sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+  VkSemaphore waitSemaphores[]{ imageAvailableSemaphore };
+
+  VkPipelineStageFlags waitStages[]
+    { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+
+  submitInfo.waitSemaphoreCount   = 1;
+  submitInfo.pWaitSemaphores      = waitSemaphores;
+  submitInfo.pWaitDstStageMask    = waitStages;
+  submitInfo.commandBufferCount   = 1;
+  submitInfo.pCommandBuffers      =
+    &mCommandBuffers.getVkCommandBuffersRef()[imageIndex];
+
+  VkSemaphore signalSemaphores[]{ renderFinishedSemaphore };
+
+  submitInfo.signalSemaphoreCount = 1;
+  submitInfo.pSignalSemaphores    = signalSemaphores;
+
+  VkResult result{ vkQueueSubmit(mSwapChain.getDevice()->getGraphicsVkQueue(),
+                                 1,
+                                 &submitInfo,
+                                 mInFlightFences[mCurrentFrame]) };
+  
+  if(result not_eq VK_SUCCESS)
+  {
+    DEBUG_CALLBACK(error,
+                   "Failed to submit draw command buffer.",
+                   vkQueueSubmit);
+  
+    return failure;
+  }
+  
+  VkPresentInfoKHR presentInfo{};
+
+  presentInfo.sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+  presentInfo.waitSemaphoreCount = 1;
+  presentInfo.pWaitSemaphores    = signalSemaphores;
+
+  VkSwapchainKHR swapChains[]{ mSwapChain.getVkSwapchainKHR() };
+
+  presentInfo.swapchainCount = 1;
+  presentInfo.pSwapchains    = swapChains;
+  presentInfo.pImageIndices  = &imageIndex;
+  presentInfo.pResults       = nullptr; // optional
+
+  vkQueuePresentKHR(mSwapChain.getDevice()->getPresentVkQueue(), &presentInfo);
+
+  vkQueueWaitIdle(mSwapChain.getDevice()->getPresentVkQueue());
+
+  size_type const maxFramesInFlight
+    { mImageAvailableSemaphores.getVkSemaphoresRef().size() };
+
+  mCurrentFrame = (mCurrentFrame + 1) %
+                  static_cast<index_t>(maxFramesInFlight); 
 
   return success;
 }

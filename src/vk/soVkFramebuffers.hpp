@@ -75,7 +75,7 @@ Framebuffers
                SwapChain              const& swapChain,
                RenderPass             const& renderPass);
 
-    inline std::vector<VkFramebuffer>& getVkFramebuffers()
+    inline std::vector<VkFramebuffer> const& getVkFramebuffersRef() const 
     {
       return mFramebuffers;
     }

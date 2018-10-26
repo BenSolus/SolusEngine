@@ -49,7 +49,9 @@
 
 #pragma once
 
-#include "vk/soVkCommandPool.hpp"
+#include "soVkCommandPool.hpp"
+#include "soVkFramebuffers.hpp"
+#include "soVkPipeline.hpp"
 
 namespace so {
 namespace vk {
@@ -74,8 +76,12 @@ CommandBuffers
 
     return_t
     initialize(SharedPtrLogicalDevice const& device,
-               SharedPtrCommandPool   const& commandPool);
- 
+               SharedPtrCommandPool   const& commandPool,
+               Framebuffers           const& framebuffers,
+               RenderPass             const& renderPass,
+               SwapChain              const& swapChain,
+               Pipeline               const& pipeline);
+
     inline auto& getVkCommandBuffersRef() { return mCommandBuffers; }
 
   private:

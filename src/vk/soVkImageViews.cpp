@@ -64,7 +64,7 @@ so::vk::ImageViews::initialize(SharedPtrLogicalDevice const& device,
 
   mImageViews.resize(size);
 
-  for(uindex i(0); i < size; ++i)
+  for(uindex_t i(0); i < size; ++i)
   {
     VkImageViewCreateInfo createInfo = {};
 
@@ -107,7 +107,7 @@ so::vk::ImageViews::addImageViews(std::vector<VkImage> const& images,
 
   mImageViews.resize(newSize);
 
-  for(uindex i(oldSize); i < newSize; ++i)
+  for(uindex_t i(oldSize); i < newSize; ++i)
   {
     VkImageViewCreateInfo createInfo({});
 

@@ -32,7 +32,7 @@ getDebugCallbackInstance()
       [](DebugCode   const  code,
          std::string const& message,
          std::string const& funcSig,
-         index       const  line,
+         index_t     const  line,
          std::string const& file)     
       {
         (void) code;
@@ -60,7 +60,7 @@ void
 so::executeDebugCallback(DebugCode   const  code,
                          std::string const& message,
                          std::string const& funcSig,
-                         index       const  line,
+                         index_t     const  line,
                          std::string const& file)
 {
   (*getDebugCallbackInstance())(code, message, funcSig, line, file);

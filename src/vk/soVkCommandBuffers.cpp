@@ -22,6 +22,7 @@
 
 #include "soVkCommandBuffers.hpp"
 
+#include "cxx/soDebugCallback.hpp"
 #include "cxx/soDefinitions.hpp"
 
 so::vk::CommandBuffers::CommandBuffers()
@@ -58,8 +59,104 @@ so::vk::CommandBuffers::operator=(CommandBuffers&& other) noexcept
 
 so::return_t
 so::vk::CommandBuffers::initialize(SharedPtrLogicalDevice const& device,
-                                   SharedPtrCommandPool   const& commandPool)
+                                   SharedPtrCommandPool   const& commandPool,
+                                   Framebuffers           const& framebuffers,
+                                   RenderPass             const& renderPass,
+                                   SwapChain              const& swapChain,
+                                   Pipeline               const& pipeline)
 {
+  mDevice      = device;
+  mCommandPool = commandPool;
+
+  auto&         vkFramebuffers{ framebuffers.getVkFramebuffersRef() };
+
+  VkCommandPool vkCommandPool{ mCommandPool->getVkCommandPool() };
+  VkDevice      vkDevice{ mDevice->getVkDevice() };
+  VkExtent2D    vkExtent{ swapChain.getVkExtent() };
+  VkPipeline    vkPipeline{ pipeline.getVkPipeline() };
+  VkRenderPass  vkRenderPass{ renderPass.getVkRenderPass() };
+    
+  mCommandBuffers.resize(vkFramebuffers.size());
+
+  VkCommandBufferAllocateInfo allocInfo{};
+
+  allocInfo.sType              =
+    VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+  allocInfo.commandPool        = vkCommandPool;
+  allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+  allocInfo.commandBufferCount = static_cast<uint32_t>(mCommandBuffers.size());
+
+  VkResult result{ vkAllocateCommandBuffers(vkDevice,
+                                            &allocInfo,
+                                            mCommandBuffers.data()) };
+  
+  if(result not_eq VK_SUCCESS)
+  {
+    DEBUG_CALLBACK(error,
+                   "Failed to allocate command buffers.",
+                   vkAllocateCommandBuffers);
+
+    return failure;
+  }
+
+  auto begin{ mCommandBuffers.begin() };
+  auto end{ mCommandBuffers.end() };
+
+  for(auto it{ begin }; it not_eq end; ++it)
+  {
+    VkCommandBufferBeginInfo beginInfo{};
+    
+    beginInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags            = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+    beginInfo.pInheritanceInfo = nullptr; // Optional
+
+    if (vkBeginCommandBuffer(*it, &beginInfo) not_eq VK_SUCCESS)
+    {
+      DEBUG_CALLBACK(error,
+                     "Failed to begin recording a command buffer.",
+                     vkBeginCommandBuffer);
+    
+      return failure;
+    }
+
+    auto const idx{ static_cast<std::size_t>(std::distance(begin, it)) };
+
+    VkRenderPassBeginInfo renderPassInfo{};
+
+    renderPassInfo.sType             =
+      VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass        = vkRenderPass;
+    renderPassInfo.framebuffer       = vkFramebuffers[idx];
+    renderPassInfo.renderArea.offset = { 0, 0 };
+    renderPassInfo.renderArea.extent = vkExtent;
+
+    VkClearValue clearColor{ 0.0f, 0.0f, 0.0f, 1.0f };
+
+    renderPassInfo.clearValueCount   = 1;
+    renderPassInfo.pClearValues      = &clearColor;
+
+    vkCmdBeginRenderPass(*it,
+                         &renderPassInfo,
+                         VK_SUBPASS_CONTENTS_INLINE);
+    
+    vkCmdBindPipeline(*it,
+                      VK_PIPELINE_BIND_POINT_GRAPHICS,
+                      vkPipeline);
+
+    vkCmdDraw(*it, 3, 1, 0, 0);
+
+    vkCmdEndRenderPass(*it);
+
+    if(vkEndCommandBuffer(*it) not_eq VK_SUCCESS)
+    {
+      DEBUG_CALLBACK(error,
+                     "Failed to record command buffer.",
+                     vkEndCommandBuffer);
+    
+      return failure;
+    }
+  }
+
   return success;
 }
 
@@ -73,7 +170,7 @@ so::vk::CommandBuffers::destroyMembers()
   {
     if(commandPool not_eq VK_NULL_HANDLE)
     {
-      if(mCommandBuffers.size() not_eq 0)
+      if(not mCommandBuffers.empty())
       {
         vkFreeCommandBuffers(device,
                              commandPool,

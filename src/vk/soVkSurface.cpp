@@ -79,7 +79,7 @@ so::vk::Surface::Impl
     {
       bool   atLeastOneValidBackend(false);
   
-      index idx(0);
+      index_t idx(0);
   
       for(auto& provider : mProviders)
       {
@@ -276,7 +276,7 @@ so::vk::Surface::Impl
   private:
     SurfaceProviders mProviders{ 0 };
 
-    index            mCurrentProvider{ -1 };
+    index_t          mCurrentProvider{ -1 };
 
     inline Module&
     getModule()
