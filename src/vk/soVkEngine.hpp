@@ -100,6 +100,12 @@ Engine
     vk::Fences<>               mInFlightFences;
 
     index_t                    mCurrentFrame;
+
+    bool                       mFramebuffersResized;
+
+    return_t
+    recreateSwapChain();
+
 };
 
 } // namespace so

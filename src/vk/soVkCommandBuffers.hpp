@@ -82,6 +82,12 @@ CommandBuffers
                SwapChain              const& swapChain,
                Pipeline               const& pipeline);
 
+    return_t
+    reset(Framebuffers const& framebuffers,
+          RenderPass   const& renderPass,
+          SwapChain    const& swapChain,
+          Pipeline     const& pipeline);
+
     inline auto& getVkCommandBuffersRef() { return mCommandBuffers; }
 
   private:
@@ -89,6 +95,12 @@ CommandBuffers
 
     SharedPtrLogicalDevice       mDevice;
     SharedPtrCommandPool         mCommandPool;
+
+    return_t
+    initializeMembers(Framebuffers const& framebuffers,
+                      RenderPass   const& renderPass,
+                      SwapChain    const& swapChain,
+                      Pipeline     const& pipeline);
 
     void
     destroyMembers();

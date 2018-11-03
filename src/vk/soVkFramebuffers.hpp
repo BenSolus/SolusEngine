@@ -75,6 +75,9 @@ Framebuffers
                SwapChain              const& swapChain,
                RenderPass             const& renderPass);
 
+    return_t
+    reset(SwapChain const& swapChain, RenderPass const& renderPass);
+
     inline std::vector<VkFramebuffer> const& getVkFramebuffersRef() const 
     {
       return mFramebuffers;
@@ -85,7 +88,12 @@ Framebuffers
 
     SharedPtrLogicalDevice     mDevice;
 
-    void destroyMembers();
+    return_t
+    initializeMembers(SwapChain  const& swapChain,
+                      RenderPass const& renderPass);
+
+    void
+    destroyMembers();
 
 }; // class Framebuffers
 

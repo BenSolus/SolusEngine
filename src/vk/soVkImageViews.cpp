@@ -60,41 +60,17 @@ so::vk::ImageViews::initialize(SharedPtrLogicalDevice const& device,
 {
   mDevice = device;
 
-  std::size_t const size(images.size());
+  return initializeMembers(images, format, aspectFlags);
+}
 
-  mImageViews.resize(size);
+so::return_t
+so::vk::ImageViews::reset(std::vector<VkImage> const& images,
+                          VkFormat                    format,
+                          VkImageAspectFlags          aspectFlags)
+{
+  destroyMembers();
 
-  for(uindex_t i(0); i < size; ++i)
-  {
-    VkImageViewCreateInfo createInfo = {};
-
-    createInfo.sType                           =
-      VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    createInfo.image                           = images[i];
-    createInfo.viewType                        = VK_IMAGE_VIEW_TYPE_2D;
-    createInfo.format                          = format;
-    createInfo.components.r                    = VK_COMPONENT_SWIZZLE_IDENTITY;
-    createInfo.components.g                    = VK_COMPONENT_SWIZZLE_IDENTITY;
-    createInfo.components.b                    = VK_COMPONENT_SWIZZLE_IDENTITY;
-    createInfo.components.a                    = VK_COMPONENT_SWIZZLE_IDENTITY;
-    createInfo.subresourceRange.aspectMask     = aspectFlags;
-    createInfo.subresourceRange.baseMipLevel   = 0;
-    createInfo.subresourceRange.levelCount     = 1;
-    createInfo.subresourceRange.baseArrayLayer = 0;
-    createInfo.subresourceRange.layerCount     = 1;
-
-    VkResult const result(vkCreateImageView(device->getVkDevice(),
-                                            &createInfo,
-                                            nullptr,
-                                            &mImageViews[i]));
-
-    if(result not_eq VK_SUCCESS)
-    {
-      return failure;
-    }
-  }
-
-  return success;
+  return initializeMembers(images, format, aspectFlags);
 }
 
 so::return_t
@@ -127,6 +103,50 @@ so::vk::ImageViews::addImageViews(std::vector<VkImage> const& images,
     createInfo.subresourceRange.layerCount     = 1;
 
     VkResult const result(vkCreateImageView(mDevice->getVkDevice(),
+                                            &createInfo,
+                                            nullptr,
+                                            &mImageViews[i]));
+
+    if(result not_eq VK_SUCCESS)
+    {
+      return failure;
+    }
+  }
+
+  return success;
+}
+
+so::return_t
+so::vk::ImageViews::initializeMembers(std::vector<VkImage> const& images,
+                                      VkFormat                    format,
+                                      VkImageAspectFlags          aspectFlags)
+{
+  VkDevice device{ mDevice->getVkDevice() };
+
+  std::size_t const size(images.size());
+
+  mImageViews.resize(size);
+
+  for(uindex_t i(0); i < size; ++i)
+  {
+    VkImageViewCreateInfo createInfo = {};
+
+    createInfo.sType                           =
+      VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    createInfo.image                           = images[i];
+    createInfo.viewType                        = VK_IMAGE_VIEW_TYPE_2D;
+    createInfo.format                          = format;
+    createInfo.components.r                    = VK_COMPONENT_SWIZZLE_IDENTITY;
+    createInfo.components.g                    = VK_COMPONENT_SWIZZLE_IDENTITY;
+    createInfo.components.b                    = VK_COMPONENT_SWIZZLE_IDENTITY;
+    createInfo.components.a                    = VK_COMPONENT_SWIZZLE_IDENTITY;
+    createInfo.subresourceRange.aspectMask     = aspectFlags;
+    createInfo.subresourceRange.baseMipLevel   = 0;
+    createInfo.subresourceRange.levelCount     = 1;
+    createInfo.subresourceRange.baseArrayLayer = 0;
+    createInfo.subresourceRange.layerCount     = 1;
+
+    VkResult const result(vkCreateImageView(device,
                                             &createInfo,
                                             nullptr,
                                             &mImageViews[i]));

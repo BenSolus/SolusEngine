@@ -33,8 +33,9 @@ void error_callback(int error, char const* description)
   puts(description);
 }
 
-
-so::base::Surface::Surface() : mIsInitialized(false), mWindow(nullptr)
+so::base::Surface::Surface() : mIsInitialized(false),
+                               mFramebuffersResized(false),
+                               mWindow(nullptr)
 {
 }
 
@@ -58,18 +59,20 @@ so::base::Surface::operator=(Surface&& other) noexcept
 
   deleteMembers();
 
-  mIsInitialized = other.mIsInitialized;
-  mWindow        = other.mWindow;
+  mIsInitialized       = other.mIsInitialized;
+  mFramebuffersResized = other.mFramebuffersResized;
+  mWindow              = other.mWindow;
 
-  other.mIsInitialized = false;
-  other.mWindow        = nullptr;
+  other.mIsInitialized       = false;
+  other.mFramebuffersResized = false;
+  other.mWindow              = nullptr;
 
   return *this;
 }
 
 so::return_t
 so::base::Surface::initialize()
-{
+{ 
   glfwSetErrorCallback(error_callback);
 
   if(glfwInit() is_eq GLFW_FALSE)
@@ -78,6 +81,8 @@ so::base::Surface::initialize()
   }
 
   mIsInitialized = true;
+
+  mFramebuffersResized = false;
 
   return success;
 }

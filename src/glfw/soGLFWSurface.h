@@ -95,6 +95,9 @@ soGLFWSurfaceGetWindowSize(void*          surface,
                            so::size_type* width,
                            so::size_type* height);
 
+bool
+soGLFWSurfaceFramebuffersAreResized(void* surface);
+
 #ifdef __cplusplus
 
 } // extern "C"

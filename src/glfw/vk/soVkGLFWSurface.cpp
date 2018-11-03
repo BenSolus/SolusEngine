@@ -22,6 +22,18 @@
 
 #include "soVkGLFWSurface.hpp"
 
+static void
+framebufferResizeCallback(GLFWwindow* window, int width, int height)
+{
+  (void) width;
+  (void) height;
+
+  auto surface
+    { reinterpret_cast<so::base::Surface*>(glfwGetWindowUserPointer(window)) };
+
+  surface->setFrameBuffersAreResized(true);
+}
+
 so::vk::GLFWSurface::GLFWSurface()
   : base::Surface(), mSurface(VK_NULL_HANDLE), mInstance(VK_NULL_HANDLE) {}
 
@@ -77,13 +89,15 @@ so::vk::GLFWSurface::createWindow(std::string   const& title,
                                   so::size_type const  height)
 {
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
+  
   auto const iWidth{ static_cast<int>(width) };
   auto const iHeight{ static_cast<int>(height) };
 
   mWindow = glfwCreateWindow(iWidth, iHeight, title.c_str(), nullptr, nullptr);
 
+  glfwSetWindowUserPointer(mWindow, this);
+  glfwSetFramebufferSizeCallback(mWindow, framebufferResizeCallback);
+ 
   return mWindow not_eq nullptr ? success : failure;
 }
 

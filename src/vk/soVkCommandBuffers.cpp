@@ -68,6 +68,54 @@ so::vk::CommandBuffers::initialize(SharedPtrLogicalDevice const& device,
   mDevice      = device;
   mCommandPool = commandPool;
 
+  return_t result{ initializeMembers(framebuffers,
+                                     renderPass,
+                                     swapChain,
+                                     pipeline) };
+
+  if(result is_eq failure)
+  {
+    DEBUG_CALLBACK(error,
+                   "Failed to create a command buffer during initialization.",
+                   CommandBuffers::initializeMembers);
+
+    return failure;
+  }
+
+  return success;
+}
+
+so::return_t
+so::vk::CommandBuffers::reset(Framebuffers const& framebuffers,
+                              RenderPass   const& renderPass,
+                              SwapChain    const& swapChain,
+                              Pipeline     const& pipeline)
+{
+  destroyMembers();
+
+  return_t result{ initializeMembers(framebuffers,
+                                     renderPass,
+                                     swapChain,
+                                     pipeline) };
+
+  if(result is_eq failure)
+  {
+    DEBUG_CALLBACK(error,
+                   "Failed to create a command buffer while resetting.",
+                   CommandBuffers::initializeMembers);
+
+    return failure;
+  }
+
+  return success;
+}
+
+so::return_t
+so::vk::CommandBuffers::initializeMembers(Framebuffers const& framebuffers,
+                                          RenderPass   const& renderPass,
+                                          SwapChain    const& swapChain,
+                                          Pipeline     const& pipeline)
+{
   auto&         vkFramebuffers{ framebuffers.getVkFramebuffersRef() };
 
   VkCommandPool vkCommandPool{ mCommandPool->getVkCommandPool() };
@@ -176,6 +224,10 @@ so::vk::CommandBuffers::destroyMembers()
                              commandPool,
                              static_cast<uint32_t>(mCommandBuffers.size()),
                              mCommandBuffers.data());
+
+        std::fill(mCommandBuffers.begin(),
+                  mCommandBuffers.end(),
+                  static_cast<VkCommandBuffer>(VK_NULL_HANDLE)); 
       }
     }
   }

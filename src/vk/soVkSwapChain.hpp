@@ -79,9 +79,11 @@ SwapChain
 
     return_t
     initialize(SharedPtrLogicalDevice const& device,
-               Surface const&                surface, 
-               VkSwapchainKHR                oldSwapChain = VK_NULL_HANDLE);
- 
+               Surface                const& surface);
+
+    return_t
+    reset(Surface const& surface);
+
     inline VkSwapchainKHR getVkSwapchainKHR() { return mSwapChain; }
 
     inline VkExtent2D getVkExtent() const { return mSwapChainExtent; }
@@ -120,6 +122,9 @@ SwapChain
     VkExtent2D
     chooseSwapExtent(VkSurfaceCapabilitiesKHR const& capabilities,
                      Surface                  const& surface);
+
+    return_t
+    initializeMembers(Surface const& surface);
 
     void
     destroyMembers();

@@ -104,6 +104,9 @@ Surface
     void
     getWindowSize(size_type& width, size_type& height) const;
 
+    bool
+    framebuffersAreResized();
+
     void
     setSharedPtrInstance(SharedPtrInstance const& instance);
 

@@ -87,10 +87,19 @@ Surface
     void
     getWindowSize(size_type& width, size_type& height);
 
+    inline
+    void setFrameBuffersAreResized(bool const areResized)
+    {
+      mFramebuffersResized = areResized;
+    }
+
+    inline bool framebuffersAreResized() { return mFramebuffersResized; }
+
     inline GLFWwindow* getGLFWwindow() { return mWindow; }
 
   protected:
     bool        mIsInitialized;
+    bool        mFramebuffersResized;
 
     GLFWwindow* mWindow;
 

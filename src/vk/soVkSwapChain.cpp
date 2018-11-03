@@ -39,104 +39,55 @@ so::vk::SwapChain::SwapChain()
 
 so::return_t
 so::vk::SwapChain::initialize(SharedPtrLogicalDevice const& device,
-                              Surface const&                surface, 
-                              VkSwapchainKHR                oldSwapChain)
+                              Surface                const& surface)
 {
   mDevice = device;
 
-  VkDevice         vkDevice{ device->getVkDevice() };
-  VkPhysicalDevice physicalDevice{ device->getVkPhysicalDevice() };
 
-  SwapChainSupportDetails swapChainSupport{ physicalDevice,
-                                            surface.getVkSurfaceKHR()};
-
-  VkSurfaceFormatKHR surfaceFormat
-    { chooseSwapSurfaceFormat(swapChainSupport.getFormats()) };
-  VkPresentModeKHR presentMode
-    { chooseSwapPresentMode(swapChainSupport.getPresentModes()) };
-  VkExtent2D extent{ chooseSwapExtent(swapChainSupport.getCapabilities(),
-                                      surface) };
-
-  uint32_t imageCount
-    { swapChainSupport.getCapabilities().minImageCount + 1 };
-
-  uint32_t const maxImageCount
-    { swapChainSupport.getCapabilities().maxImageCount };
-  
-  bool const imageLimitDefined{ maxImageCount > 0 };
-  bool const maxSmallerMin{ imageCount > maxImageCount };
-
-  if(imageLimitDefined and maxSmallerMin)
-  {
-    imageCount = maxImageCount;
-  }
-
-  VkSwapchainCreateInfoKHR createInfo{};
-
-  createInfo.sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-  createInfo.surface          = surface.getVkSurfaceKHR();
-  createInfo.minImageCount    = imageCount;
-  createInfo.imageFormat      = surfaceFormat.format;
-  createInfo.imageColorSpace  = surfaceFormat.colorSpace;
-  createInfo.imageExtent      = extent;
-  createInfo.imageArrayLayers = 1;
-  createInfo.imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-
-  QueueFamilyIndices indices{ physicalDevice, surface };
-
-  uint32_t queueFamilyIndices[]
-    { static_cast<uint32_t>(indices.getGraphicsFamily()),
-      static_cast<uint32_t>(indices.getPresentFamily()) };
-
-  if(indices.getGraphicsFamily() not_eq indices.getPresentFamily())
-  {
-    createInfo.imageSharingMode      = VK_SHARING_MODE_CONCURRENT;
-    createInfo.queueFamilyIndexCount = 2;
-    createInfo.pQueueFamilyIndices   = queueFamilyIndices;
-  }
-  else
-  {   
-    createInfo.imageSharingMode      = VK_SHARING_MODE_EXCLUSIVE;
-  }
-
-  createInfo.preTransform   =
-    swapChainSupport.getCapabilities().currentTransform;
-  createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-  createInfo.presentMode    = presentMode;
-  createInfo.clipped        = VK_TRUE;
-  createInfo.oldSwapchain   = oldSwapChain;
-
-  VkResult const swapChainResult(vkCreateSwapchainKHR(vkDevice,
-                                                      &createInfo,
-                                                      nullptr,
-                                                      &mSwapChain));
-
-  if(swapChainResult not_eq VK_SUCCESS)
+  if(initializeMembers(surface) is_eq failure)
   {
     DEBUG_CALLBACK(error,
                    "Failed to create swap chain.",
-                   vkCreateSwapchainKHR);
+                   SwapChain::initializeMembers);
 
-    return failure;  
+    return failure;
   }
-
-  vkGetSwapchainImagesKHR(vkDevice, mSwapChain, &imageCount, nullptr);
   
-  mSwapChainImages.resize(imageCount);
-
-  vkGetSwapchainImagesKHR(vkDevice,
-                          mSwapChain,
-                          &imageCount,
-                          mSwapChainImages.data());
-
-  mSwapChainImageFormat = surfaceFormat.format;
-  mSwapChainExtent      = extent;
-
   return_t result{ mSwapChainImageViews.initialize
                      (mDevice,
                       mSwapChainImages,
                       mSwapChainImageFormat,
                       VK_IMAGE_ASPECT_COLOR_BIT) };
+
+  if(result is_eq failure)
+  {
+    DEBUG_CALLBACK(error,
+                   "Failed to create image views for the swap chain.",
+                   ImageViews::initialize);
+
+    return failure;
+  }
+
+  return success;
+}
+
+so::return_t
+so::vk::SwapChain::reset(Surface const& surface)
+{
+  destroyMembers();
+
+  if(initializeMembers(surface) is_eq failure)
+  {
+    DEBUG_CALLBACK(error,
+                   "Failed to create swap chain.",
+                   SwapChain::initializeMembers);
+
+    return failure;
+  }
+
+  return_t result{ mSwapChainImageViews.reset(mSwapChainImages,
+                                              mSwapChainImageFormat,
+                                              VK_IMAGE_ASPECT_COLOR_BIT) };
 
   if(result is_eq failure)
   {
@@ -274,6 +225,100 @@ so::vk::SwapChain::chooseSwapExtent
   return swapExtent;
 }
 
+so::return_t
+so::vk::SwapChain::initializeMembers(Surface const& surface)
+{
+  VkDevice         vkDevice{ mDevice->getVkDevice() };
+  VkPhysicalDevice physicalDevice{ mDevice->getVkPhysicalDevice() };
+
+  SwapChainSupportDetails swapChainSupport{ physicalDevice,
+                                            surface.getVkSurfaceKHR()};
+
+  VkSurfaceFormatKHR surfaceFormat
+    { chooseSwapSurfaceFormat(swapChainSupport.getFormats()) };
+  VkPresentModeKHR presentMode
+    { chooseSwapPresentMode(swapChainSupport.getPresentModes()) };
+  VkExtent2D extent{ chooseSwapExtent(swapChainSupport.getCapabilities(),
+                                      surface) };
+
+  uint32_t imageCount
+    { swapChainSupport.getCapabilities().minImageCount + 1 };
+
+  uint32_t const maxImageCount
+    { swapChainSupport.getCapabilities().maxImageCount };
+  
+  bool const imageLimitDefined{ maxImageCount > 0 };
+  bool const maxSmallerMin{ imageCount > maxImageCount };
+
+  if(imageLimitDefined and maxSmallerMin)
+  {
+    imageCount = maxImageCount;
+  }
+
+  VkSwapchainCreateInfoKHR createInfo{};
+
+  createInfo.sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+  createInfo.surface          = surface.getVkSurfaceKHR();
+  createInfo.minImageCount    = imageCount;
+  createInfo.imageFormat      = surfaceFormat.format;
+  createInfo.imageColorSpace  = surfaceFormat.colorSpace;
+  createInfo.imageExtent      = extent;
+  createInfo.imageArrayLayers = 1;
+  createInfo.imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+  QueueFamilyIndices indices{ physicalDevice, surface };
+
+  uint32_t queueFamilyIndices[]
+    { static_cast<uint32_t>(indices.getGraphicsFamily()),
+      static_cast<uint32_t>(indices.getPresentFamily()) };
+
+  if(indices.getGraphicsFamily() not_eq indices.getPresentFamily())
+  {
+    createInfo.imageSharingMode      = VK_SHARING_MODE_CONCURRENT;
+    createInfo.queueFamilyIndexCount = 2;
+    createInfo.pQueueFamilyIndices   = queueFamilyIndices;
+  }
+  else
+  {   
+    createInfo.imageSharingMode      = VK_SHARING_MODE_EXCLUSIVE;
+  }
+
+  createInfo.preTransform   =
+    swapChainSupport.getCapabilities().currentTransform;
+  createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+  createInfo.presentMode    = presentMode;
+  createInfo.clipped        = VK_TRUE;
+  createInfo.oldSwapchain   = mSwapChain;
+
+  VkResult const swapChainResult(vkCreateSwapchainKHR(vkDevice,
+                                                      &createInfo,
+                                                      nullptr,
+                                                      &mSwapChain));
+
+  if(swapChainResult not_eq VK_SUCCESS)
+  {
+    DEBUG_CALLBACK(error,
+                   "Failed to create swap chain.",
+                   vkCreateSwapchainKHR);
+
+    return failure;  
+  }
+
+  vkGetSwapchainImagesKHR(vkDevice, mSwapChain, &imageCount, nullptr);
+  
+  mSwapChainImages.resize(imageCount);
+
+  vkGetSwapchainImagesKHR(vkDevice,
+                          mSwapChain,
+                          &imageCount,
+                          mSwapChainImages.data());
+
+  mSwapChainImageFormat = surfaceFormat.format;
+  mSwapChainExtent      = extent;
+ 
+  return success;
+}
+
 void
 so::vk::SwapChain::destroyMembers()
 {
@@ -282,6 +327,8 @@ so::vk::SwapChain::destroyMembers()
   if((mSwapChain not_eq VK_NULL_HANDLE) and (device not_eq VK_NULL_HANDLE))
   {
     vkDestroySwapchainKHR(device, mSwapChain, nullptr);
+
+    mSwapChain = VK_NULL_HANDLE;
   }
 }
 

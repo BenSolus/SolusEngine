@@ -66,10 +66,45 @@ so::vk::Pipeline::initialize(SharedPtrLogicalDevice const& device,
 {
   mDevice = device;
 
-  ShaderModule vertShader{ device,
+  if(initializeMembers(swapChain, renderPass) is_eq failure)
+  {
+    DEBUG_CALLBACK(error,
+                   "Failed to create a graphics pipeline during "
+                   "initialization.",
+                   Pipeline::initializeMembers);
+
+    return failure;
+  }
+
+  return success;
+}
+
+so::return_t
+so::vk::Pipeline::reset(SwapChain  const& swapChain,
+                        RenderPass const& renderPass)
+{
+  destroyMembers();
+
+  if(initializeMembers(swapChain, renderPass) is_eq failure)
+  {
+    DEBUG_CALLBACK(error,
+                   "Failed to create a graphics pipeline while resetting.",
+                   Pipeline::initializeMembers);
+
+    return failure;
+  }
+  
+  return success;
+}
+
+so::return_t
+so::vk::Pipeline::initializeMembers(SwapChain  const& swapChain,
+                                    RenderPass const& renderPass)
+{
+  ShaderModule vertShader{ mDevice,
                            BIN_DIR + "/data/shaders/triangle/vert.spv" };
 
-  ShaderModule fragShader{ device,
+  ShaderModule fragShader{ mDevice,
                            BIN_DIR + "/data/shaders/triangle/frag.spv" };
 
   bool const gotValidShaders
@@ -245,7 +280,7 @@ so::vk::Pipeline::initialize(SharedPtrLogicalDevice const& device,
   if(result not_eq VK_SUCCESS)
   {
     DEBUG_CALLBACK(error,
-                   "Failed to create graphics pipeline.",
+                   "Failed to create a graphics pipeline.",
                    vkCreateGraphicsPipelines);
 
     return failure;
@@ -264,11 +299,15 @@ so::vk::Pipeline::destroyMembers()
     if(mPipeline not_eq VK_NULL_HANDLE)
     { 
       vkDestroyPipeline(device, mPipeline, nullptr);
+
+      mPipeline = VK_NULL_HANDLE;
     }
 
     if(mPipelineLayout not_eq VK_NULL_HANDLE)
     {
       vkDestroyPipelineLayout(device, mPipelineLayout, nullptr);
+
+      mPipelineLayout = VK_NULL_HANDLE;
     }
   }
 }

@@ -79,6 +79,11 @@ ImageViews
                VkFormat                      format,
                VkImageAspectFlags            aspectFlags);
 
+    return_t
+    reset(std::vector<VkImage> const& images,
+          VkFormat                    format,
+          VkImageAspectFlags          aspectFlags);
+
     inline std::vector<VkImageView> const&
     getVkImageViewsRef() const { return mImageViews; }
 
@@ -91,6 +96,11 @@ ImageViews
     std::vector<VkImageView> mImageViews;
 
     SharedPtrLogicalDevice   mDevice;
+
+    return_t
+    initializeMembers(std::vector<VkImage> const& images,
+                      VkFormat                    format,
+                      VkImageAspectFlags          aspectFlags);
 
     void
     destroyMembers();

@@ -48,6 +48,10 @@
         {
           "symbol" : "soGLFWSurfaceGetWindowSize",
           "index"  : 8
+        },
+        {
+          "symbol" : "soGLFWSurfaceFramebuffersAreResized",
+          "index"  : 9
         }
       ]
     }

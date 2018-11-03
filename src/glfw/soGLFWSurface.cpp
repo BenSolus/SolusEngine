@@ -101,3 +101,10 @@ soGLFWSurfaceGetWindowSize(void*          surface,
 {
   static_cast<so::vk::GLFWSurface*>(surface)->getWindowSize(*width, *height);
 }
+
+bool
+soGLFWSurfaceFramebuffersAreResized(void* surface)
+{
+  return static_cast<so::base::Surface*>(surface)->framebuffersAreResized();
+}
+

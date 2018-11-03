@@ -56,6 +56,40 @@ so::vk::Framebuffers::initialize(SharedPtrLogicalDevice const& device,
 {
   mDevice = device;
 
+  if(initializeMembers(swapChain, renderPass) is_eq failure)
+  {
+    DEBUG_CALLBACK(error,
+                   "Failed to create frame buffers during initialization.",
+                   Framebuffers::initializeMembers);
+
+    return failure;
+  }
+
+  return success;
+}
+
+so::return_t
+so::vk::Framebuffers::reset(SwapChain  const& swapChain,
+                            RenderPass const& renderPass)
+{
+  destroyMembers();
+
+  if(initializeMembers(swapChain, renderPass) is_eq failure)
+  {
+    DEBUG_CALLBACK(error,
+                   "Failed to create frame buffers while resetting.",
+                   Framebuffers::initializeMembers);
+
+    return failure;
+  }
+
+  return success;
+}
+
+so::return_t
+so::vk::Framebuffers::initializeMembers(SwapChain  const& swapChain,
+                                        RenderPass const& renderPass)
+{
   auto& swapChainImageViews{ swapChain.getImageViews().getVkImageViewsRef() };
 
   mFramebuffers.resize(swapChainImageViews.size());
@@ -116,6 +150,8 @@ so::vk::Framebuffers::destroyMembers()
       if(framebuffer != VK_NULL_HANDLE)
       {
         vkDestroyFramebuffer(device, framebuffer, nullptr);
+
+        framebuffer = VK_NULL_HANDLE;
       }
     }
   }

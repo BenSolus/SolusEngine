@@ -73,7 +73,7 @@ before_install:
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd boost; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then git checkout tags/boost-1.62.0; fi
   - if [ $TRAVIS_OS_NAME = "linux" ]; then ./bootstrap.sh; fi
-  - if [ $TRAVIS_OS_NAME = "linux" ]; then ./b2 install; fi
+  - if [ $TRAVIS_OS_NAME = "linux" ]; then sudo ./b2 install; fi
 
   - if [ $TRAVIS_OS_NAME = "linux" ]; then cd ..; fi
 

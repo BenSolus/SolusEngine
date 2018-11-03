@@ -81,6 +81,9 @@ Pipeline
                SwapChain              const& swapChain,
 							 RenderPass             const& renderPass);
 
+    return_t
+    reset(SwapChain const& swapChain, RenderPass const& renderPass);
+
     inline VkPipeline getVkPipeline() const { return mPipeline; }
  
     inline VkPipelineLayout getVkPipelineLayout() { return mPipelineLayout; }
@@ -90,6 +93,10 @@ Pipeline
     VkPipelineLayout          mPipelineLayout;
 
     SharedPtrLogicalDevice    mDevice;
+
+    return_t
+    initializeMembers(SwapChain  const& swapChain,
+                      RenderPass const& renderPass);
 
     void
     destroyMembers();

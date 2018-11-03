@@ -77,6 +77,9 @@ RenderPass
     initialize(SharedPtrLogicalDevice const& device,
                SwapChain              const& swapChain);
 
+    return_t
+    reset(SwapChain const& swapChain);
+
     inline VkRenderPass getVkRenderPass() const { return mRenderPass; }
 
   private:
@@ -84,7 +87,11 @@ RenderPass
 
     SharedPtrLogicalDevice mDevice;
 
-    void destroyMembers();
+    return_t
+    initializeMembers(SwapChain const& swapChain);
+
+    void
+    destroyMembers();
 
 }; // class RenderPass
 

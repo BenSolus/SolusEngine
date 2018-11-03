@@ -36,7 +36,8 @@ so::Engine::Engine()
     mImageAvailableSemaphores(),
     mRenderFinishedSemaphores(),
     mInFlightFences(),
-    mCurrentFrame(0)
+    mCurrentFrame(0),
+    mFramebuffersResized(false)
 {}
 
 so::Engine::~Engine() noexcept
@@ -199,9 +200,7 @@ so::Engine::drawFrame()
                   &mInFlightFences[mCurrentFrame],
                   VK_TRUE,
                   std::numeric_limits<uint64_t>::max());
-
-  vkResetFences(device, 1, &mInFlightFences[mCurrentFrame]);
-
+ 
   uint32_t imageIndex;
 
   VkSemaphore imageAvailableSemaphore
@@ -210,12 +209,27 @@ so::Engine::drawFrame()
   VkSemaphore renderFinishedSemaphore
     { mRenderFinishedSemaphores.getVkSemaphoresRef()[mCurrentFrame] };
 
-  vkAcquireNextImageKHR(getVkDevice(),
-                        mSwapChain.getVkSwapchainKHR(),
-                        std::numeric_limits<uint64_t>::max(),
-                        imageAvailableSemaphore,
-                        VK_NULL_HANDLE,
-                        &imageIndex);
+  VkResult result{ vkAcquireNextImageKHR(getVkDevice(),
+                                         mSwapChain.getVkSwapchainKHR(),
+                                         std::numeric_limits<uint64_t>::max(),
+                                         imageAvailableSemaphore,
+                                         VK_NULL_HANDLE,
+                                         &imageIndex) };
+
+  if(result is_eq VK_ERROR_OUT_OF_DATE_KHR)
+  {
+    recreateSwapChain();
+
+    return success;
+  }
+  else if((result not_eq VK_SUCCESS) and (result not_eq VK_SUBOPTIMAL_KHR))
+  {
+    DEBUG_CALLBACK(error,
+                   "Failed to aquire a swap chain image.",
+                   vkAcquireNextImageKHR);
+
+    return failure;
+  }
 
   VkSubmitInfo submitInfo{};
 
@@ -238,10 +252,12 @@ so::Engine::drawFrame()
   submitInfo.signalSemaphoreCount = 1;
   submitInfo.pSignalSemaphores    = signalSemaphores;
 
-  VkResult result{ vkQueueSubmit(mSwapChain.getDevice()->getGraphicsVkQueue(),
-                                 1,
-                                 &submitInfo,
-                                 mInFlightFences[mCurrentFrame]) };
+  vkResetFences(device, 1, &mInFlightFences[mCurrentFrame]);
+
+  result = vkQueueSubmit(mSwapChain.getDevice()->getGraphicsVkQueue(),
+                         1,
+                         &submitInfo,
+                         mInFlightFences[mCurrentFrame]);
   
   if(result not_eq VK_SUCCESS)
   {
@@ -265,7 +281,26 @@ so::Engine::drawFrame()
   presentInfo.pImageIndices  = &imageIndex;
   presentInfo.pResults       = nullptr; // optional
 
-  vkQueuePresentKHR(mSwapChain.getDevice()->getPresentVkQueue(), &presentInfo);
+  result = vkQueuePresentKHR(mSwapChain.getDevice()->getPresentVkQueue(),
+                             &presentInfo);
+
+  bool const outOfDateSwapChain{  result is_eq VK_ERROR_OUT_OF_DATE_KHR };
+  bool const suboptimalSwapChain{ result is_eq VK_SUBOPTIMAL_KHR };
+
+  if(outOfDateSwapChain or suboptimalSwapChain or mFramebuffersResized)
+  {
+    recreateSwapChain();
+
+    mFramebuffersResized = false;
+  }
+  else if(result not_eq VK_SUCCESS)
+  {
+    DEBUG_CALLBACK(error,
+                   "Failed to present a swap chain image.",
+                   vkQueuePresentKHR);
+
+    return failure;
+  }
 
   vkQueueWaitIdle(mSwapChain.getDevice()->getPresentVkQueue());
 
@@ -274,6 +309,69 @@ so::Engine::drawFrame()
 
   mCurrentFrame = (mCurrentFrame + 1) %
                   static_cast<index_t>(maxFramesInFlight); 
+
+  return success;
+}
+
+so::return_t
+so::Engine::recreateSwapChain()
+{
+  vkDeviceWaitIdle(mSwapChain.getDevice()->getVkDevice());
+
+  if(mSwapChain.reset(mSurface) is_eq failure)
+  {
+    DEBUG_CALLBACK(error,
+                   "Failed to reset the swap chain during swap chain "
+                   "recreation.",
+                   vk::SwapChain::reset);
+
+    return failure;
+  }
+
+  if(mRenderPass.reset(mSwapChain) is_eq failure)
+  {
+    DEBUG_CALLBACK(error,
+                   "Failed to reset the render pass during swap chain "
+                   "recreation.",
+                   vk::RenderPass::reset);
+
+    return failure;
+  }
+
+  if(mPipeline.reset(mSwapChain, mRenderPass) is_eq failure)
+  {
+    DEBUG_CALLBACK(error,
+                   "Failed to reset the graphics pipeline during swap chain "
+                   "recreation.",
+                   vk::Pipeline::reset);
+
+    return failure;
+  }
+
+  if(mFramebuffers.reset(mSwapChain, mRenderPass) is_eq failure)
+  {
+    DEBUG_CALLBACK(error,
+                   "Failed to reset the render pass during swap chain "
+                   "recreation.",
+                   vk::Framebuffers::reset);
+
+    return failure;
+  }
+
+  return_t result{ mCommandBuffers.reset(mFramebuffers,
+                                         mRenderPass,
+                                         mSwapChain,
+                                         mPipeline) };
+
+  if(result is_eq failure)
+  {
+    DEBUG_CALLBACK(error,
+                   "Failed to reset the command buffers during swap chain "
+                   "recreation.",
+                   vk::CommandBuffers::reset);
+
+    return failure;
+  }
 
   return success;
 }

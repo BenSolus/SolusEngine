@@ -261,6 +261,16 @@ so::vk::Surface::Impl
       module(8, VoidReturn::getVoidReturn(), handle, &width, &height);
     }
 
+    bool
+    framebuffersAreResized()
+    {
+      bool areResized;
+
+      getModule()(9, areResized, getHandle());
+    
+      return areResized;
+    }
+
     std::string const
     getName()
     {
@@ -351,6 +361,12 @@ void
 so::vk::Surface::getWindowSize(size_type& width, size_type& height) const
 {
   mPImpl->getWindowSize(width, height);
+}
+
+bool
+so::vk::Surface::framebuffersAreResized()
+{
+  return mPImpl->framebuffersAreResized();
 }
 
 void

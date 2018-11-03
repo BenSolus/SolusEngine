@@ -60,6 +60,38 @@ so::vk::RenderPass::initialize(SharedPtrLogicalDevice const& device,
 {
   mDevice = device;
  
+  if(initializeMembers(swapChain) is_eq failure)
+  {
+    DEBUG_CALLBACK(error,
+                   "Failed to create a render pass during initialization.",
+                   RenderPass::initializeMembers);
+
+    return failure;
+  }
+
+  return success;
+}
+
+so::return_t
+so::vk::RenderPass::reset(SwapChain const& swapChain)
+{
+  destroyMembers();
+
+  if(initializeMembers(swapChain) is_eq failure)
+  {
+    DEBUG_CALLBACK(error,
+                   "Failed to create a render pass while resetting.",
+                   RenderPass::initializeMembers);
+
+    return failure;
+  }
+
+  return success;
+}
+
+so::return_t
+so::vk::RenderPass::initializeMembers(SwapChain const& swapChain)
+{
   VkAttachmentDescription colorAttachment{};
 
   colorAttachment.format  			 = swapChain.getVkFormat();
@@ -112,7 +144,7 @@ so::vk::RenderPass::initialize(SharedPtrLogicalDevice const& device,
   if(result not_eq VK_SUCCESS)
   {
 		DEBUG_CALLBACK(error,
-		               "Failed to create render pass.",
+		               "Failed to create a render pass.",
 		               vkCreateRenderPass);
 
     return failure; 
@@ -120,7 +152,6 @@ so::vk::RenderPass::initialize(SharedPtrLogicalDevice const& device,
 
 	return success;
 }
-
 
 void
 so::vk::RenderPass::destroyMembers()
@@ -130,6 +161,8 @@ so::vk::RenderPass::destroyMembers()
   if((mRenderPass not_eq VK_NULL_HANDLE) and (device not_eq VK_NULL_HANDLE))
   {
     vkDestroyRenderPass(device, mRenderPass, nullptr);
+
+    mRenderPass = VK_NULL_HANDLE;
   }
 }
 
